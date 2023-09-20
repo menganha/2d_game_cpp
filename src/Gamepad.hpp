@@ -47,6 +47,8 @@ public:
 
     bool IsButtonPressed(Button button) const;
 
+    bool IsInputEvent() const;
+
 private:
     const std::unordered_map<SDL_Scancode, Button> m_key_map;
     std::array<Uint8, N_BUTTONS> m_previous_keyboard_state;

@@ -1,7 +1,9 @@
 #include "GameScene.hpp"
 
-#include <SDL2/SDL.h>
-#include "Gamepad.hpp"
+#include "Components.hpp"
+#include "systems/MovementSystem.hpp"
+#include "Events.hpp"
+#include <iostream>
 
 void GameScene::update_render_system() {
     auto view = m_registry.view<const Position, const Color>();
@@ -13,41 +15,26 @@ void GameScene::update_render_system() {
 
 }
 
-void GameScene::update_movement_system() {
-    auto view = m_registry.view<Position, const Velocity>();
-
-    // use a callback
-    view.each([](auto &pos, auto const &vel) {
-        pos.x = pos.x + vel.dx;
-        pos.y = pos.y + vel.dy;
-    });
-
-    // use an extended callback
-    view.each([](const auto entity, const auto &pos, auto &vel) { /* ... */ });
-
-    // use a range-for
-    for (auto [entity, pos, vel]: view.each()) {
-        // ...
-    }
-
-    // use forward iterators and get only the components of interest
-    for (auto entity: view) {
-        auto &vel = view.get<Velocity>(entity);
-        // ...
-    }
-}
-
 GameScene::GameScene(SDL_Renderer *renderer) :
-        m_renderer{renderer},
         m_is_running{true},
+        m_gamepad{},
+        m_renderer{renderer},
         m_registry{},
-        m_gamepad{} {
+        m_dispatcher{} {
 
-    for (auto i = 0u; i < 15u; ++i) {
+
+    // creates a "player" entity
+    const auto player_entity = m_registry.create();
+    m_registry.emplace<Position>(player_entity, 20.0f, 0.0f);
+    m_registry.emplace<Color>(player_entity, RED);
+    m_registry.emplace<Velocity>(player_entity, 0.0f, 0.0f);
+
+    for (int i = 1; i < 15; ++i) {
         const auto entity = m_registry.create();
-        m_registry.emplace<Position>(entity, 20, i * 20.f);
+        m_registry.emplace<Position>(entity, 20.0f, i * 20.0f);
         m_registry.emplace<Color>(entity, WHITE);
-        if (i % 2 == 0) { m_registry.emplace<Velocity>(entity, i * .1f, 0); }
+        std::cout << i << " " << i%2 << " " << static_cast<float>(i) * .1f << std::endl;
+        if (i % 2 == 0) { m_registry.emplace<Velocity>(entity, i * .1f, 0.0f); }
     }
 }
 
@@ -56,6 +43,10 @@ bool GameScene::IsRunning() const {
 }
 
 void GameScene::Run() {
+    // We should move this to the constructor
+    MovementSystem movement_system{};
+    m_dispatcher.sink<InputEvent>().connect<&MovementSystem::OnInputEvent>(movement_system);
+
     while (IsRunning()) {
 
         // SDL stuff
@@ -71,8 +62,8 @@ void GameScene::Run() {
         m_gamepad.Update(keyboard_state);
 
         // Process event inputs translated. for example!
-        if (m_gamepad.IsButtonReleased(Gamepad::UP)) {
-            // do something
+        if (m_gamepad.IsInputEvent()) {
+            m_dispatcher.trigger(InputEvent{&m_gamepad});
         }
 
         // Clear screen
@@ -81,7 +72,7 @@ void GameScene::Run() {
         // Receive input
 
         // Game Logic
-        update_movement_system();
+        movement_system.Update(m_registry);
         update_render_system();
 
         // Present
