@@ -20,15 +20,23 @@ add_executable(2d_cpp_ecs_game src/main.cpp
         src/GameScene.cpp
         src/GameScene.hpp
         src/Gamepad.cpp
-        src/Gamepad.hpp)
+        src/Gamepad.hpp
+        src/Components.hpp
+        src/systems/MovementSystem.cpp
+        src/systems/MovementSystem.hpp
+        src/Events.hpp)
 
 # Include or add directories
 #target_include_directories(2d_cpp_ecs_game PRIVATE libs)
 add_subdirectory(libs/entt)
+add_subdirectory(libs/spdlog)
 
 # compile features and options
 target_compile_features(2d_cpp_ecs_game PRIVATE cxx_std_17)
-
+target_compile_options(2d_cpp_ecs_game PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/W4>
+        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
+)
 # Link libraries
 if (TARGET SDL2::SDL2main)
     # SDL2::SDL2main may or may not be available. It is e.g. required by Windows GUI applications
@@ -36,4 +44,4 @@ if (TARGET SDL2::SDL2main)
     target_link_libraries(2d_cpp_ecs_game PRIVATE SDL2::SDL2main)
 endif ()
 
-target_link_libraries(2d_cpp_ecs_game PRIVATE SDL2::SDL2 SDL2_image::SDL2_image EnTT::EnTT)
+target_link_libraries(2d_cpp_ecs_game PRIVATE SDL2::SDL2 SDL2_image::SDL2_image EnTT::EnTT spdlog::spdlog)

@@ -1,5 +1,6 @@
 #include "MovementSystem.hpp"
 #include "../Components.hpp"
+#include <spdlog/spdlog.h>
 
 
 void MovementSystem::Update(entt::registry &registry) {
@@ -27,4 +28,6 @@ void MovementSystem::Update(entt::registry &registry) {
 }
 
 
-void MovementSystem::OnInputEvent(InputEvent input_event) {}
+void MovementSystem::OnInputEvent(InputEvent input_event) {
+    spdlog::info("Received event");
+}
