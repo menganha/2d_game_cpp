@@ -3,18 +3,18 @@
 #include <spdlog/spdlog.h>
 
 
-void MovementSystem::Update(entt::registry &registry) {
-    auto view = registry.view<Position, const Velocity>();
+MovementSystem::MovementSystem(entt::registry& registry) : m_registry{registry} {
+};
+
+void MovementSystem::Update() {
+    auto view = m_registry.view<Position, const Velocity>();
 
     // use a callback
-    view.each([](auto &pos, auto const &vel) {
+    view.each([](auto& pos, auto const& vel) {
         pos.x = pos.x + vel.dx;
         pos.y = pos.y + vel.dy;
     });
 
-//    // use an extended callback
-//    view.each([](const auto entity, const auto &pos, auto &vel) { /* ... */ });
-//
 //    // use a range-for
 //    for (auto [entity, pos, vel]: view.each()) {
 //        // ...
@@ -28,6 +28,11 @@ void MovementSystem::Update(entt::registry &registry) {
 }
 
 
-void MovementSystem::OnInputEvent(InputEvent input_event) {
-    spdlog::info("Received event");
+void MovementSystem::OnDirectionalButtonEvent(DirectionalButtonEvent directional_button_event) {
+    auto view = m_registry.view<const Movable, Velocity>();
+    // use a callback
+    view.each([directional_button_event](const auto& movable, auto& vel) {
+        vel.dx = directional_button_event.right - directional_button_event.left;
+        vel.dy = directional_button_event.down - directional_button_event.up;
+    });
 }

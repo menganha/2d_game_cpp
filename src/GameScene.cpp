@@ -4,6 +4,7 @@
 #include "systems/MovementSystem.hpp"
 #include "Events.hpp"
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 void GameScene::update_render_system() {
     auto view = m_registry.view<const Position, const Color>();
@@ -28,12 +29,13 @@ GameScene::GameScene(SDL_Renderer *renderer) :
     m_registry.emplace<Position>(player_entity, 20.0f, 0.0f);
     m_registry.emplace<Color>(player_entity, RED);
     m_registry.emplace<Velocity>(player_entity, 0.0f, 0.0f);
+    m_registry.emplace<Movable>(player_entity);
 
     for (int i = 1; i < 15; ++i) {
         const auto entity = m_registry.create();
         m_registry.emplace<Position>(entity, 20.0f, i * 20.0f);
         m_registry.emplace<Color>(entity, WHITE);
-        std::cout << i << " " << i%2 << " " << static_cast<float>(i) * .1f << std::endl;
+        spdlog::debug("Entity number {}, {}%2 velocity x axis {}", i, i, static_cast<float>(i) * .1f);
         if (i % 2 == 0) { m_registry.emplace<Velocity>(entity, i * .1f, 0.0f); }
     }
 }
@@ -44,8 +46,8 @@ bool GameScene::IsRunning() const {
 
 void GameScene::Run() {
     // We should move this to the constructor
-    MovementSystem movement_system{};
-    m_dispatcher.sink<InputEvent>().connect<&MovementSystem::OnInputEvent>(movement_system);
+    MovementSystem movement_system{m_registry};
+    m_dispatcher.sink<DirectionalButtonEvent>().connect<&MovementSystem::OnDirectionalButtonEvent>(movement_system);
 
     while (IsRunning()) {
 
@@ -62,8 +64,11 @@ void GameScene::Run() {
         m_gamepad.Update(keyboard_state);
 
         // Process event inputs translated. for example!
-        if (m_gamepad.IsInputEvent()) {
-            m_dispatcher.trigger(InputEvent{&m_gamepad});
+        if (m_gamepad.IsDirectionalButtonEvent()) {
+            m_dispatcher.trigger(DirectionalButtonEvent{
+                m_gamepad[Gamepad::UP], m_gamepad[Gamepad::DOWN],
+                m_gamepad[Gamepad::LEFT], m_gamepad[Gamepad::RIGHT]}
+            );
         }
 
         // Clear screen
@@ -72,7 +77,7 @@ void GameScene::Run() {
         // Receive input
 
         // Game Logic
-        movement_system.Update(m_registry);
+        movement_system.Update();
         update_render_system();
 
         // Present

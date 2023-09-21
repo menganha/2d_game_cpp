@@ -7,8 +7,14 @@
 class MovementSystem {
 
 public:
-    void Update(entt::registry & registry);
-    void OnInputEvent(InputEvent input_event);
+    MovementSystem(entt::registry& registry);
+
+    void Update();
+
+    void OnDirectionalButtonEvent(DirectionalButtonEvent input_event);
+
+private:
+    entt::registry& m_registry;
 };
 
 

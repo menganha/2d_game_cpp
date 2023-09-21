@@ -5,10 +5,11 @@
 #include <unordered_map>
 #include <array>
 
-
 class Gamepad {
-    // Represents the gamepad states after SDL events have been processed
+    // Represents the gamepad states after SDL events have been processed. So far this is only related to a keyboard
+    // input, but later we can add a subclass (or sibling class), e.g.,  for joystick input
 public:
+
     enum Button {
         UP,
         DOWN,
@@ -23,7 +24,9 @@ public:
         N_BUTTONS // Number of Buttons
     };
 
-    inline static const std::unordered_map<SDL_Scancode, Button> DEFAULT_KEY_MAP{
+    using KeyMap = std::unordered_map<SDL_Scancode, Button>;
+
+    inline static const KeyMap DEFAULT_KEY_MAP{
             {SDL_SCANCODE_UP,     UP},
             {SDL_SCANCODE_DOWN,   DOWN},
             {SDL_SCANCODE_LEFT,   LEFT},
@@ -36,7 +39,9 @@ public:
             {SDL_SCANCODE_C,      SELECT},
     };
 
-    Gamepad();
+    using KeyboardState = std::array<Uint8, Button::N_BUTTONS>;
+
+    explicit Gamepad(KeyMap keymap = DEFAULT_KEY_MAP);
 
     // Refreshes the internal state of the gamepad
     void Update(const Uint8 *sdl_keyboard_state);
@@ -47,12 +52,21 @@ public:
 
     bool IsButtonPressed(Button button) const;
 
-    bool IsInputEvent() const;
+    bool IsButtonEvent(Button button) const;
+
+    bool IsDirectionalButtonEvent() const;
+
+    KeyboardState GetKeyboardState() const;
+
+    // Getter method
+    Uint8 operator[](size_t index){
+        return m_current_keyboard_state[index];
+    };
 
 private:
-    const std::unordered_map<SDL_Scancode, Button> m_key_map;
-    std::array<Uint8, N_BUTTONS> m_previous_keyboard_state;
-    std::array<Uint8, N_BUTTONS> m_current_keyboard_state;
+    const KeyMap m_key_map;
+    KeyboardState m_previous_keyboard_state;
+    KeyboardState m_current_keyboard_state;
 };
 
 

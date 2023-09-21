@@ -1,10 +1,13 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include "GameScene.hpp"
+#include <spdlog/cfg/env.h>
 
 
 
 int main() {
+    spdlog::cfg::load_env_levels();
+
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::string err_msg = "SDL could not initialize! SDL Error: ";
         throw std::runtime_error(err_msg + SDL_GetError());
