@@ -3,13 +3,13 @@
 
 Gamepad::Gamepad(KeyMap key_map) :
         m_key_map{std::move(key_map)},
-        m_previous_keyboard_state{0},
-        m_current_keyboard_state{0} {
+        m_previous_keyboard_state{},
+        m_current_keyboard_state{} {
 }
 
-void Gamepad::Update(const Uint8 *sdl_keyboard_state) {
+void Gamepad::Update(const Uint8* sdl_keyboard_state) {
     m_previous_keyboard_state = m_current_keyboard_state;
-    for (const auto &[sdl_scan_code, button]: m_key_map) {
+    for (const auto& [sdl_scan_code, button]: m_key_map) {
         m_current_keyboard_state[button] = sdl_keyboard_state[sdl_scan_code];
     }
 }
@@ -31,10 +31,10 @@ bool Gamepad::IsButtonEvent(Button button) const {
 }
 
 bool Gamepad::IsDirectionalButtonEvent() const {
-    return IsButtonEvent(Button::UP) or IsButtonEvent(Button::DOWN) or IsButtonEvent(Button::LEFT) or
-           IsButtonEvent(Button::RIGHT);
+    return IsButtonEvent(Button::UP) or IsButtonEvent(Button::DOWN)
+           or IsButtonEvent(Button::LEFT) or IsButtonEvent(Button::RIGHT);
 }
 
-Gamepad::KeyboardState Gamepad::GetKeyboardState() const {
-    return m_current_keyboard_state;
+Uint8 Gamepad::GetKeyState(Button button) const {
+    return m_current_keyboard_state.at(button);
 }

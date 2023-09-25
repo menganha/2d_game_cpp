@@ -44,7 +44,7 @@ public:
     explicit Gamepad(KeyMap keymap = DEFAULT_KEY_MAP);
 
     // Refreshes the internal state of the gamepad
-    void Update(const Uint8 *sdl_keyboard_state);
+    void Update(const Uint8* sdl_keyboard_state);
 
     bool IsButtonDown(Button button) const;
 
@@ -56,16 +56,11 @@ public:
 
     bool IsDirectionalButtonEvent() const;
 
-    KeyboardState GetKeyboardState() const;
-
-    // Getter method
-    Uint8 operator[](size_t index){
-        return m_current_keyboard_state[index];
-    };
+    Uint8 GetKeyState(Button button) const;
 
 private:
     const KeyMap m_key_map;
-    KeyboardState m_previous_keyboard_state;
+    std::array<Uint8, Button::N_BUTTONS> m_previous_keyboard_state;
     KeyboardState m_current_keyboard_state;
 };
 

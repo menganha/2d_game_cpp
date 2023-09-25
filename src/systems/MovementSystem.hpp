@@ -7,7 +7,7 @@
 class MovementSystem {
 
 public:
-    MovementSystem(entt::registry& registry);
+    MovementSystem(entt::registry& registry, int screen_width, int screen_height);
 
     void Update();
 
@@ -15,6 +15,8 @@ public:
 
 private:
     entt::registry& m_registry;
+    int m_screen_width;
+    int m_screen_height;
 };
 
 

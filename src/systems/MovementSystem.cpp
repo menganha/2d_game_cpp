@@ -1,38 +1,34 @@
 #include "MovementSystem.hpp"
 #include "../Components.hpp"
-#include <spdlog/spdlog.h>
 
 
-MovementSystem::MovementSystem(entt::registry& registry) : m_registry{registry} {
-};
+MovementSystem::MovementSystem(entt::registry& registry, int screen_width, int screen_height) :
+        m_registry{registry},
+        m_screen_width{screen_width},
+        m_screen_height{screen_height} {};
 
 void MovementSystem::Update() {
-    auto view = m_registry.view<Position, const Velocity>();
+    auto view = m_registry.view<Position, Velocity>();
 
     // use a callback
-    view.each([](auto& pos, auto const& vel) {
+    view.each([this](auto& pos, auto& vel) {
         pos.x = pos.x + vel.dx;
         pos.y = pos.y + vel.dy;
+        if (pos.x > m_screen_width or pos.x < 0) {
+            vel.dx = -vel.dx;
+        }
+        if (pos.y < 0 or pos.y > m_screen_height) {
+            vel.dy = -vel.dy;
+        }
     });
-
-//    // use a range-for
-//    for (auto [entity, pos, vel]: view.each()) {
-//        // ...
-//    }
-//
-//    // use forward iterators and get only the components of interest
-//    for (auto entity: view) {
-//        auto &vel = view.get<Velocity>(entity);
-//        // ...
-//    }
 }
 
 
 void MovementSystem::OnDirectionalButtonEvent(DirectionalButtonEvent directional_button_event) {
     auto view = m_registry.view<const Movable, Velocity>();
-    // use a callback
-    view.each([directional_button_event](const auto& movable, auto& vel) {
-        vel.dx = directional_button_event.right - directional_button_event.left;
-        vel.dy = directional_button_event.down - directional_button_event.up;
-    });
+    for (auto entity: view) {
+        auto& velocity = view.get<Velocity>(entity);
+        velocity.dx = directional_button_event.right - directional_button_event.left;
+        velocity.dy = directional_button_event.down - directional_button_event.up;
+    }
 }

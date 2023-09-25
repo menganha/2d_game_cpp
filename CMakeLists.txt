@@ -24,7 +24,13 @@ add_executable(2d_cpp_ecs_game src/main.cpp
         src/Components.hpp
         src/systems/MovementSystem.cpp
         src/systems/MovementSystem.hpp
-        src/Events.hpp)
+        src/Events.hpp
+        src/systems/CollisionSystem.cpp
+        src/systems/CollisionSystem.hpp
+        src/systems/RenderSystem.cpp
+        src/systems/RenderSystem.hpp
+        src/Window.cpp
+        src/Window.hpp)
 
 # Include or add directories
 #target_include_directories(2d_cpp_ecs_game PRIVATE libs)
