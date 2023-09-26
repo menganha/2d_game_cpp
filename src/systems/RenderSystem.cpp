@@ -7,7 +7,7 @@ RenderSystem::RenderSystem(entt::registry& registry) :
         m_renderer{nullptr} {};
 
 void RenderSystem::Init(SDL_Renderer* renderer) {
-    m_renderer=renderer;
+    m_renderer = renderer;
 }
 
 void RenderSystem::Update() {
@@ -17,4 +17,11 @@ void RenderSystem::Update() {
         SDL_Rect rectangle{static_cast<int>(pos.x), static_cast<int>(pos.y), ren.width, ren.height};
         SDL_RenderFillRect(this->m_renderer, &rectangle);
     });
+    SDL_SetRenderDrawColor(this->m_renderer, 0xCD, 0xDB, 0xDD, 0xE6);
+    for (int i_x = 0; i_x < 20; ++i_x) {
+        for (int i_y = 0; i_y < 15; ++i_y) {
+            SDL_Rect rect{i_x * 40, i_y * 40, 40, 40};
+            SDL_RenderDrawRect(this->m_renderer, &rect);
+        }
+    }
 }

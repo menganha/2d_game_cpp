@@ -31,6 +31,14 @@ struct Velocity {
     int dy;
 };
 
+struct Health {
+    int points;
+};
+
+struct Misile {
+    int power;
+};
+
 
 
 #endif //INC_2D_CPP_ECS_GAME_COMPONENTS_HPP

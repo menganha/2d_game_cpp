@@ -30,7 +30,9 @@ add_executable(2d_cpp_ecs_game src/main.cpp
         src/systems/RenderSystem.cpp
         src/systems/RenderSystem.hpp
         src/Window.cpp
-        src/Window.hpp)
+        src/Window.hpp
+        src/systems/CombatSystem.cpp
+        src/systems/CombatSystem.hpp)
 
 # Include or add directories
 #target_include_directories(2d_cpp_ecs_game PRIVATE libs)

@@ -9,10 +9,12 @@
 GameScene::GameScene(const char* title, int screen_width, int screen_height, Uint32 flags) :
         m_gamepad{},
         m_window{},
+        m_player_entity{},
         m_registry{},
         m_dispatcher{},
         m_movement_system{m_registry, screen_width, screen_height},
-        m_collision_system{m_registry, m_dispatcher},
+        m_collision_system{m_registry, m_dispatcher, Grid{0, 0, screen_width, screen_height, 40, 40}},
+        m_combat_system{m_registry},
         m_render_system{m_registry} {
 
     // Initializes SDL
@@ -25,23 +27,25 @@ GameScene::GameScene(const char* title, int screen_width, int screen_height, Uin
     m_window.Create(title, screen_width, screen_height, flags);
 
     // creates a "player" entity
-    const auto player_entity = m_registry.create();
-    m_registry.emplace<Position>(player_entity, 20, 0);
-    m_registry.emplace<Renderable>(player_entity, 10, 10, RED);
-    m_registry.emplace<Velocity>(player_entity, 0, 0);
-    m_registry.emplace<Movable>(player_entity);
-    m_registry.emplace<Collider>(player_entity, 10, 10);
-    spdlog::debug("Created entity with id {} at x={}, y={}", static_cast<int>(player_entity), 20, 0);
+    m_player_entity = m_registry.create();
+    m_registry.emplace<Position>(m_player_entity, 20, 0);
+    m_registry.emplace<Renderable>(m_player_entity, 10, 10, RED);
+    m_registry.emplace<Velocity>(m_player_entity, 0, 0);
+    m_registry.emplace<Movable>(m_player_entity);
+    m_registry.emplace<Collider>(m_player_entity, 10, 10, 0, 0);
+    spdlog::debug("Created entity with id {} at x={}, y={}", static_cast<int>(m_player_entity), 20, 0);
 
-    for (int i = 1; i < 30; ++i) {
+    for (int i = 1; i < 35; ++i) {
         const auto entity = m_registry.create();
         m_registry.emplace<Position>(entity, rand() % (screen_width - 10), rand() % (screen_height - 10));
-        m_registry.emplace<Collider>(entity, 10, 10);
-        m_registry.emplace<Renderable>(entity, 10, 10, WHITE);
-        if (i == 2) {
-            m_registry.emplace<Movable>(entity);
+        m_registry.emplace<Collider>(entity, 10, 10, 0, 0);
+        if (i % 2 == 0) {
+            m_registry.emplace<Velocity>(entity, rand() % 4, rand() % 4);
+            m_registry.emplace<Health>(entity, 3);
+            m_registry.emplace<Renderable>(entity, 10, 10, WHITE);
+        } else {
+            m_registry.emplace<Renderable>(entity, 10, 10, GREEN);
         }
-        if (i % 2 == 0) { m_registry.emplace<Velocity>(entity, rand() % 4, rand() % 4); }
         spdlog::debug("Created entity with id {} at x={}, y={}", static_cast<int>(entity), 20, i * 20);
     }
 
@@ -50,7 +54,9 @@ GameScene::GameScene(const char* title, int screen_width, int screen_height, Uin
 
     // Sets some event listeners
     m_dispatcher.sink<DirectionalButtonEvent>().connect<&MovementSystem::OnDirectionalButtonEvent>(m_movement_system);
-    m_dispatcher.sink<CollisionEvent>().connect<&CollisionSystem::OnCollisionEvent>(m_collision_system);
+    m_dispatcher.sink<ShootEvent>().connect<&CombatSystem::OnShootButtonEvent>(m_combat_system);
+    m_dispatcher.sink<CollisionEvent>().connect<&CombatSystem::OnCollisionEvent>(m_combat_system);
+    m_dispatcher.sink<OutOfBoundariesEvent>().connect<&CombatSystem::OnOutOfBoundariesEvent>(m_combat_system);
 
 }
 
@@ -79,6 +85,10 @@ void GameScene::ProcessEvents() {
         );
     }
 
+    if (m_gamepad.IsButtonPressed(Gamepad::A)) {
+        m_dispatcher.trigger(ShootEvent{m_player_entity});
+    }
+
     // Dispatch any game event accumulated from the previous frame here
     m_dispatcher.update();
 
@@ -87,6 +97,7 @@ void GameScene::ProcessEvents() {
 void GameScene::UpdateLogic() {
     m_movement_system.Update();
     m_collision_system.Update();
+    m_combat_system.Update();
 }
 
 void GameScene::Render() {

@@ -28,7 +28,7 @@ void MovementSystem::OnDirectionalButtonEvent(DirectionalButtonEvent directional
     auto view = m_registry.view<const Movable, Velocity>();
     for (auto entity: view) {
         auto& velocity = view.get<Velocity>(entity);
-        velocity.dx = directional_button_event.right - directional_button_event.left;
-        velocity.dy = directional_button_event.down - directional_button_event.up;
+        velocity.dx = (directional_button_event.right - directional_button_event.left) * 2;
+        velocity.dy = (directional_button_event.down - directional_button_event.up) * 2;
     }
 }

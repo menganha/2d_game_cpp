@@ -23,7 +23,7 @@ bool Gamepad::IsButtonReleased(Button button) const {
 }
 
 bool Gamepad::IsButtonPressed(Button button) const {
-    return m_current_keyboard_state[button] and m_previous_keyboard_state[button];
+    return m_current_keyboard_state[button] and not m_previous_keyboard_state[button];
 }
 
 bool Gamepad::IsButtonEvent(Button button) const {
