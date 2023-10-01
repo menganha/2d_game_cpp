@@ -18,10 +18,12 @@ void RenderSystem::Update() {
         SDL_RenderFillRect(this->m_renderer, &rectangle);
     });
     SDL_SetRenderDrawColor(this->m_renderer, 0xCD, 0xDB, 0xDD, 0xE6);
+#ifndef NDEBUG
     for (int i_x = 0; i_x < 20; ++i_x) {
         for (int i_y = 0; i_y < 15; ++i_y) {
             SDL_Rect rect{i_x * 40, i_y * 40, 40, 40};
             SDL_RenderDrawRect(this->m_renderer, &rect);
         }
     }
+#endif
 }

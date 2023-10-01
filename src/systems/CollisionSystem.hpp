@@ -1,12 +1,14 @@
 #ifndef INC_2D_CPP_ECS_GAME_COLLISIONSYSTEM_HPP
 #define INC_2D_CPP_ECS_GAME_COLLISIONSYSTEM_HPP
 
-#include <entt/entt.hpp>
-#include "../Events.hpp"
 #include "../Components.hpp"
+#include "../Events.hpp"
+
+#include <entt/entt.hpp>
 #include <vector>
 
-struct Grid {
+struct Grid
+{
     int origin_x;
     int origin_y;
     int width;
@@ -15,33 +17,34 @@ struct Grid {
     int cell_height;
 };
 
+class CollisionSystem
+{
+    // Checks for collision using a grid-based approach
+    // Subdivides the space into a grid of squared cells and checks which entities collider
+    // boxes intersect within each cell. Afterward, the collision checks between entities can be
+    // reduced to only those that are within one cell
 
-class CollisionSystem {
-// Checks for collision using a grid-based approach
-// Subdivides the space into a grid of squared cells and checks which entities collider boxes intersect within each cell.
-// Afterward, the collision checks between entities can be reduces to only those that are within one cell
-
-public:
+  public:
     CollisionSystem(entt::registry& registry, entt::dispatcher& dispatcher, Grid grid);
 
     void Update();
 
     void OnCollisionEvent(CollisionEvent);
 
-
-private:
+  private:
     using Cells = std::vector<std::vector<entt::entity>>;
-    entt::registry& m_registry;
+    entt::registry&   m_registry;
     entt::dispatcher& m_dispatcher;
-    Grid m_grid;
-    Cells m_cells;
-    int m_num_cells_x, m_num_cells_y;
+    Grid              m_grid;
+    Cells             m_cells;
+    int               m_num_cells_x, m_num_cells_y;
 
+    // Checks if the rectangular colliders intersects. If they touch borders, i.e., top borders
+    // have the same coordinate as the bottom of the other, it is not counted as a collision
     static bool HasCollided(Position pos_a, Collider coll_a, Position pos_b, Collider coll_b);
 
     // Returns whether the entity with collider b is within collider a
     static bool IsFullyContained(Position pos_a, Collider coll_a, Position pos_b, Collider coll_b);
 };
 
-
-#endif //INC_2D_CPP_ECS_GAME_COLLISIONSYSTEM_HPP
+#endif // INC_2D_CPP_ECS_GAME_COLLISIONSYSTEM_HPP

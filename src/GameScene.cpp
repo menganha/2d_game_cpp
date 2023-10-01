@@ -1,21 +1,22 @@
 #include "GameScene.hpp"
 
-#include <spdlog/spdlog.h>
-#include <cstdlib>
 #include "Components.hpp"
 #include "Events.hpp"
 
+#include <cstdlib>
+#include <spdlog/spdlog.h>
 
-GameScene::GameScene(const char* title, int screen_width, int screen_height, Uint32 flags) :
-        m_gamepad{},
-        m_window{},
-        m_player_entity{},
-        m_registry{},
-        m_dispatcher{},
-        m_movement_system{m_registry, screen_width, screen_height},
-        m_collision_system{m_registry, m_dispatcher, Grid{0, 0, screen_width, screen_height, 40, 40}},
-        m_combat_system{m_registry},
-        m_render_system{m_registry} {
+GameScene::GameScene(const char* title, int screen_width, int screen_height, Uint32 flags)
+  : m_gamepad{}
+  , m_window{}
+  , m_player_entity{}
+  , m_registry{}
+  , m_dispatcher{}
+  , m_movement_system{ m_registry, screen_width, screen_height }
+  , m_collision_system{ m_registry, m_dispatcher, Grid{ 0, 0, screen_width, screen_height, 40, 40 } }
+  , m_combat_system{ m_registry }
+  , m_render_system{ m_registry }
+{
 
     // Initializes SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -54,13 +55,15 @@ GameScene::GameScene(const char* title, int screen_width, int screen_height, Uin
 
     // Sets some event listeners
     m_dispatcher.sink<DirectionalButtonEvent>().connect<&MovementSystem::OnDirectionalButtonEvent>(m_movement_system);
+    m_dispatcher.sink<OutOfBoundariesEvent>().connect<&MovementSystem::OnOutOfBoundariesEvent>(m_movement_system);
     m_dispatcher.sink<ShootEvent>().connect<&CombatSystem::OnShootButtonEvent>(m_combat_system);
     m_dispatcher.sink<CollisionEvent>().connect<&CombatSystem::OnCollisionEvent>(m_combat_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&CombatSystem::OnOutOfBoundariesEvent>(m_combat_system);
-
 }
 
-void GameScene::Run() {
+void
+GameScene::Run()
+{
     while (m_window.IsOpen()) {
         ProcessEvents();
         UpdateLogic();
@@ -68,8 +71,9 @@ void GameScene::Run() {
     }
 }
 
-
-void GameScene::ProcessEvents() {
+void
+GameScene::ProcessEvents()
+{
 
     // Process events from the SDL window
     m_window.ProcessEvents();
@@ -79,28 +83,33 @@ void GameScene::ProcessEvents() {
     m_gamepad.Update(keyboard_state);
 
     if (m_gamepad.IsDirectionalButtonEvent()) {
-        m_dispatcher.trigger(DirectionalButtonEvent{
-                m_gamepad.GetKeyState(Gamepad::UP), m_gamepad.GetKeyState(Gamepad::DOWN),
-                m_gamepad.GetKeyState(Gamepad::LEFT), m_gamepad.GetKeyState(Gamepad::RIGHT)}
-        );
+        m_dispatcher.trigger(DirectionalButtonEvent{ m_gamepad.GetKeyState(Gamepad::UP),
+                                                     m_gamepad.GetKeyState(Gamepad::DOWN),
+                                                     m_gamepad.GetKeyState(Gamepad::LEFT),
+                                                     m_gamepad.GetKeyState(Gamepad::RIGHT) });
     }
 
     if (m_gamepad.IsButtonPressed(Gamepad::A)) {
-        m_dispatcher.trigger(ShootEvent{m_player_entity});
+        m_dispatcher.trigger(ShootEvent{ m_player_entity });
     }
 
     // Dispatch any game event accumulated from the previous frame here
     m_dispatcher.update();
-
 }
 
-void GameScene::UpdateLogic() {
+void
+GameScene::UpdateLogic()
+{
     m_movement_system.Update();
     m_collision_system.Update();
+    m_dispatcher.update<CollisionEvent>(); // Process all collision events once we pick them up
+    m_dispatcher.update<OutOfBoundariesEvent>();
     m_combat_system.Update();
 }
 
-void GameScene::Render() {
+void
+GameScene::Render()
+{
 
     SDL_SetRenderDrawColor(m_window.GetRenderer(), 255, 255, 255, 255);
     SDL_RenderClear(m_window.GetRenderer());
