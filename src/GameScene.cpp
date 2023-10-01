@@ -12,7 +12,7 @@ GameScene::GameScene(const char* title, int screen_width, int screen_height, Uin
   , m_player_entity{}
   , m_registry{}
   , m_dispatcher{}
-  , m_movement_system{ m_registry, screen_width, screen_height }
+  , m_movement_system{ m_registry, entt::null, screen_width, screen_height }
   , m_collision_system{ m_registry, m_dispatcher, Grid{ 0, 0, screen_width, screen_height, 40, 40 } }
   , m_combat_system{ m_registry }
   , m_render_system{ m_registry }
@@ -36,22 +36,19 @@ GameScene::GameScene(const char* title, int screen_width, int screen_height, Uin
     m_registry.emplace<Collider>(m_player_entity, 10, 10, 0, 0);
     spdlog::debug("Created entity with id {} at x={}, y={}", static_cast<int>(m_player_entity), 20, 0);
 
-    for (int i = 1; i < 35; ++i) {
+    for (int i = 1; i < 15; ++i) {
         const auto entity = m_registry.create();
         m_registry.emplace<Position>(entity, rand() % (screen_width - 10), rand() % (screen_height - 10));
         m_registry.emplace<Collider>(entity, 10, 10, 0, 0);
-        if (i % 2 == 0) {
-            m_registry.emplace<Velocity>(entity, rand() % 4, rand() % 4);
-            m_registry.emplace<Health>(entity, 3);
-            m_registry.emplace<Renderable>(entity, 10, 10, WHITE);
-        } else {
-            m_registry.emplace<Renderable>(entity, 10, 10, GREEN);
-        }
+        m_registry.emplace<Velocity>(entity, rand() % 4, rand() % 4);
+        m_registry.emplace<Health>(entity, 3);
+        m_registry.emplace<Renderable>(entity, 10, 10, WHITE);
         spdlog::debug("Created entity with id {} at x={}, y={}", static_cast<int>(entity), 20, i * 20);
     }
 
     // initializes the systems
     m_render_system.Init(m_window.GetRenderer());
+    m_movement_system.Init(m_player_entity);
 
     // Sets some event listeners
     m_dispatcher.sink<DirectionalButtonEvent>().connect<&MovementSystem::OnDirectionalButtonEvent>(m_movement_system);

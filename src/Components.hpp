@@ -6,7 +6,8 @@
 
 using namespace entt::literals;
 
-using Movable = entt::tag<"Movable"_hs>; // TODO: Maybe not necessary. We will keep track of the player with its entity ID
+// TODO: Maybe not necessary. We will keep track of the player with its entity ID
+using Movable = entt::tag<"Movable"_hs>;
 
 struct Position
 {

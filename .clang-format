@@ -2,6 +2,7 @@
 Language:        Cpp
 # BasedOnStyle:  Mozilla
 AccessModifierOffset: -2
+AlignArrayOfStructures: Right
 AlignAfterOpenBracket: Align
 AlignConsecutiveMacros: false
 AlignConsecutiveAssignments: false
@@ -103,7 +104,7 @@ ObjCBlockIndentWidth: 2
 ObjCBreakBeforeNestedBlockParam: true
 ObjCSpaceAfterProperty: true
 ObjCSpaceBeforeProtocolList: false
-PenaltyBreakAssignment: 2
+PenaltyBreakAssignment: 6
 PenaltyBreakBeforeFirstCallParameter: 19
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120

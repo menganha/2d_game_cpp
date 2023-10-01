@@ -29,8 +29,6 @@ class CollisionSystem
 
     void Update();
 
-    void OnCollisionEvent(CollisionEvent);
-
   private:
     using Cells = std::vector<std::vector<entt::entity>>;
     entt::registry&   m_registry;
@@ -38,13 +36,6 @@ class CollisionSystem
     Grid              m_grid;
     Cells             m_cells;
     int               m_num_cells_x, m_num_cells_y;
-
-    // Checks if the rectangular colliders intersects. If they touch borders, i.e., top borders
-    // have the same coordinate as the bottom of the other, it is not counted as a collision
-    static bool HasCollided(Position pos_a, Collider coll_a, Position pos_b, Collider coll_b);
-
-    // Returns whether the entity with collider b is within collider a
-    static bool IsFullyContained(Position pos_a, Collider coll_a, Position pos_b, Collider coll_b);
 };
 
 #endif // INC_2D_CPP_ECS_GAME_COLLISIONSYSTEM_HPP

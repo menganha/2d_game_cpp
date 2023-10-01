@@ -9,16 +9,19 @@ class MovementSystem
 {
 
   public:
-    MovementSystem(entt::registry& registry, int screen_width, int screen_height);
+    MovementSystem(entt::registry& registry, entt::entity player_entity, int screen_width, int screen_height);
 
     void Update();
 
     void OnDirectionalButtonEvent(DirectionalButtonEvent input_event);
 
     void OnOutOfBoundariesEvent(OutOfBoundariesEvent out_of_boundaries_event);
+    
+    void Init(entt::entity player_entity);
 
   private:
     entt::registry& m_registry;
+    entt::entity    m_player_entity;
     int             m_screen_width;
     int             m_screen_height;
 };

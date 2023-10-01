@@ -31,6 +31,8 @@ add_executable(2d_cpp_ecs_game src/main.cpp
         src/systems/RenderSystem.hpp
         src/Window.cpp
         src/Window.hpp
+        src/Collision.cpp
+        src/Collision.hpp
         src/systems/CombatSystem.cpp
         src/systems/CombatSystem.hpp)
 
