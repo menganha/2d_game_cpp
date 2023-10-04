@@ -3,6 +3,7 @@
 #include "../Collision.hpp"
 #include "../Components.hpp"
 
+#include <entt/entt.hpp>
 #include <spdlog/spdlog.h>
 
 MovementSystem::MovementSystem(entt::registry& registry,
@@ -22,16 +23,12 @@ MovementSystem::Update()
     for (auto entity : movables) {
         auto& pos = m_registry.get<Position>(entity);
         auto& vel = m_registry.get<Velocity>(entity);
-        pos.x = pos.x + vel.dx;
-        pos.y = pos.y + vel.dy;
-        // TODO: This part would have to change to reproduce galaga-style stuff
-        if (not m_registry.all_of<Movable>(entity)) { // If not player entity
-            if (pos.x > m_screen_width or pos.x < 0) {
-                vel.dx = -vel.dx;
-            }
-            if (pos.y < 0 or pos.y > m_screen_height) {
-                vel.dy = -vel.dy;
-            }
+        if (not m_registry.all_of<Enemy>(entity)) { // If not enemy
+            pos.x = pos.x + vel.dx;
+            pos.y = pos.y + vel.dy;
+        } else {
+            pos.x = pos.x + vel.dx;
+            pos.y = pos.y + vel.dx * vel.dx;
         }
     }
 }

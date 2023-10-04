@@ -1,11 +1,9 @@
 #ifndef INC_2D_CPP_ECS_GAME_COLLISIONSYSTEM_HPP
 #define INC_2D_CPP_ECS_GAME_COLLISIONSYSTEM_HPP
 
-#include "../Components.hpp"
-#include "../Events.hpp"
-
-#include <entt/entt.hpp>
+#include <entt/fwd.hpp>
 #include <vector>
+
 
 struct Grid
 {

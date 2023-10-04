@@ -26,10 +26,10 @@ CombatSystem::OnShootButtonEvent(ShootEvent shoot_event)
     auto& position = m_registry.get<Position>(shoot_event.shooter_entity);
     auto  bullet_entity = m_registry.create();
     m_registry.emplace<Position>(bullet_entity, position.x + 3, position.y - 10);
-    m_registry.emplace<Velocity>(bullet_entity, 0, -6);
+    m_registry.emplace<Velocity>(bullet_entity, 0.f, -6.f);
     SDL_Color black_color{ 0x00, 0x00, 0x00, 0x00 };
-    m_registry.emplace<Renderable>(bullet_entity, 4, 5, black_color);
-    m_registry.emplace<Collider>(bullet_entity, 4, 5, 0, 0);
+    m_registry.emplace<Renderable>(bullet_entity, 4, 7, black_color);
+    m_registry.emplace<Collider>(bullet_entity, 4, 7, 0, 0);
     m_registry.emplace<Misile>(bullet_entity, 5);
 }
 
@@ -39,14 +39,13 @@ CombatSystem::OnCollisionEvent(CollisionEvent collision_event)
     if (m_registry.all_of<Health>(collision_event.entity_a) and m_registry.all_of<Misile>(collision_event.entity_b)) {
         auto& health = m_registry.get<Health>(collision_event.entity_a);
         auto  weapon = m_registry.get<Misile>(collision_event.entity_b);
+        m_registry.destroy(collision_event.entity_b);
         health.points -= weapon.power;
-    } else if (m_registry.all_of<Misile>(collision_event.entity_a) and
-               m_registry.all_of<Health>(collision_event.entity_b)) {
+    } else if (m_registry.all_of<Misile>(collision_event.entity_a) and m_registry.all_of<Health>(collision_event.entity_b)) {
         auto& health = m_registry.get<Health>(collision_event.entity_b);
         auto  weapon = m_registry.get<Misile>(collision_event.entity_a);
         health.points -= weapon.power;
-    } else {
-        return;
+        m_registry.destroy(collision_event.entity_a);
     }
 }
 

@@ -1,6 +1,8 @@
 #include "CollisionSystem.hpp"
 
 #include "../Collision.hpp"
+#include "../Components.hpp"
+#include "../Events.hpp"
 
 #include <cmath>
 
@@ -22,7 +24,7 @@ void
 CollisionSystem::Update()
 {
 
-    Position grid_position{ m_grid.origin_x, m_grid.origin_y };
+    Position grid_position{ static_cast<float>(m_grid.origin_x), static_cast<float>(m_grid.origin_y) };
     Collider grid_collider{ m_grid.width, m_grid.height, 0, 0 };
     auto     colliders = m_registry.view<Position, Collider>();
     for (auto entity : colliders) {
@@ -31,11 +33,12 @@ CollisionSystem::Update()
         if (not Collision::IsFullyContained(grid_position, grid_collider, entity_pos, entity_coll)) {
             m_dispatcher.enqueue<OutOfBoundariesEvent>(grid_position, grid_collider, entity);
         }
+        // Assign entities to the grid they belong
         int counter = 0;
         for (auto& cell : m_cells) {
             int      origin_x = m_grid.origin_x + (counter % m_num_cells_x) * m_grid.cell_width;
             int      origin_y = m_grid.origin_y + (counter / m_num_cells_x) * m_grid.cell_height;
-            Position cell_pos{ origin_x, origin_y };
+            Position cell_pos{ static_cast<float>(origin_x), static_cast<float>(origin_y) };
             Collider cell_coll{ m_grid.cell_width, m_grid.cell_height, 0, 0 };
             if (Collision::HasCollided(cell_pos, cell_coll, entity_pos, entity_coll)) {
                 cell.push_back(entity);

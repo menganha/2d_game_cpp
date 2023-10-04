@@ -15,9 +15,10 @@ class GameScene
 {
 
   public:
-    static constexpr SDL_Color WHITE{ 0xAB, 0xB2, 0xBF, 0xFF };
+    static constexpr SDL_Color WHITE{ 0xAB, 0xB2, 0xBF, 0xFF }; // TODO: Move this to their own header file
     static constexpr SDL_Color RED{ 0xFF, 0x00, 0x00, 0x00 };
     static constexpr SDL_Color GREEN{ 0x00, 0xFF, 0x00, 0xFF };
+    static constexpr SDL_Color BLUE{ 0x00, 0x00, 0xFF, 0xFF };
 
     GameScene(const char* title, int screen_width, int screen_height, Uint32 flags);
 

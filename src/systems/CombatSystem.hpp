@@ -1,12 +1,14 @@
 #ifndef INC_2D_CPP_ECS_GAME_COMBATSYSTEM_HPP
 #define INC_2D_CPP_ECS_GAME_COMBATSYSTEM_HPP
 
-#include <entt/entt.hpp>
 #include "../Events.hpp"
 
-class CombatSystem {
+#include <entt/fwd.hpp>
 
-public:
+class CombatSystem
+{
+
+  public:
     CombatSystem(entt::registry& registry);
 
     void Update();
@@ -17,10 +19,8 @@ public:
 
     void OnOutOfBoundariesEvent(OutOfBoundariesEvent out_of_boundaries_event);
 
-private:
+  private:
     entt::registry& m_registry;
-
 };
 
-
-#endif //INC_2D_CPP_ECS_GAME_COMBATSYSTEM_HPP
+#endif // INC_2D_CPP_ECS_GAME_COMBATSYSTEM_HPP

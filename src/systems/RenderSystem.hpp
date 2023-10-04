@@ -2,7 +2,7 @@
 #define INC_2D_CPP_ECS_GAME_RENDERSYSTEM_HPP
 
 #include <SDL2/SDL.h>
-#include <entt/entt.hpp>
+#include <entt/fwd.hpp>
 
 class RenderSystem
 {

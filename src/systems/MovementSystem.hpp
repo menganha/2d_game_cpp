@@ -3,7 +3,7 @@
 
 #include "../Events.hpp"
 
-#include <entt/entt.hpp>
+#include <entt/fwd.hpp>
 
 class MovementSystem
 {
@@ -16,7 +16,7 @@ class MovementSystem
     void OnDirectionalButtonEvent(DirectionalButtonEvent input_event);
 
     void OnOutOfBoundariesEvent(OutOfBoundariesEvent out_of_boundaries_event);
-    
+
     void Init(entt::entity player_entity);
 
   private:

@@ -39,9 +39,11 @@ add_executable(2d_cpp_ecs_game src/main.cpp
 # Include or add directories
 #target_include_directories(2d_cpp_ecs_game PRIVATE libs)
 add_subdirectory(libs/entt)
-add_subdirectory(libs/spdlog)
+target_compile_definitions(EnTT INTERFACE ENTT_DISABLE_ASSERT)  # Improves compilation time by disabling the assert
 
 # compile features and options
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)  # To generate compile commands for vim YCM. Set it on perhaps only on 
+add_subdirectory(libs/spdlog)
 target_compile_features(2d_cpp_ecs_game PRIVATE cxx_std_17)
 target_compile_options(2d_cpp_ecs_game PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:/W4>

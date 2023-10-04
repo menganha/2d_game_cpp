@@ -11,8 +11,20 @@ using Movable = entt::tag<"Movable"_hs>;
 
 struct Position
 {
-    int x;
-    int y;
+    float x;
+    float y;
+};
+
+struct Velocity
+{
+    float dx;
+    float dy;
+};
+
+
+struct Enemy
+{
+    int type;
 };
 
 struct Renderable
@@ -28,12 +40,6 @@ struct Collider
     int height;
     int x_offset;
     int y_offset;
-};
-
-struct Velocity
-{
-    int dx;
-    int dy;
 };
 
 struct Health
