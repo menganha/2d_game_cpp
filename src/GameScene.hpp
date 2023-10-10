@@ -3,6 +3,7 @@
 
 #include "Gamepad.hpp"
 #include "Window.hpp"
+#include "systems/EnemySystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/CombatSystem.hpp"
 #include "systems/MovementSystem.hpp"
@@ -40,6 +41,7 @@ class GameScene
     CollisionSystem  m_collision_system;
     CombatSystem     m_combat_system;
     RenderSystem     m_render_system;
+    EnemySystem      m_enemy_system;
 };
 
 #endif // INC_2D_CPP_ECS_GAME_GAMESCENE_H_HPP

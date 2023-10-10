@@ -31,17 +31,17 @@ Gamepad::IsButtonReleased(Button button) const
 bool
 Gamepad::IsButtonPressed(Button button) const
 {
-    return m_current_keyboard_state[button] and not m_previous_keyboard_state[button];
+    return m_current_keyboard_state[button]  and not m_previous_keyboard_state[button];
 }
 
 bool
-Gamepad::IsButtonEvent(Button button) const
+Gamepad::IsButtonEvent(Button button) const  //  Necessary?
 {
     return IsButtonReleased(button) or IsButtonPressed(button);
 }
 
 bool
-Gamepad::IsDirectionalButtonEvent() const
+Gamepad::IsDirectionalButtonEvent() const  // Necessary?
 {
     return IsButtonEvent(Button::UP) or IsButtonEvent(Button::DOWN) or IsButtonEvent(Button::LEFT) or
            IsButtonEvent(Button::RIGHT);

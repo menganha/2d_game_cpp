@@ -1,6 +1,7 @@
 #ifndef INC_2D_CPP_ECS_GAME_MOVEMENTSYSTEM_HPP
 #define INC_2D_CPP_ECS_GAME_MOVEMENTSYSTEM_HPP
 
+#include "../Components.hpp"
 #include "../Events.hpp"
 
 #include <entt/fwd.hpp>
@@ -9,19 +10,20 @@ class MovementSystem
 {
 
   public:
-    MovementSystem(entt::registry& registry, entt::entity player_entity, int screen_width, int screen_height);
+    MovementSystem(entt::registry& registry, int screen_width, int screen_height);
 
     void Update();
 
-    void OnDirectionalButtonEvent(DirectionalButtonEvent input_event);
+    void SetEntityPosition(const Position& new_position, entt::entity entity);
+
+    void MoveEntity(const Position& displacement, entt::entity entity);
+
+    // void OnDirectionalButtonEvent(DirectionalButtonEvent input_event);
 
     void OnOutOfBoundariesEvent(OutOfBoundariesEvent out_of_boundaries_event);
 
-    void Init(entt::entity player_entity);
-
   private:
     entt::registry& m_registry;
-    entt::entity    m_player_entity;
     int             m_screen_width;
     int             m_screen_height;
 };

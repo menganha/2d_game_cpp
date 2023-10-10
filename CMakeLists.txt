@@ -16,7 +16,8 @@ else ()
     find_package(SDL2 CONFIG COMPONENTS SDL2main)
 endif ()
 
-add_executable(2d_cpp_ecs_game src/main.cpp
+add_executable(
+        2d_cpp_ecs_game src/main.cpp
         src/GameScene.cpp
         src/GameScene.hpp
         src/Gamepad.cpp
@@ -34,7 +35,11 @@ add_executable(2d_cpp_ecs_game src/main.cpp
         src/Collision.cpp
         src/Collision.hpp
         src/systems/CombatSystem.cpp
-        src/systems/CombatSystem.hpp)
+        src/systems/CombatSystem.hpp
+        src/systems/EnemySystem.cpp
+        src/systems/EnemySystem.hpp
+        )
+        
 
 # Include or add directories
 #target_include_directories(2d_cpp_ecs_game PRIVATE libs)

@@ -2,18 +2,9 @@
 #define INC_2D_CPP_ECS_GAME_EVENTS_HPP
 
 #include "Components.hpp"
-#include "Gamepad.hpp"
 
 #include <SDL2/SDL.h>
 #include <entt/entt.hpp>
-
-struct DirectionalButtonEvent
-{
-    int up;
-    int down;
-    int left;
-    int right;
-};
 
 struct ShootEvent
 {

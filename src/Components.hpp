@@ -21,10 +21,15 @@ struct Velocity
     float dy;
 };
 
-
 struct Enemy
 {
     int type;
+};
+
+struct Timer
+{
+    int time;
+    int countdown = 0;
 };
 
 struct Renderable
@@ -36,10 +41,11 @@ struct Renderable
 
 struct Collider
 {
-    int width;
-    int height;
-    int x_offset;
-    int y_offset;
+    int  width;
+    int  height;
+    int  x_offset = 0;
+    int  y_offset = 0;
+    bool solid = false; // Means it cannot go over the external boundary
 };
 
 struct Health

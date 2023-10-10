@@ -1,17 +1,12 @@
 #include "MovementSystem.hpp"
 
 #include "../Collision.hpp"
-#include "../Components.hpp"
 
 #include <entt/entt.hpp>
 #include <spdlog/spdlog.h>
 
-MovementSystem::MovementSystem(entt::registry& registry,
-                               entt::entity    player_entity,
-                               int             screen_width,
-                               int             screen_height)
+MovementSystem::MovementSystem(entt::registry& registry, int screen_width, int screen_height)
   : m_registry{ registry }
-  , m_player_entity{ player_entity }
   , m_screen_width{ screen_width }
   , m_screen_height{ screen_height } {};
 
@@ -20,64 +15,68 @@ MovementSystem::Update()
 {
     auto movables = m_registry.view<Position, Velocity>();
 
-    for (auto entity : movables) {
+    for (auto entity : movables)
+    {
         auto& pos = m_registry.get<Position>(entity);
-        auto& vel = m_registry.get<Velocity>(entity);
-        if (not m_registry.all_of<Enemy>(entity)) { // If not enemy
-            pos.x = pos.x + vel.dx;
-            pos.y = pos.y + vel.dy;
-        } else {
-            pos.x = pos.x + vel.dx;
-            pos.y = pos.y + vel.dx * vel.dx;
-        }
+        auto  vel = m_registry.get<Velocity>(entity);
+        pos.x = pos.x + vel.dx;
+        pos.y = pos.y + vel.dy;
     }
-}
-
-void
-MovementSystem::Init(entt::entity player_entity)
-{
-    m_player_entity = player_entity;
 }
 
 void
 MovementSystem::OnOutOfBoundariesEvent(OutOfBoundariesEvent out_of_boundaries_event)
 {
-    if (out_of_boundaries_event.entity == m_player_entity) {
+    auto* coll_ptr = m_registry.try_get<Collider>(out_of_boundaries_event.entity);
+
+    if (coll_ptr != nullptr and coll_ptr->solid) // Resolve collision
+    {
         auto& pos = m_registry.get<Position>(out_of_boundaries_event.entity);
-        auto  coll = m_registry.get<Collider>(out_of_boundaries_event.entity);
-        auto  vel = m_registry.get<Velocity>(out_of_boundaries_event.entity);
 
-        Position tmp_pos{ pos };
-        tmp_pos.x = tmp_pos.x - vel.dx;
-        if (Collision::IsFullyContained(
-              out_of_boundaries_event.bound_pos, out_of_boundaries_event.bound_coll, tmp_pos, coll)) {
-            pos = tmp_pos;
-            return;
-        }
-        tmp_pos.x = tmp_pos.x + vel.dx; // return it to its previous value
-        tmp_pos.y = tmp_pos.y - vel.dy;
-        if (Collision::IsFullyContained(
-              out_of_boundaries_event.bound_pos, out_of_boundaries_event.bound_coll, tmp_pos, coll)) {
-            pos = tmp_pos;
-            return;
-        }
-        tmp_pos.x = tmp_pos.x - vel.dx; // substract the two values
-        if (Collision::IsFullyContained(
-              out_of_boundaries_event.bound_pos, out_of_boundaries_event.bound_coll, tmp_pos, coll)) {
-            pos = tmp_pos;
-            return;
-        }
+        int a_min, a_max, b_min, b_max;
+        a_min = static_cast<int>(out_of_boundaries_event.bound_pos.x) + out_of_boundaries_event.bound_coll.x_offset;
+        a_max = a_min + out_of_boundaries_event.bound_coll.width;
+        b_min = static_cast<int>(pos.x) + coll_ptr->x_offset;
+        b_max = b_min + coll_ptr->width;
+        // spdlog::info("boundaries {}, {}, {}, {}", a_min, a_max, b_min, b_max);
 
-        spdlog::error(
-          "OutOfBoundariesEvent was not resolved for player entity {} {} {} {}", pos.x, pos.y, vel.dx, vel.dy);
+        if (b_min < a_min)
+            pos.x = a_min - coll_ptr->x_offset;
+        else if (b_max > a_max)
+            pos.x = a_max - coll_ptr->x_offset - coll_ptr->width;
+
+        a_min = static_cast<int>(out_of_boundaries_event.bound_pos.y) + out_of_boundaries_event.bound_coll.y_offset;
+        a_max = a_min + out_of_boundaries_event.bound_coll.height;
+        b_min = static_cast<int>(pos.y) + coll_ptr->y_offset;
+        b_max = b_min + coll_ptr->height;
+        if (b_min < a_min)
+            pos.y = a_min - coll_ptr->y_offset;
+        else if (b_max > a_max)
+            pos.y = a_max - coll_ptr->y_offset - coll_ptr->height;
+    }
+}
+void
+MovementSystem::SetEntityPosition(const Position& new_position, entt::entity entity)
+{
+    auto* position = m_registry.try_get<Position>(entity);
+    if (position == nullptr)
+        spdlog::error("Trying to set the position of entity {} without position component", static_cast<int>(entity));
+    else
+    {
+        position->x = new_position.x;
+        position->y = new_position.y;
     }
 }
 
 void
-MovementSystem::OnDirectionalButtonEvent(DirectionalButtonEvent directional_button_event)
+MovementSystem::MoveEntity(const Position& displacement, entt::entity entity)
 {
-    // TODO: This 2 should be a velocity constant set somewhere
-    auto& velocity = m_registry.get<Velocity>(m_player_entity);
-    velocity.dx = (directional_button_event.right - directional_button_event.left) * 2;
-    velocity.dy = (directional_button_event.down - directional_button_event.up) * 2;
+    auto* position = m_registry.try_get<Position>(entity);
+    if (position == nullptr)
+        spdlog::error("Trying to move entity {} without position component", static_cast<int>(entity));
+    else
+    {
+        position->x += displacement.x;
+        position->y += displacement.y;
+    }
 }
