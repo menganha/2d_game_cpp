@@ -25,7 +25,39 @@ MovementSystem::Update()
 }
 
 void
-MovementSystem::OnOutOfBoundariesEvent(OutOfBoundariesEvent out_of_boundaries_event)
+MovementSystem::SetEntityPosition(const Position& new_position, entt::entity entity)
+{
+    auto* position = m_registry.try_get<Position>(entity);
+    if (position == nullptr)
+        spdlog::error("Trying to set the position of entity {} without position component", static_cast<int>(entity));
+    else
+    {
+        position->x = new_position.x;
+        position->y = new_position.y;
+    }
+}
+
+void
+MovementSystem::MoveEntity(const Position& displacement, entt::entity entity)
+{
+    auto* position = m_registry.try_get<Position>(entity);
+    if (position == nullptr)
+        spdlog::error("Trying to move entity {} without position component", static_cast<int>(entity));
+    else
+    {
+        position->x += displacement.x;
+        position->y += displacement.y;
+    }
+}
+
+void
+MovementSystem::OnSetEntityPositionEvent(const SetEntityPositionEvent& move_entity_event)
+{
+    SetEntityPosition(move_entity_event.new_position, move_entity_event.entity);
+}
+
+void
+MovementSystem::OnOutOfBoundariesEvent(const OutOfBoundariesEvent& out_of_boundaries_event)
 {
     auto* coll_ptr = m_registry.try_get<Collider>(out_of_boundaries_event.entity);
 
@@ -53,30 +85,5 @@ MovementSystem::OnOutOfBoundariesEvent(OutOfBoundariesEvent out_of_boundaries_ev
             pos.y = a_min - coll_ptr->y_offset;
         else if (b_max > a_max)
             pos.y = a_max - coll_ptr->y_offset - coll_ptr->height;
-    }
-}
-void
-MovementSystem::SetEntityPosition(const Position& new_position, entt::entity entity)
-{
-    auto* position = m_registry.try_get<Position>(entity);
-    if (position == nullptr)
-        spdlog::error("Trying to set the position of entity {} without position component", static_cast<int>(entity));
-    else
-    {
-        position->x = new_position.x;
-        position->y = new_position.y;
-    }
-}
-
-void
-MovementSystem::MoveEntity(const Position& displacement, entt::entity entity)
-{
-    auto* position = m_registry.try_get<Position>(entity);
-    if (position == nullptr)
-        spdlog::error("Trying to move entity {} without position component", static_cast<int>(entity));
-    else
-    {
-        position->x += displacement.x;
-        position->y += displacement.y;
     }
 }

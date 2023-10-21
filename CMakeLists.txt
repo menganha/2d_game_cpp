@@ -16,12 +16,14 @@ else ()
     find_package(SDL2 CONFIG COMPONENTS SDL2main)
 endif ()
 
-add_executable(
-        2d_cpp_ecs_game src/main.cpp
+add_executable(app 
+        src/main.cpp
         src/GameScene.cpp
         src/GameScene.hpp
         src/Gamepad.cpp
         src/Gamepad.hpp
+        src/Enemy.cpp
+        src/Enemy.hpp
         src/Components.hpp
         src/systems/MovementSystem.cpp
         src/systems/MovementSystem.hpp
@@ -39,26 +41,30 @@ add_executable(
         src/systems/EnemySystem.cpp
         src/systems/EnemySystem.hpp
         )
+
+# Always set the name to app for easily passing this variable to vim
+set_target_properties(app PROPERTIES OUTPUT_NAME "app")
         
 
 # Include or add directories
-#target_include_directories(2d_cpp_ecs_game PRIVATE libs)
 add_subdirectory(libs/entt)
 target_compile_definitions(EnTT INTERFACE ENTT_DISABLE_ASSERT)  # Improves compilation time by disabling the assert
 
-# compile features and options
+# Compile features and options
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)  # To generate compile commands for vim YCM. Set it on perhaps only on 
 add_subdirectory(libs/spdlog)
-target_compile_features(2d_cpp_ecs_game PRIVATE cxx_std_17)
-target_compile_options(2d_cpp_ecs_game PRIVATE
+target_compile_features(app PRIVATE cxx_std_17)
+target_compile_options(app PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:/W4>
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
 )
+
 # Link libraries
 if (TARGET SDL2::SDL2main)
     # SDL2::SDL2main may or may not be available. It is e.g. required by Windows GUI applications
     # It has an implicit dependency on SDL2 functions, so it MUST be added before SDL2::SDL2 (or SDL2::SDL2-static)
-    target_link_libraries(2d_cpp_ecs_game PRIVATE SDL2::SDL2main)
+    target_link_libraries(app PRIVATE SDL2::SDL2main)
 endif ()
 
-target_link_libraries(2d_cpp_ecs_game PRIVATE SDL2::SDL2 SDL2_image::SDL2_image EnTT::EnTT spdlog::spdlog)
+target_link_libraries(app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image EnTT::EnTT spdlog::spdlog)
+

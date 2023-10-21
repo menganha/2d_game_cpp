@@ -15,7 +15,7 @@ GameScene::GameScene(const char* title, int screen_width, int screen_height, Uin
   , m_collision_system{ m_registry, m_dispatcher, Grid{ 0, 0, screen_width, screen_height, 40, 40 } }
   , m_combat_system{ m_registry }
   , m_render_system{ m_registry }
-  , m_enemy_system{ m_registry }
+  , m_enemy_system{ m_registry, m_dispatcher}
 {
 
     // Initializes SDL
@@ -45,6 +45,8 @@ GameScene::GameScene(const char* title, int screen_width, int screen_height, Uin
     m_render_system.Init(m_window.GetRenderer()); // TODO: Elminate these weird inits
 
     // Sets some event listeners
+    // m_dispatcher.sink<EEnemyMovement>().connect<&MovementSystem::OnOutOfBoundariesEvent>(m_movement_system);
+    m_dispatcher.sink<SetEntityPositionEvent>().connect<&MovementSystem::OnSetEntityPositionEvent>(m_movement_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&MovementSystem::OnOutOfBoundariesEvent>(m_movement_system);
     m_dispatcher.sink<ShootEvent>().connect<&CombatSystem::OnShootButtonEvent>(m_combat_system);
     m_dispatcher.sink<CollisionEvent>().connect<&CombatSystem::OnCollisionEvent>(m_combat_system);

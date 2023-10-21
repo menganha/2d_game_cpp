@@ -24,4 +24,11 @@ struct OutOfBoundariesEvent
     entt::entity entity;
 };
 
+
+struct SetEntityPositionEvent
+{
+    entt::entity entity;
+    Position     new_position;
+};
+
 #endif // INC_2D_CPP_ECS_GAME_EVENTS_HPP

@@ -21,15 +21,19 @@ struct Velocity
     float dy;
 };
 
-struct Enemy
+class Counter
 {
-    int type;
-};
+  public:
+    Counter() = default;
+    Counter(int goal_count) : m_goal_count{ goal_count }, m_current_count{ 0 } {}
+    void Tick() { m_current_count += 1; }
+    bool IsDone() const { return m_current_count >= m_goal_count; }
+    void Reset() { m_current_count = 0; }
+    int  GetCurrentCount() { return m_current_count; }
 
-struct Timer
-{
-    int time;
-    int countdown = 0;
+  private:
+    int m_goal_count;
+    int m_current_count;
 };
 
 struct Renderable

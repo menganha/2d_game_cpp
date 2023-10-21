@@ -14,13 +14,13 @@ class MovementSystem
 
     void Update();
 
-    void SetEntityPosition(const Position& new_position, entt::entity entity);
-
     void MoveEntity(const Position& displacement, entt::entity entity);
 
-    // void OnDirectionalButtonEvent(DirectionalButtonEvent input_event);
+    void SetEntityPosition(const Position& new_position, entt::entity entity);
 
-    void OnOutOfBoundariesEvent(OutOfBoundariesEvent out_of_boundaries_event);
+    void OnSetEntityPositionEvent(const SetEntityPositionEvent& move_entity_event);
+
+    void OnOutOfBoundariesEvent(const OutOfBoundariesEvent& out_of_boundaries_event);
 
   private:
     entt::registry& m_registry;
