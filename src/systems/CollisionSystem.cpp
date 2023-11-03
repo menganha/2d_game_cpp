@@ -21,7 +21,6 @@ CollisionSystem::CollisionSystem(entt::registry& registry, entt::dispatcher& dis
 void
 CollisionSystem::Update()
 {
-
     Position grid_position{ static_cast<float>(m_grid.origin_x), static_cast<float>(m_grid.origin_y) };
     Collider grid_collider{ m_grid.width, m_grid.height, 0, 0, false };
     auto     colliders = m_registry.view<Position, Collider>();
@@ -29,11 +28,14 @@ CollisionSystem::Update()
     {
         const auto entity_coll = colliders.get<Collider>(entity);
         const auto entity_pos = colliders.get<Position>(entity);
+
+        // Check if entities are out of the boundary defined by the grid collider
         if (not Collision::IsFullyContained(grid_position, grid_collider, entity_pos, entity_coll))
         {
             m_dispatcher.enqueue<OutOfBoundariesEvent>(grid_position, grid_collider, entity);
         }
-        // Assign entities to the grid they belong
+
+        // Assigns entities to the grid they belong
         int counter = 0;
         for (auto& cell : m_cells)
         {
@@ -48,6 +50,8 @@ CollisionSystem::Update()
             counter += 1;
         }
     }
+
+    // Check for collisions
     for (const auto& cell : m_cells)
     {
         for (auto it = std::begin(cell); it != std::end(cell); ++it)

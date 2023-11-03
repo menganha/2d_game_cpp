@@ -20,10 +20,17 @@ add_executable(app
         src/main.cpp
         src/GameScene.cpp
         src/GameScene.hpp
+        src/AssetManager.hpp
+        src/AssetManager.cpp
+        src/Config.hpp
         src/Gamepad.cpp
         src/Gamepad.hpp
+        src/Game.cpp
+        src/Game.hpp
         src/Enemy.cpp
         src/Enemy.hpp
+        src/Font.cpp
+        src/Font.hpp
         src/Components.hpp
         src/systems/MovementSystem.cpp
         src/systems/MovementSystem.hpp
@@ -66,5 +73,5 @@ if (TARGET SDL2::SDL2main)
     target_link_libraries(app PRIVATE SDL2::SDL2main)
 endif ()
 
-target_link_libraries(app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image EnTT::EnTT spdlog::spdlog)
+target_link_libraries(app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf EnTT::EnTT spdlog::spdlog)
 

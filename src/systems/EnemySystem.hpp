@@ -5,7 +5,6 @@
 #include "../Enemy.hpp"
 
 #include <entt/fwd.hpp>
-#include <vector>
 
 class EnemySystem
 {
@@ -17,17 +16,8 @@ class EnemySystem
     void Update();
 
   private:
-    struct EnemyHorde
-    {
-        EnemyType type;
-        Counter timer;
-        Counter amount;
-        Counter delay;
-    };
-    std::vector<EnemyHorde> m_hordes;
     entt::registry&         m_registry;
     entt::dispatcher&       m_dispatcher;
-    Counter                 m_timer;
 };
 
 #endif // INC_2D_CPP_ECS_GAME_ENEMYSYSTEM_HPP

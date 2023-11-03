@@ -1,11 +1,11 @@
 #ifndef INC_2D_CPP_ECS_GAME_GAMESCENE_H_HPP
 #define INC_2D_CPP_ECS_GAME_GAMESCENE_H_HPP
 
+#include "AssetManager.hpp"
 #include "Gamepad.hpp"
-#include "Window.hpp"
-#include "systems/EnemySystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/CombatSystem.hpp"
+#include "systems/EnemySystem.hpp"
 #include "systems/MovementSystem.hpp"
 #include "systems/RenderSystem.hpp"
 
@@ -16,24 +16,26 @@ class GameScene
 {
 
   public:
-    static constexpr SDL_Color WHITE{ 0xAB, 0xB2, 0xBF, 0xFF }; // TODO: Move this to their own header file
-    static constexpr SDL_Color RED{ 0xFF, 0x00, 0x00, 0x00 };
-    static constexpr SDL_Color GREEN{ 0x00, 0xFF, 0x00, 0xFF };
-    static constexpr SDL_Color BLUE{ 0x00, 0x00, 0xFF, 0xFF };
+    GameScene();
 
-    GameScene(const char* title, int screen_width, int screen_height, Uint32 flags);
+    ~GameScene();
 
-    void Run();
+    void Run(const AssetManager& asset_manager, SDL_Renderer* renderer);
 
   private:
     void ProcessEvents();
 
     void UpdateLogic();
 
-    void Render();
+    void Render(const AssetManager& asset_manager, SDL_Renderer* renderer);
+
+    void LoadLevel();
+
+    void RestartLevel();
+
+    void OnDeathEvent(DeathEvent death_event);
 
     Gamepad          m_gamepad;
-    Window           m_window;
     entt::entity     m_player_entity;
     entt::registry   m_registry;
     entt::dispatcher m_dispatcher;

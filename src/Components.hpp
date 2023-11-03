@@ -3,16 +3,21 @@
 
 #include <SDL2/SDL.h>
 #include <entt/entt.hpp>
+#include <string>
 
 using namespace entt::literals;
-
-// TODO: Maybe not necessary. We will keep track of the player with its entity ID
-using Movable = entt::tag<"Movable"_hs>;
 
 struct Position
 {
     float x;
     float y;
+};
+
+struct Text
+{
+    std::string text;
+    std::string font_id;
+    SDL_Color color;
 };
 
 struct Velocity
@@ -43,13 +48,21 @@ struct Renderable
     SDL_Color color;
 };
 
+// Primitive square shape of SDL
+struct SquarePrimitive
+{
+    int       height;
+    int       width;
+    SDL_Color color;
+};
+
 struct Collider
 {
     int  width;
     int  height;
     int  x_offset = 0;
     int  y_offset = 0;
-    bool solid = false; // Means it cannot go over the external boundary
+    bool solid = false;  // Means it cannot go over the external boundary
 };
 
 struct Health
@@ -57,9 +70,11 @@ struct Health
     int points;
 };
 
-struct Misile
+// Something that make damage
+struct Weapon
 {
-    int power;
+    int  power;
+    bool disposable = true;
 };
 
 #endif // INC_2D_CPP_ECS_GAME_COMPONENTS_HPP

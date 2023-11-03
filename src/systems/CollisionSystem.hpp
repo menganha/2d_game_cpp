@@ -4,7 +4,6 @@
 #include <entt/fwd.hpp>
 #include <vector>
 
-
 struct Grid
 {
     int origin_x;

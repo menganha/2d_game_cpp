@@ -40,7 +40,7 @@ BraceWrapping:
   AfterStruct:     true
   AfterUnion:      true
   AfterExternBlock: true
-  BeforeCatch:     false
+  BeforeCatch:     true
   BeforeElse:      true
   BeforeLambdaBody: false
   BeforeWhile:     false
@@ -111,7 +111,7 @@ PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
-PenaltyExcessCharacter: 1000000
+PenaltyExcessCharacter: 50
 PenaltyReturnTypeOnItsOwnLine: 200
 InsertNewlineAtEOF: true
 PointerAlignment: Left

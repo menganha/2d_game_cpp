@@ -3,10 +3,7 @@
 #include "Components.hpp"
 
 bool
-Collision::IsFullyContained(const Position& pos_a,
-                            const Collider& coll_a,
-                            const Position& pos_b,
-                            const Collider& coll_b)
+Collision::IsFullyContained(const Position& pos_a, const Collider& coll_a, const Position& pos_b, const Collider& coll_b)
 {
     int a_min, a_max, b_min, b_max;
 
@@ -53,11 +50,13 @@ Collision::HasCollided(const Position& pos_a, const Collider& coll_a, const Posi
     a_max = a_min + coll_a.height;
     b_min = static_cast<int>(pos_b.y) + coll_b.y_offset;
     b_max = b_min + coll_b.height;
+
     if (b_min > a_min)
         a_min = b_min;
     if (b_max < a_max)
         a_max = b_max;
     if (a_max <= a_min)
         return false;
+
     return true;
 }

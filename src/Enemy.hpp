@@ -23,6 +23,15 @@ struct Enemy
     Enemy(EnemyType t_type, Position t_reach, float t_vel, float t_spread = 0.05f);
 };
 
+struct EnemyHorde
+{
+    // Represent a bunch of enemies
+    EnemyType type;
+    Counter   every; // how often to instantiate the next enemy
+    Counter   amount;
+    Counter   delay;
+};
+
 namespace EnemyUtils {
 
     Position get_position(const Enemy& enemy);

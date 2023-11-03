@@ -1,75 +1,97 @@
 #include "GameScene.hpp"
 
+#include "Colors.hpp"
 #include "Components.hpp"
+#include "Config.hpp"
+#include "Enemy.hpp"
 #include "Events.hpp"
 
+#include <SDL2/SDL_ttf.h>
 #include <spdlog/spdlog.h>
 
-GameScene::GameScene(const char* title, int screen_width, int screen_height, Uint32 flags)
+// AssetManager asset_manager)
+//  , m_asset_manager{asset_manager}
+GameScene::GameScene() 
   : m_gamepad{}
-  , m_window{}
   , m_player_entity{}
   , m_registry{}
   , m_dispatcher{}
-  , m_movement_system{ m_registry, screen_width, screen_height }
-  , m_collision_system{ m_registry, m_dispatcher, Grid{ 0, 0, screen_width, screen_height, 40, 40 } }
-  , m_combat_system{ m_registry }
+  , m_movement_system{ m_registry, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y }
+  , m_collision_system{ m_registry, m_dispatcher, 
+      Grid{ 0, 0, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y, Config::COLLISION_GRID_CELL_WIDTH, Config::COLLISION_GRID_CELL_HEIGHT } }
+  , m_combat_system{ m_registry, m_dispatcher }
   , m_render_system{ m_registry }
   , m_enemy_system{ m_registry, m_dispatcher}
 {
 
-    // Initializes SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
-        std::string err_msg = "SDL could not initialize! SDL Error: ";
-        throw std::runtime_error(err_msg + SDL_GetError());
-    }
-
-    // Creates window
-    m_window.Create(title, screen_width, screen_height, flags);
-
-    // Creates a "player" entity
-    m_player_entity = m_registry.create();
-    m_registry.emplace<Position>(m_player_entity, 402.f, 500.f);
-    m_registry.emplace<Renderable>(m_player_entity, 10, 10, RED);
-    m_registry.emplace<Velocity>(m_player_entity, 0.f, 0.f);
-    m_registry.emplace<Movable>(m_player_entity);
-    m_registry.emplace<Collider>(m_player_entity, 10, 10, 0, 0, true);
-    spdlog::debug("Created entity with id {} at x={}, y={}", static_cast<int>(m_player_entity), 20, 0);
-
-    // Creates a batch of enemies
-    // const auto entity = m_registry.create();
-    // m_registry.emplace<EnemyHorde>(entity, 0, 4, 1000);
-
-    // initializes the systems
-    m_render_system.Init(m_window.GetRenderer()); // TODO: Elminate these weird inits
-
     // Sets some event listeners
-    // m_dispatcher.sink<EEnemyMovement>().connect<&MovementSystem::OnOutOfBoundariesEvent>(m_movement_system);
     m_dispatcher.sink<SetEntityPositionEvent>().connect<&MovementSystem::OnSetEntityPositionEvent>(m_movement_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&MovementSystem::OnOutOfBoundariesEvent>(m_movement_system);
     m_dispatcher.sink<ShootEvent>().connect<&CombatSystem::OnShootButtonEvent>(m_combat_system);
     m_dispatcher.sink<CollisionEvent>().connect<&CombatSystem::OnCollisionEvent>(m_combat_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&CombatSystem::OnOutOfBoundariesEvent>(m_combat_system);
+    m_dispatcher.sink<DeathEvent>().connect<&GameScene::OnDeathEvent>(this);
+
+    // Loads first level
+    LoadLevel();
+}
+
+GameScene::~GameScene()
+{
+    m_dispatcher.clear();
 }
 
 void
-GameScene::Run()
+GameScene::LoadLevel()
 {
-    while (m_window.IsOpen())
+    // Creates a "player" entity
+    m_player_entity = m_registry.create();
+    m_registry.emplace<Position>(m_player_entity, 402.f, 500.f);
+    m_registry.emplace<SquarePrimitive>(m_player_entity, 10, 10, Colors::RED);
+    m_registry.emplace<Velocity>(m_player_entity, 0.f, 0.f);
+    m_registry.emplace<Collider>(m_player_entity, 10, 10, 0, 0, true);
+    m_registry.emplace<Health>(m_player_entity, 40);
+
+    // Creates 10 batches of enemies
+    for (int idx = 1; idx <= 10; ++idx)
     {
-        ProcessEvents();
-        UpdateLogic();
-        Render();
+        auto entity = m_registry.create();
+        m_registry.emplace<EnemyHorde>(entity, EnemyType::PARAB, 40, 5, (idx - 1) * 500);
     }
+
+    // Create UI elements
+    auto entity = m_registry.create();
+    m_registry.emplace<Position>(entity, 20.f, 20.f);
+    m_registry.emplace<Text>(entity, "Lives: " + std::to_string(40), "fonts/Anonymous Pro.ttf", Colors::BLACK);
+}
+
+void
+GameScene::RestartLevel()
+{
+    m_registry.clear();
+    LoadLevel();
+}
+
+void
+GameScene::OnDeathEvent(DeathEvent death_event)
+{
+    if (death_event.entity == m_player_entity)
+    {
+        RestartLevel();
+    }
+}
+
+void
+GameScene::Run(const AssetManager& asset_manager, SDL_Renderer* renderer)
+{
+    ProcessEvents();
+    UpdateLogic();
+    Render(asset_manager, renderer);
 }
 
 void
 GameScene::ProcessEvents()
 {
-
-    // Process events from the SDL window
-    m_window.ProcessEvents();
 
     // Keyboard processing
     auto keyboard_state = SDL_GetKeyboardState(nullptr);
@@ -104,13 +126,13 @@ GameScene::UpdateLogic()
 }
 
 void
-GameScene::Render()
+GameScene::Render(const AssetManager& asset_manager, SDL_Renderer* renderer)
 {
+    SDL_SetRenderDrawColor(renderer, Colors::WHITE.r, Colors::WHITE.g, Colors::WHITE.b, Colors::WHITE.a);
 
-    SDL_SetRenderDrawColor(m_window.GetRenderer(), 255, 255, 255, 255);
-    SDL_RenderClear(m_window.GetRenderer());
+    SDL_RenderClear(renderer);
 
-    m_render_system.Update();
+    m_render_system.Update(asset_manager, renderer);
 
-    SDL_RenderPresent(m_window.GetRenderer());
+    SDL_RenderPresent(renderer);
 }
