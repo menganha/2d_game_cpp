@@ -27,7 +27,7 @@ GamePlayScene::GamePlayScene()
     // Sets some event listeners
     m_dispatcher.sink<SetEntityPositionEvent>().connect<&MovementSystem::OnSetEntityPositionEvent>(m_movement_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&MovementSystem::OnOutOfBoundariesEvent>(m_movement_system);
-    m_dispatcher.sink<ShootEvent>().connect<&CombatSystem::OnShootButtonEvent>(m_combat_system);
+    m_dispatcher.sink<ShootEvent>().connect<&CombatSystem::OnShootEvent>(m_combat_system);
     m_dispatcher.sink<CollisionEvent>().connect<&CombatSystem::OnCollisionEvent>(m_combat_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&CombatSystem::OnOutOfBoundariesEvent>(m_combat_system);
     m_dispatcher.sink<DeathEvent>().connect<&GamePlayScene::OnDeathEvent>(this);
@@ -44,12 +44,12 @@ GamePlayScene::~GamePlayScene()
 void
 GamePlayScene::ProcessEvents()
 {
+    // Dispatch any game other event accumulated from the previous frame here
+    m_dispatcher.update();
 
-    // Keyboard processing
+    // Input processing
     auto keyboard_state = SDL_GetKeyboardState(nullptr);
     m_gamepad.Update(keyboard_state);
-
-    // TODO: This should be the a constant somwhere (i.e., the velocity of the player entitty)
     if (m_gamepad.IsButtonDown(Gamepad::UP))
         m_movement_system.MoveEntity(Position{ 0.0f, -2.0f }, m_player_entity);
     if (m_gamepad.IsButtonDown(Gamepad::DOWN))
@@ -58,12 +58,9 @@ GamePlayScene::ProcessEvents()
         m_movement_system.MoveEntity(Position{ -2.0f, 0.0f }, m_player_entity);
     if (m_gamepad.IsButtonDown(Gamepad::RIGHT))
         m_movement_system.MoveEntity(Position{ 2.0f, 0.0f }, m_player_entity);
-
     if (m_gamepad.IsButtonPressed(Gamepad::A))
-        m_dispatcher.trigger(ShootEvent{ m_player_entity });
-
-    // Dispatch any game other event accumulated from the previous frame here
-    m_dispatcher.update();
+        m_combat_system.OnShootEvent(ShootEvent{ m_player_entity });
+    // TODO: Velocity should be the a constant somwhere (i.e., the velocity of the player entitty)
 }
 
 void
@@ -94,6 +91,7 @@ GamePlayScene::LoadLevel()
 {
     // Creates a "player" entity
     m_player_entity = m_registry.create();
+    spdlog::info("Creating player entity with id {}", static_cast<int>(m_player_entity));
     m_registry.emplace<Position>(m_player_entity, 402.f, 500.f);
     m_registry.emplace<SquarePrimitive>(m_player_entity, 10, 10, Colors::RED);
     m_registry.emplace<Velocity>(m_player_entity, 0.f, 0.f);

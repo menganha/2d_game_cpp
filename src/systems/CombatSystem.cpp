@@ -28,7 +28,7 @@ CombatSystem::Update()
 }
 
 void
-CombatSystem::OnShootButtonEvent(ShootEvent shoot_event)
+CombatSystem::OnShootEvent(ShootEvent shoot_event)
 {
     auto& position = m_registry.get<Position>(shoot_event.shooter_entity);
     auto  bullet_entity = m_registry.create();

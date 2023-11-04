@@ -14,7 +14,7 @@ class CombatSystem
 
     void Update();
 
-    void OnShootButtonEvent(ShootEvent shoot_event);
+    void OnShootEvent(ShootEvent shoot_event);
 
     void OnCollisionEvent(CollisionEvent collision_event);
 
