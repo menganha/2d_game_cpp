@@ -11,7 +11,7 @@ class Font
     Font() = default;
     Font(const std::string_view font_filepath, int point_size, SDL_Renderer* renderer);
     ~Font();
-    void DrawText(const std::string_view text, int x, int y, SDL_Color color, SDL_Renderer* renderer);
+    void DrawText(const std::string_view text, int x, int y, SDL_Color color, SDL_Renderer* renderer) const;
 
   private:
     static const int  N_ASCII_CODES = 128;

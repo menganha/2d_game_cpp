@@ -18,11 +18,9 @@ endif ()
 
 add_executable(app 
         src/main.cpp
-        src/GameScene.cpp
-        src/GameScene.hpp
+        src/Config.hpp
         src/AssetManager.hpp
         src/AssetManager.cpp
-        src/Config.hpp
         src/Gamepad.cpp
         src/Gamepad.hpp
         src/Game.cpp
@@ -32,17 +30,20 @@ add_executable(app
         src/Font.cpp
         src/Font.hpp
         src/Components.hpp
-        src/systems/MovementSystem.cpp
-        src/systems/MovementSystem.hpp
         src/Events.hpp
-        src/systems/CollisionSystem.cpp
-        src/systems/CollisionSystem.hpp
-        src/systems/RenderSystem.cpp
-        src/systems/RenderSystem.hpp
         src/Window.cpp
         src/Window.hpp
         src/Collision.cpp
         src/Collision.hpp
+        src/scenes/GamePlayScene.cpp
+        src/scenes/GamePlayScene.hpp
+        src/scenes/IScene.hpp
+        src/systems/MovementSystem.cpp
+        src/systems/MovementSystem.hpp
+        src/systems/CollisionSystem.cpp
+        src/systems/CollisionSystem.hpp
+        src/systems/RenderSystem.cpp
+        src/systems/RenderSystem.hpp
         src/systems/CombatSystem.cpp
         src/systems/CombatSystem.hpp
         src/systems/EnemySystem.cpp

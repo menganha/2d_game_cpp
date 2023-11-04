@@ -11,7 +11,7 @@ RenderSystem::Update(const AssetManager& asset_manager, SDL_Renderer* renderer)
     // Render text
     auto view_text = m_registry.view<const Position, const Text>();
     view_text.each([renderer, asset_manager](const auto& position, const auto& text) {
-        auto font = asset_manager.GetFont(text.font_id); // reference or copy????
+        const auto& font = asset_manager.GetFont(text.font_id); // reference or copy????
         font.DrawText(text.text, static_cast<int>(position.x), static_cast<int>(position.y), text.color, renderer);
     });
 

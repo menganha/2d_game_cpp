@@ -1,17 +1,17 @@
-#include "GameScene.hpp"
+#include "GamePlayScene.hpp"
 
-#include "Colors.hpp"
-#include "Components.hpp"
-#include "Config.hpp"
-#include "Enemy.hpp"
-#include "Events.hpp"
+#include "../Colors.hpp"
+#include "../Components.hpp"
+#include "../Config.hpp"
+#include "../Enemy.hpp"
+#include "../Events.hpp"
 
 #include <SDL2/SDL_ttf.h>
 #include <spdlog/spdlog.h>
 
 // AssetManager asset_manager)
 //  , m_asset_manager{asset_manager}
-GameScene::GameScene() 
+GamePlayScene::GamePlayScene() 
   : m_gamepad{}
   , m_player_entity{}
   , m_registry{}
@@ -30,67 +30,19 @@ GameScene::GameScene()
     m_dispatcher.sink<ShootEvent>().connect<&CombatSystem::OnShootButtonEvent>(m_combat_system);
     m_dispatcher.sink<CollisionEvent>().connect<&CombatSystem::OnCollisionEvent>(m_combat_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&CombatSystem::OnOutOfBoundariesEvent>(m_combat_system);
-    m_dispatcher.sink<DeathEvent>().connect<&GameScene::OnDeathEvent>(this);
+    m_dispatcher.sink<DeathEvent>().connect<&GamePlayScene::OnDeathEvent>(this);
 
     // Loads first level
     LoadLevel();
 }
 
-GameScene::~GameScene()
+GamePlayScene::~GamePlayScene()
 {
     m_dispatcher.clear();
 }
 
 void
-GameScene::LoadLevel()
-{
-    // Creates a "player" entity
-    m_player_entity = m_registry.create();
-    m_registry.emplace<Position>(m_player_entity, 402.f, 500.f);
-    m_registry.emplace<SquarePrimitive>(m_player_entity, 10, 10, Colors::RED);
-    m_registry.emplace<Velocity>(m_player_entity, 0.f, 0.f);
-    m_registry.emplace<Collider>(m_player_entity, 10, 10, 0, 0, true);
-    m_registry.emplace<Health>(m_player_entity, 40);
-
-    // Creates 10 batches of enemies
-    for (int idx = 1; idx <= 10; ++idx)
-    {
-        auto entity = m_registry.create();
-        m_registry.emplace<EnemyHorde>(entity, EnemyType::PARAB, 40, 5, (idx - 1) * 500);
-    }
-
-    // Create UI elements
-    auto entity = m_registry.create();
-    m_registry.emplace<Position>(entity, 20.f, 20.f);
-    m_registry.emplace<Text>(entity, "Lives: " + std::to_string(40), "fonts/Anonymous Pro.ttf", Colors::BLACK);
-}
-
-void
-GameScene::RestartLevel()
-{
-    m_registry.clear();
-    LoadLevel();
-}
-
-void
-GameScene::OnDeathEvent(DeathEvent death_event)
-{
-    if (death_event.entity == m_player_entity)
-    {
-        RestartLevel();
-    }
-}
-
-void
-GameScene::Run(const AssetManager& asset_manager, SDL_Renderer* renderer)
-{
-    ProcessEvents();
-    UpdateLogic();
-    Render(asset_manager, renderer);
-}
-
-void
-GameScene::ProcessEvents()
+GamePlayScene::ProcessEvents()
 {
 
     // Keyboard processing
@@ -115,7 +67,7 @@ GameScene::ProcessEvents()
 }
 
 void
-GameScene::UpdateLogic()
+GamePlayScene::Update()
 {
     m_movement_system.Update();
     m_collision_system.Update();
@@ -126,7 +78,7 @@ GameScene::UpdateLogic()
 }
 
 void
-GameScene::Render(const AssetManager& asset_manager, SDL_Renderer* renderer)
+GamePlayScene::Render(const AssetManager& asset_manager, SDL_Renderer* renderer)
 {
     SDL_SetRenderDrawColor(renderer, Colors::WHITE.r, Colors::WHITE.g, Colors::WHITE.b, Colors::WHITE.a);
 
@@ -135,4 +87,44 @@ GameScene::Render(const AssetManager& asset_manager, SDL_Renderer* renderer)
     m_render_system.Update(asset_manager, renderer);
 
     SDL_RenderPresent(renderer);
+}
+
+void
+GamePlayScene::LoadLevel()
+{
+    // Creates a "player" entity
+    m_player_entity = m_registry.create();
+    m_registry.emplace<Position>(m_player_entity, 402.f, 500.f);
+    m_registry.emplace<SquarePrimitive>(m_player_entity, 10, 10, Colors::RED);
+    m_registry.emplace<Velocity>(m_player_entity, 0.f, 0.f);
+    m_registry.emplace<Collider>(m_player_entity, 10, 10, 0, 0, true);
+    m_registry.emplace<Health>(m_player_entity, 40);
+
+    // Creates 10 batches of enemies
+    for (int idx = 1; idx <= 10; ++idx)
+    {
+        auto entity = m_registry.create();
+        m_registry.emplace<EnemyHorde>(entity, EnemyType::PARAB, 40, 5, (idx - 1) * 500);
+    }
+
+    // Create UI elements
+    auto entity = m_registry.create();
+    m_registry.emplace<Position>(entity, 20.f, 20.f);
+    m_registry.emplace<Text>(entity, "Lives: " + std::to_string(40), "fonts/Anonymous Pro.ttf", Colors::BLACK);
+}
+
+void
+GamePlayScene::RestartLevel()
+{
+    m_registry.clear();
+    LoadLevel();
+}
+
+void
+GamePlayScene::OnDeathEvent(DeathEvent death_event)
+{
+    if (death_event.entity == m_player_entity)
+    {
+        RestartLevel();
+    }
 }

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "AssetManager.hpp"
-#include "GameScene.hpp"
 #include "Window.hpp"
+#include "scenes/IScene.hpp"
+#include <stack>
 
 class Game
 {
@@ -14,5 +15,5 @@ class Game
   private:
     Window       m_window;
     AssetManager m_asset_manager;
-    GameScene    m_game_scene;
+    std::stack<std::shared_ptr<IScene>> m_scene_stack;
 };

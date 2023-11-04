@@ -2,10 +2,11 @@
 
 #include "Config.hpp"
 #include "SDL2/SDL.h"
+#include "scenes/GamePlayScene.hpp"
 
 #include <filesystem>
 
-Game::Game(std::string_view root_path_str) : m_window{}, m_asset_manager{}, m_game_scene{}
+Game::Game(std::string_view root_path_str) : m_window{}, m_asset_manager{}, m_scene_stack{}
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
@@ -26,6 +27,9 @@ Game::Game(std::string_view root_path_str) : m_window{}, m_asset_manager{}, m_ga
 
     // Load resources
     m_asset_manager.AddFont("fonts/Anonymous Pro.ttf", 12, m_window.GetRenderer());
+
+    // Start the stack of scenes
+    m_scene_stack.push(std::make_shared<GamePlayScene>());
 }
 
 Game::~Game()
@@ -39,7 +43,22 @@ Game::Run()
 {
     while (m_window.IsOpen())
     {
+        if (m_scene_stack.empty())
+        {
+            break;
+        }
         m_window.ProcessEvents();
-        m_game_scene.Run(m_asset_manager, m_window.GetRenderer());
+        auto current_scene = m_scene_stack.top();
+        current_scene->ProcessEvents();
+        current_scene->Update();
+        current_scene->Render(m_asset_manager, m_window.GetRenderer());
+        if (current_scene->HasEnded())
+        {
+            m_scene_stack.pop();
+        }
+        else if (current_scene->HasRequestedChange())
+        {
+            // push here the requested scene to the stack
+        }
     }
 }

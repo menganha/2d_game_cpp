@@ -56,7 +56,7 @@ Font::~Font()
 }
 
 void
-Font::DrawText(const std::string_view text, int x, int y, SDL_Color color, SDL_Renderer* renderer)
+Font::DrawText(const std::string_view text, int x, int y, SDL_Color color, SDL_Renderer* renderer) const
 {
 
     SDL_SetTextureColorMod(m_texture, color.r, color.g, color.b);

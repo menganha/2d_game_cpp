@@ -1,5 +1,4 @@
-#ifndef INC_2D_CPP_ECS_GAME_COLLISION_HPP
-#define INC_2D_CPP_ECS_GAME_COLLISION_HPP
+#pragma once
 
 struct Position;
 struct Collider;
@@ -14,4 +13,3 @@ namespace Collision {
     bool IsFullyContained(const Position& pos_a, const Collider& coll_a, const Position& pos_b, const Collider& coll_b);
 }
 
-#endif // INC_2D_CPP_ECS_GAME_COLLISION_HPP
