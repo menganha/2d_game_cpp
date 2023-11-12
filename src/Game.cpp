@@ -3,6 +3,7 @@
 #include "Config.hpp"
 #include "SDL2/SDL.h"
 #include "scenes/GamePlayScene.hpp"
+#include "scenes/PauseScene.hpp"
 
 #include <filesystem>
 
@@ -26,10 +27,10 @@ Game::Game(std::string_view root_path_str) : m_window{}, m_asset_manager{}, m_sc
     m_asset_manager = AssetManager((root_path.parent_path() / "assets").c_str());
 
     // Load resources
-    m_asset_manager.AddFont("fonts/Anonymous Pro.ttf", 12, m_window.GetRenderer());
+    m_asset_manager.AddFont("fonts/PressStart2P.ttf", 20, m_window.GetRenderer());
 
     // Start the stack of scenes
-    m_scene_stack.push(std::make_shared<GamePlayScene>());
+    m_scene_stack.push(std::make_shared<PauseScene>());
 }
 
 Game::~Game()

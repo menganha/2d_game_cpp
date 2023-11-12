@@ -1,9 +1,10 @@
 #ifndef INC_2D_CPP_ECS_GAME_RENDERSYSTEM_HPP
 #define INC_2D_CPP_ECS_GAME_RENDERSYSTEM_HPP
 
+#include "../AssetManager.hpp"
+
 #include <SDL2/SDL.h>
 #include <entt/fwd.hpp>
-#include "../AssetManager.hpp"
 
 class RenderSystem
 {

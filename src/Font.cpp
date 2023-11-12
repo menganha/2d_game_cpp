@@ -14,6 +14,8 @@ Font::Font(const std::string_view font_filepath, int point_size, SDL_Renderer* r
         std::string err_msg = "SDL TTF Error: ";
         throw std::runtime_error(err_msg + TTF_GetError());
     }
+    // TTF_SetFontHinting(font, TTF_HINTING_LIGHT);
+    // TTF_SetFontStyle(font, TTF_STYLE_ITALIC);
 
     SDL_Surface* surface{ SDL_CreateRGBSurface(0, FONT_ATLAS_SIZE, FONT_ATLAS_SIZE, 32, 0, 0, 0, 0xFF) };
     SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGBA(surface->format, 0, 0, 0, 0));
@@ -23,7 +25,7 @@ Font::Font(const std::string_view font_filepath, int point_size, SDL_Renderer* r
     {
         char char_to_store[2]{ ascii_char, 0 };
 
-        SDL_Surface* text_surface{ TTF_RenderText_Solid(font, char_to_store, { 0xFF, 0xFF, 0xFF, 0xFF }) };
+        SDL_Surface* text_surface{ TTF_RenderUTF8_Blended(font, char_to_store, { 0xFF, 0xFF, 0xFF, 0xFF }) };
 
         TTF_SizeText(font, char_to_store, &destination.w, &destination.h);
 

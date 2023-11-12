@@ -1,9 +1,6 @@
 #ifndef INC_2D_CPP_ECS_GAME_ENEMYSYSTEM_HPP
 #define INC_2D_CPP_ECS_GAME_ENEMYSYSTEM_HPP
 
-#include "../Components.hpp"
-#include "../Enemy.hpp"
-
 #include <entt/fwd.hpp>
 
 class EnemySystem
@@ -16,8 +13,8 @@ class EnemySystem
     void Update();
 
   private:
-    entt::registry&         m_registry;
-    entt::dispatcher&       m_dispatcher;
+    entt::registry&   m_registry;
+    entt::dispatcher& m_dispatcher;
 };
 
 #endif // INC_2D_CPP_ECS_GAME_ENEMYSYSTEM_HPP

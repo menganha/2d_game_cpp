@@ -72,20 +72,3 @@ CombatSystem::OnOutOfBoundariesEvent(OutOfBoundariesEvent out_of_boundaries_even
     }
 }
 
-template<typename Ta, typename Tb>
-std::tuple<Ta*, Tb*>
-CombatSystem::try_signature(entt::entity entity_a, entt::entity entity_b)
-{
-    auto* component_a = m_registry.try_get<Ta>(entity_a);
-    auto* component_b = m_registry.try_get<Tb>(entity_b);
-    if (component_a and component_b)
-    {
-        return { component_a, component_b };
-    }
-    else
-    {
-        auto* component_a = m_registry.try_get<Ta>(entity_b);
-        auto* component_b = m_registry.try_get<Tb>(entity_a);
-        return { component_a, component_b };
-    }
-}

@@ -37,6 +37,8 @@ add_executable(app
         src/Collision.hpp
         src/scenes/GamePlayScene.cpp
         src/scenes/GamePlayScene.hpp
+        src/scenes/PauseScene.cpp
+        src/scenes/PauseScene.hpp
         src/scenes/IScene.hpp
         src/systems/MovementSystem.cpp
         src/systems/MovementSystem.hpp
@@ -48,6 +50,11 @@ add_executable(app
         src/systems/CombatSystem.hpp
         src/systems/EnemySystem.cpp
         src/systems/EnemySystem.hpp
+        src/widgets/Widget.hpp
+        src/widgets/WidgetContainer.hpp
+        src/widgets/WidgetContainer.cpp
+        src/widgets/ButtonWidget.hpp
+        src/widgets/ButtonWidget.cpp
         )
 
 # Always set the name to app for easily passing this variable to vim
@@ -56,16 +63,16 @@ set_target_properties(app PROPERTIES OUTPUT_NAME "app")
 
 # Include or add directories
 add_subdirectory(libs/entt)
-target_compile_definitions(EnTT INTERFACE ENTT_DISABLE_ASSERT)  # Improves compilation time by disabling the assert
+add_subdirectory(libs/spdlog)
 
 # Compile features and options
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)  # To generate compile commands for vim YCM. Set it on perhaps only on 
-add_subdirectory(libs/spdlog)
-target_compile_features(app PRIVATE cxx_std_17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+target_compile_definitions(EnTT INTERFACE ENTT_DISABLE_ASSERT)  # Improves compilation time by disabling the assert
 target_compile_options(app PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:/W4>
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
 )
+target_compile_features(app PRIVATE cxx_std_17)
 
 # Link libraries
 if (TARGET SDL2::SDL2main)

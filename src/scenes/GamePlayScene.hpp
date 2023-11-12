@@ -10,7 +10,7 @@
 #include "IScene.hpp"
 
 #include <SDL2/SDL.h>
-#include <entt/entt.hpp>
+#include <entt/fwd.hpp>
 
 class GamePlayScene : public IScene
 {

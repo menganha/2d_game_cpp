@@ -108,7 +108,7 @@ GamePlayScene::LoadLevel()
     // Create UI elements
     auto entity = m_registry.create();
     m_registry.emplace<Position>(entity, 20.f, 20.f);
-    m_registry.emplace<Text>(entity, "Lives: " + std::to_string(40), "fonts/Anonymous Pro.ttf", Colors::BLACK);
+    m_registry.emplace<Text>(entity, "Lives: " + std::to_string(40), "fonts/PressStart2P.ttf", Colors::BLACK);
 }
 
 void
