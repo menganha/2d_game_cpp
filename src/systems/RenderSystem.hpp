@@ -10,12 +10,12 @@ class RenderSystem
 {
 
   public:
-    explicit RenderSystem(entt::registry& registry);
+    explicit RenderSystem(const entt::registry& registry);
     void Update(const AssetManager& asset_manager, SDL_Renderer* renderer);
 
   private:
-    entt::registry& m_registry;
-    SDL_Renderer*   m_renderer;
+    const entt::registry& m_registry;
+    SDL_Renderer*         m_renderer;
 };
 
 #endif // INC_2D_CPP_ECS_GAME_RENDERSYSTEM_HPP

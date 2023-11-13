@@ -60,5 +60,6 @@ WidgetContainer::MoveToNext()
 void
 WidgetContainer::TriggerAction()
 {
-    m_current->widget.TriggerAction();
+    if (m_current)
+        m_current->widget.TriggerAction();
 }

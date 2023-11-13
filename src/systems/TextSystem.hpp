@@ -6,6 +6,5 @@ class TextSystem{
     public:
         TextSystem(entt::registry registry);
         void Update();
-        inter
 
-}
+};

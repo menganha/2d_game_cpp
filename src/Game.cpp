@@ -7,7 +7,7 @@
 
 #include <filesystem>
 
-Game::Game(std::string_view root_path_str) : m_window{}, m_asset_manager{}, m_scene_stack{}
+Game::Game(std::string_view root_path_str) : m_window{}, m_asset_manager{}, m_gamepad{}, m_scene_stack{}
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
@@ -30,7 +30,7 @@ Game::Game(std::string_view root_path_str) : m_window{}, m_asset_manager{}, m_sc
     m_asset_manager.AddFont("fonts/PressStart2P.ttf", 20, m_window.GetRenderer());
 
     // Start the stack of scenes
-    m_scene_stack.push(std::make_shared<PauseScene>());
+    m_scene_stack.push(std::make_shared<GamePlayScene>()); // Why Shared
 }
 
 Game::~Game()
@@ -49,8 +49,10 @@ Game::Run()
             break;
         }
         m_window.ProcessEvents();
+        m_gamepad.Update(SDL_GetKeyboardState(nullptr));
+
         auto current_scene = m_scene_stack.top();
-        current_scene->ProcessEvents();
+        current_scene->ProcessEvents(m_gamepad);
         current_scene->Update();
         current_scene->Render(m_asset_manager, m_window.GetRenderer());
         if (current_scene->HasEnded())
@@ -59,7 +61,15 @@ Game::Run()
         }
         else if (current_scene->HasRequestedChange())
         {
-            // push here the requested scene to the stack
+            if (current_scene->GetNextScene() == SceneType::EXIT)
+            {
+                m_scene_stack = {};
+            }
+            else
+            {
+                m_scene_stack.push(std::make_shared<PauseScene>());
+                current_scene->ResetSceneStatus();
+            }
         }
     }
 }

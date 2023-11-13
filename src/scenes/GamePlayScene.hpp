@@ -19,7 +19,7 @@ class GamePlayScene : public IScene
     GamePlayScene();
     ~GamePlayScene();
 
-    void ProcessEvents() override;
+    void ProcessEvents(const Gamepad& gamepad) override;
     void Update() override;
     void Render(const AssetManager& asset_manager, SDL_Renderer* renderer) override;
 
@@ -28,7 +28,6 @@ class GamePlayScene : public IScene
     void RestartLevel();
     void OnDeathEvent(DeathEvent death_event);
 
-    Gamepad          m_gamepad;
     entt::entity     m_player_entity;
     entt::registry   m_registry;
     entt::dispatcher m_dispatcher;

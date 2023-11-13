@@ -14,15 +14,13 @@ class PauseScene : public IScene
 
   public:
     PauseScene();
-    // ~PauseScene();
-    void ProcessEvents() override;
+    void ProcessEvents(const Gamepad& gamepad) override;
     void Update() override;
     void Render(const AssetManager& asset_manager, SDL_Renderer* renderer) override;
 
   private:
     void             StupidFunction();
     WidgetContainer  m_widget_container;
-    Gamepad          m_gamepad;
     entt::registry   m_registry;
     entt::dispatcher m_dispatcher;
     RenderSystem     m_render_system;

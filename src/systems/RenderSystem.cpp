@@ -2,7 +2,7 @@
 
 #include "../Components.hpp"
 
-RenderSystem::RenderSystem(entt::registry& registry) : m_registry{ registry } {};
+RenderSystem::RenderSystem(const entt::registry& registry) : m_registry{ registry } {};
 
 void
 RenderSystem::Update(const AssetManager& asset_manager, SDL_Renderer* renderer)

@@ -9,10 +9,10 @@ PauseScene::PauseScene()
   , m_registry{}
   , m_dispatcher{}
   , m_render_system{ m_registry }
-  , m_return_button{ "RETURN", 0, 100, m_registry }
-  , m_exit_button{ "EXIT", 0, 200, m_registry }
+  , m_return_button{ "REGRESAR", 0, 100, m_registry }
+  , m_exit_button{ "SALIR", 0, 200, m_registry }
 {
-    m_return_button.Connect<&PauseScene::StupidFunction>(this);
+    m_return_button.Connect<&PauseScene::EndScene>(this);
     m_exit_button.Connect<&PauseScene::StupidFunction>(this);
 
     m_widget_container.AppendWidget(m_return_button);
@@ -22,7 +22,8 @@ PauseScene::PauseScene()
 void
 PauseScene::StupidFunction()
 {
-    spdlog::info("Calling stupid function!");
+    spdlog::info("Estoy apretando algo en el teclado");
+    RequestChangeScene(SceneType::EXIT);
 }
 
 void
@@ -42,14 +43,12 @@ PauseScene::Render(const AssetManager& asset_manager, SDL_Renderer* renderer)
 }
 
 void
-PauseScene::ProcessEvents()
+PauseScene::ProcessEvents(const Gamepad& gamepad)
 {
-    auto keyboard_state = SDL_GetKeyboardState(nullptr);
-    m_gamepad.Update(keyboard_state);
-    if (m_gamepad.IsButtonPressed(Gamepad::UP))
+    if (gamepad.IsButtonPressed(Gamepad::UP))
         m_widget_container.MoveToPrevious();
-    if (m_gamepad.IsButtonPressed(Gamepad::DOWN))
+    if (gamepad.IsButtonPressed(Gamepad::DOWN))
         m_widget_container.MoveToNext();
-    if (m_gamepad.IsButtonPressed(Gamepad::A))
+    if (gamepad.IsButtonPressed(Gamepad::A))
         m_widget_container.TriggerAction();
 }

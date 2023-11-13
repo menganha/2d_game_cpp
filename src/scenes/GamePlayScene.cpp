@@ -12,8 +12,7 @@
 // AssetManager asset_manager)
 //  , m_asset_manager{asset_manager}
 GamePlayScene::GamePlayScene() 
-  : m_gamepad{}
-  , m_player_entity{}
+  : m_player_entity{}
   , m_registry{}
   , m_dispatcher{}
   , m_movement_system{ m_registry, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y }
@@ -42,25 +41,28 @@ GamePlayScene::~GamePlayScene()
 }
 
 void
-GamePlayScene::ProcessEvents()
+GamePlayScene::ProcessEvents(const Gamepad& gamepad)
 {
     // Dispatch any game other event accumulated from the previous frame here
     m_dispatcher.update();
 
     // Input processing
-    auto keyboard_state = SDL_GetKeyboardState(nullptr);
-    m_gamepad.Update(keyboard_state);
-    if (m_gamepad.IsButtonDown(Gamepad::UP))
+    if (gamepad.IsButtonDown(Gamepad::UP))
         m_movement_system.MoveEntity(Position{ 0.0f, -2.0f }, m_player_entity);
-    if (m_gamepad.IsButtonDown(Gamepad::DOWN))
+    if (gamepad.IsButtonDown(Gamepad::DOWN))
         m_movement_system.MoveEntity(Position{ 0.0f, 2.0f }, m_player_entity);
-    if (m_gamepad.IsButtonDown(Gamepad::LEFT))
+    if (gamepad.IsButtonDown(Gamepad::LEFT))
         m_movement_system.MoveEntity(Position{ -2.0f, 0.0f }, m_player_entity);
-    if (m_gamepad.IsButtonDown(Gamepad::RIGHT))
+    if (gamepad.IsButtonDown(Gamepad::RIGHT))
         m_movement_system.MoveEntity(Position{ 2.0f, 0.0f }, m_player_entity);
-    if (m_gamepad.IsButtonPressed(Gamepad::A))
+    if (gamepad.IsButtonPressed(Gamepad::A))
         m_combat_system.OnShootEvent(ShootEvent{ m_player_entity });
+    if (gamepad.IsButtonPressed(Gamepad::START)) // Si apretamos start entonces va a salir la pantalla de PAUSA
+        RequestChangeScene(SceneType::PAUSE_SCENE);
+
     // TODO: Velocity should be the a constant somwhere (i.e., the velocity of the player entitty)
+    // EMILA LALALALAL!!!!!
+    // papalalalala
 }
 
 void

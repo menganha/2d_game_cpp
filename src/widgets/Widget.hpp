@@ -5,6 +5,7 @@
 class Widget
 {
   public:
+    virtual ~Widget() = default;
     virtual void SetActive(){};
     virtual void UnsetActive(){};
     virtual void TriggerAction() = 0;
