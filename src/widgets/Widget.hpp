@@ -22,8 +22,8 @@ class CallBackWidget : public Widget
     {
         m_instance = instance;
         m_delegate = [](void* t_instance) -> void {
-            auto casted = static_cast<T*>(t_instance);
-            return std::invoke(Candidate, *casted);
+            T* casted = static_cast<T*>(t_instance);
+            return std::invoke(Candidate, casted);
         };
     }
 

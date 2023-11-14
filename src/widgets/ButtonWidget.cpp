@@ -12,6 +12,11 @@ ButtonWidget::ButtonWidget(std::string_view label, int pos_x, int pos_y, entt::r
     UnsetActive();
 }
 
+ButtonWidget::~ButtonWidget()
+{
+    m_registry.destroy(m_text_entity);
+}
+
 void
 ButtonWidget::SetActive()
 {
