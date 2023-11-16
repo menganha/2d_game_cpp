@@ -44,6 +44,8 @@ add_executable(app
         src/systems/MovementSystem.hpp
         src/systems/CollisionSystem.cpp
         src/systems/CollisionSystem.hpp
+        src/HUD.cpp
+        src/HUD.hpp
         src/systems/RenderSystem.cpp
         src/systems/RenderSystem.hpp
         src/systems/CombatSystem.cpp

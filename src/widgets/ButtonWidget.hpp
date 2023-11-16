@@ -7,13 +7,13 @@
 
 class ButtonWidget : public CallBackWidget
 {
-  public:
+public:
     ButtonWidget(std::string_view label, int pos_x, int pos_y, entt::registry& registry);
     ~ButtonWidget();
     void SetActive() override;
     void UnsetActive() override;
 
-  private:
+private:
     entt::registry& m_registry;
     entt::entity    m_text_entity;
 };

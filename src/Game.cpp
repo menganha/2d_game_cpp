@@ -67,8 +67,8 @@ Game::Run()
             }
             else
             {
-                m_scene_stack.push(std::make_shared<PauseScene>());
                 current_scene->ResetSceneStatus();
+                m_scene_stack.push(std::make_shared<PauseScene>());
             }
         }
     }

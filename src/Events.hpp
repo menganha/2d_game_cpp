@@ -6,6 +6,12 @@
 #include <SDL2/SDL.h>
 #include <entt/entt.hpp>
 
+struct HealthEvent
+{
+    entt::entity victim_entity;
+    int          health;
+};
+
 struct ShootEvent
 {
     entt::entity shooter_entity;

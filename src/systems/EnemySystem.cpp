@@ -29,7 +29,7 @@ EnemySystem::Update()
                     const auto entity = m_registry.create();
                     spdlog::info("Creating new enemy entity {}", static_cast<int>(entity));
                     // This logic should be somehow on the Enemy class
-                    m_registry.emplace<Position>(entity, -100.0f, 0.0f);  // Put them outside of the screen
+                    m_registry.emplace<Position>(entity, -100.0f, 0.0f); // Put them outside of the screen
                     m_registry.emplace<Collider>(entity, 20, 20);
                     m_registry.emplace<SquarePrimitive>(entity, 20, 20, Colors::BLUE);
                     m_registry.emplace<Health>(entity, 5);

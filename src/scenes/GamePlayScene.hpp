@@ -2,6 +2,7 @@
 
 #include "../AssetManager.hpp"
 #include "../Gamepad.hpp"
+#include "../HUD.hpp"
 #include "../systems/CollisionSystem.hpp"
 #include "../systems/CombatSystem.hpp"
 #include "../systems/EnemySystem.hpp"
@@ -15,7 +16,7 @@
 class GamePlayScene : public IScene
 {
 
-  public:
+public:
     GamePlayScene();
     ~GamePlayScene();
 
@@ -23,7 +24,7 @@ class GamePlayScene : public IScene
     void Update() override;
     void Render(const AssetManager& asset_manager, SDL_Renderer* renderer) override;
 
-  private:
+private:
     void LoadLevel();
     void RestartLevel();
     void OnDeathEvent(DeathEvent death_event);
@@ -36,4 +37,6 @@ class GamePlayScene : public IScene
     CombatSystem     m_combat_system;
     RenderSystem     m_render_system;
     EnemySystem      m_enemy_system;
+    HUD              m_hud;
+    bool             m_restart_level;
 };

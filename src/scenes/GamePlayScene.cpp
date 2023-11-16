@@ -9,18 +9,20 @@
 #include <SDL2/SDL_ttf.h>
 #include <spdlog/spdlog.h>
 
-// AssetManager asset_manager)
-//  , m_asset_manager{asset_manager}
 GamePlayScene::GamePlayScene() 
   : m_player_entity{}
   , m_registry{}
   , m_dispatcher{}
   , m_movement_system{ m_registry, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y }
-  , m_collision_system{ m_registry, m_dispatcher, 
+  , m_collision_system{ 
+      m_registry, 
+      m_dispatcher, 
       Grid{ 0, 0, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y, Config::COLLISION_GRID_CELL_WIDTH, Config::COLLISION_GRID_CELL_HEIGHT } }
   , m_combat_system{ m_registry, m_dispatcher }
   , m_render_system{ m_registry }
   , m_enemy_system{ m_registry, m_dispatcher}
+  , m_hud{m_registry}
+  , m_restart_level{false}
 {
 
     // Sets some event listeners
@@ -30,6 +32,7 @@ GamePlayScene::GamePlayScene()
     m_dispatcher.sink<CollisionEvent>().connect<&CombatSystem::OnCollisionEvent>(m_combat_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&CombatSystem::OnOutOfBoundariesEvent>(m_combat_system);
     m_dispatcher.sink<DeathEvent>().connect<&GamePlayScene::OnDeathEvent>(this);
+    m_dispatcher.sink<HealthEvent>().connect<&HUD::OnHealthEvent>(m_hud);
 
     // Loads first level
     LoadLevel();
@@ -46,23 +49,25 @@ GamePlayScene::ProcessEvents(const Gamepad& gamepad)
     // Dispatch any game other event accumulated from the previous frame here
     m_dispatcher.update();
 
+    if (m_restart_level)
+    {
+        RestartLevel();
+        m_restart_level = false;
+    }
+
     // Input processing
     if (gamepad.IsButtonDown(Gamepad::UP))
-        m_movement_system.MoveEntity(Position{ 0.0f, -2.0f }, m_player_entity);
+        m_movement_system.MoveEntity(Position{ 0.0f, -Config::kPlayerVelocity }, m_player_entity);
     if (gamepad.IsButtonDown(Gamepad::DOWN))
-        m_movement_system.MoveEntity(Position{ 0.0f, 2.0f }, m_player_entity);
+        m_movement_system.MoveEntity(Position{ 0.0f, Config::kPlayerVelocity }, m_player_entity);
     if (gamepad.IsButtonDown(Gamepad::LEFT))
-        m_movement_system.MoveEntity(Position{ -2.0f, 0.0f }, m_player_entity);
+        m_movement_system.MoveEntity(Position{ -Config::kPlayerVelocity, 0.0f }, m_player_entity);
     if (gamepad.IsButtonDown(Gamepad::RIGHT))
-        m_movement_system.MoveEntity(Position{ 2.0f, 0.0f }, m_player_entity);
+        m_movement_system.MoveEntity(Position{ Config::kPlayerVelocity, 0.0f }, m_player_entity);
     if (gamepad.IsButtonPressed(Gamepad::A))
         m_combat_system.OnShootEvent(ShootEvent{ m_player_entity });
-    if (gamepad.IsButtonPressed(Gamepad::START)) // Si apretamos start entonces va a salir la pantalla de PAUSA
+    if (gamepad.IsButtonPressed(Gamepad::START))
         RequestChangeScene(SceneType::PAUSE_SCENE);
-
-    // TODO: Velocity should be the a constant somwhere (i.e., the velocity of the player entitty)
-    // EMILA LALALALAL!!!!!
-    // papalalalala
 }
 
 void
@@ -91,14 +96,17 @@ GamePlayScene::Render(const AssetManager& asset_manager, SDL_Renderer* renderer)
 void
 GamePlayScene::LoadLevel()
 {
-    // Creates a "player" entity
+    // TODO: Creates a "player" entity (Maybe move this to it's own namespace/file/class
     m_player_entity = m_registry.create();
     spdlog::info("Creating player entity with id {}", static_cast<int>(m_player_entity));
     m_registry.emplace<Position>(m_player_entity, 402.f, 500.f);
     m_registry.emplace<SquarePrimitive>(m_player_entity, 10, 10, Colors::RED);
     m_registry.emplace<Velocity>(m_player_entity, 0.f, 0.f);
     m_registry.emplace<Collider>(m_player_entity, 10, 10, 0, 0, true);
-    m_registry.emplace<Health>(m_player_entity, 40);
+    m_registry.emplace<Health>(m_player_entity, Config::kPlayerInitialHealth);
+
+    // HUD
+    m_hud.Init(Config::kPlayerInitialHealth, m_player_entity);
 
     // Creates 10 batches of enemies
     for (int idx = 1; idx <= 10; ++idx)
@@ -106,11 +114,6 @@ GamePlayScene::LoadLevel()
         auto entity = m_registry.create();
         m_registry.emplace<EnemyHorde>(entity, EnemyType::PARAB, 40, 5, (idx - 1) * 500);
     }
-
-    // Create UI elements
-    auto entity = m_registry.create();
-    m_registry.emplace<Position>(entity, 20.f, 20.f);
-    m_registry.emplace<Text>(entity, "Lives: " + std::to_string(40), "fonts/PressStart2P.ttf", Colors::BLACK);
 }
 
 void
@@ -125,6 +128,6 @@ GamePlayScene::OnDeathEvent(DeathEvent death_event)
 {
     if (death_event.entity == m_player_entity)
     {
-        RestartLevel();
+        m_restart_level = true;
     }
 }

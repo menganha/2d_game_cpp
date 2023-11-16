@@ -17,15 +17,16 @@ enum class SceneType
 // Interface class for all game scenes
 class IScene
 {
-  public:
+public:
     virtual ~IScene() = default;
     virtual void ProcessEvents(const Gamepad& gamepad) = 0;
     virtual void Update() = 0;
     virtual void Render(const AssetManager& asset_manager, SDL_Renderer* renderer) = 0;
 
     SceneType GetNextScene() { return m_next_scene; }
-    bool HasEnded() { return m_has_ended; }
-    bool HasRequestedChange() { return m_next_scene != SceneType::NULL_SCENE; }
+    bool      HasEnded() { return m_has_ended; }
+    bool      HasRequestedChange() { return m_next_scene != SceneType::NULL_SCENE; }
+
     void EndScene()
     {
         m_has_ended = true;
@@ -42,7 +43,7 @@ class IScene
         m_next_scene = SceneType::NULL_SCENE;
     }
 
-  private:
+private:
     bool      m_has_ended{ false };
     SceneType m_next_scene{ SceneType::NULL_SCENE };
 };
