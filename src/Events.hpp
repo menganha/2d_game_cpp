@@ -1,10 +1,14 @@
-#ifndef INC_2D_CPP_ECS_GAME_EVENTS_HPP
-#define INC_2D_CPP_ECS_GAME_EVENTS_HPP
+#pragma once
 
 #include "Components.hpp"
 
 #include <SDL2/SDL.h>
 #include <entt/entt.hpp>
+
+struct DestroyEvent
+{
+    entt::entity entity;
+};
 
 struct HealthEvent
 {
@@ -36,9 +40,5 @@ struct SetEntityPositionEvent
     Position     new_position;
 };
 
-struct DeathEvent // It Refers not to the entity destruction but a character being dying in the game
-{
-    entt::entity entity;
-};
-
-#endif // INC_2D_CPP_ECS_GAME_EVENTS_HPP
+struct EndLevelEvent
+{};

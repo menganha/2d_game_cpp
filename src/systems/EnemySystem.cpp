@@ -1,7 +1,5 @@
 #include "EnemySystem.hpp"
 
-#include "../Colors.hpp"
-#include "../Enemy.hpp"
 #include "../Events.hpp"
 
 #include <spdlog/spdlog.h>
@@ -9,51 +7,58 @@
 EnemySystem::EnemySystem(entt::registry& registry, entt::dispatcher& dispatcher)
   : m_registry{ registry }
   , m_dispatcher{ dispatcher }
+  , m_enemy_stage_list{}
+  , m_enemy_stage_counter{}
 {}
+
+void
+EnemySystem::SetEnemyList(EnemyList enemy_stage_list)
+{
+    m_enemy_stage_list = std::move(enemy_stage_list);
+    std::sort(m_enemy_stage_list.begin(), m_enemy_stage_list.end(), [](const auto& a, const auto& b) {
+        return a.delay > b.delay;
+    });
+    m_enemy_stage_counter = 0;
+}
 
 void
 EnemySystem::Update()
 {
-    // Generate enemies
-    for (const auto&& [entity, horde] : m_registry.view<EnemyHorde>().each())
+
+    auto enemies = m_registry.view<Enemy, Position>();
+
+    if (not m_enemy_stage_list.empty())
     {
-        horde.delay.Tick();
-        if (horde.delay.IsDone())
+        auto last = m_enemy_stage_list.back();
+        while (last.delay <= m_enemy_stage_counter)
         {
-            horde.every.Tick();
-            if (horde.every.IsDone())
-            {
-                horde.amount.Tick();
-                if (horde.type == EnemyType::PARAB)
-                {
-                    const auto entity = m_registry.create();
-                    spdlog::info("Creating new enemy entity {}", static_cast<int>(entity));
-                    // This logic should be somehow on the Enemy class
-                    m_registry.emplace<Position>(entity, -100.0f, 0.0f); // Put them outside of the screen
-                    m_registry.emplace<Collider>(entity, 20, 20);
-                    m_registry.emplace<SquarePrimitive>(entity, 20, 20, Colors::BLUE);
-                    m_registry.emplace<Health>(entity, 5);
-                    m_registry.emplace<Weapon>(entity, 5, false);
-                    Position reach{ 300.f, 400.f };
-                    m_registry.emplace<Enemy>(entity, EnemyType::PARAB, reach, 1.f);
-                }
-                horde.every.Reset();
-                if (horde.amount.IsDone())
-                {
-                    m_registry.destroy(entity);
-                }
-            }
+            EnemyUtils::CreateEnemy(m_registry, last.type, last.pos_x, last.pos_y);
+            m_enemy_stage_list.pop_back();
+            if (m_enemy_stage_list.empty())
+                break;
+            else
+                last = m_enemy_stage_list.back();
+        }
+    }
+    else // if all enemies have been dispatched, check if there are still enemies alive and if so send the end level signal
+    {
+        if (not enemies)
+        {
+            m_dispatcher.enqueue(EndLevelEvent());
         }
     }
 
-    // Move entities
-    auto enemies = m_registry.view<Enemy, Position>();
+    // Handle enemy behaviour
     for (auto entity : enemies)
     {
         auto&                  enemy = m_registry.get<Enemy>(entity);
-        Position               new_position = EnemyUtils::get_position(enemy);
+        auto&                  previous_position = m_registry.get<Position>(entity);
+        Position               new_position = EnemyUtils::GetPosition(enemy, previous_position);
         SetEntityPositionEvent movement_event{ entity, new_position };
         m_dispatcher.enqueue(movement_event);
         enemy.lifetime += enemy.parametric_vel;
     }
+
+    // update the stage counter
+    m_enemy_stage_counter++;
 }

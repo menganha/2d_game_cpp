@@ -20,8 +20,7 @@ CombatSystem::Update()
         auto health = view.get<Health>(entity);
         if (health.points <= 0)
         {
-            m_registry.destroy(entity);
-            m_dispatcher.enqueue<DeathEvent>(entity);
+            m_dispatcher.enqueue<DestroyEvent>(entity);
         }
     }
 }
@@ -66,7 +65,7 @@ CombatSystem::OnOutOfBoundariesEvent(OutOfBoundariesEvent out_of_boundaries_even
     {
         spdlog::info("Destroying entity {}. Reason: Out of boundaries",
                      static_cast<int>(out_of_boundaries_event.entity));
-        m_registry.destroy(out_of_boundaries_event.entity);
+        m_dispatcher.enqueue(DestroyEvent{ out_of_boundaries_event.entity });
     }
 }
 

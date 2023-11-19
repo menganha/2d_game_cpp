@@ -21,18 +21,19 @@ GamePlayScene::GamePlayScene()
   , m_combat_system{ m_registry, m_dispatcher }
   , m_render_system{ m_registry }
   , m_enemy_system{ m_registry, m_dispatcher}
+  , m_cleanup_system{m_registry}
   , m_hud{m_registry}
   , m_restart_level{false}
 {
-
     // Sets some event listeners
     m_dispatcher.sink<SetEntityPositionEvent>().connect<&MovementSystem::OnSetEntityPositionEvent>(m_movement_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&MovementSystem::OnOutOfBoundariesEvent>(m_movement_system);
     m_dispatcher.sink<ShootEvent>().connect<&CombatSystem::OnShootEvent>(m_combat_system);
     m_dispatcher.sink<CollisionEvent>().connect<&CombatSystem::OnCollisionEvent>(m_combat_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&CombatSystem::OnOutOfBoundariesEvent>(m_combat_system);
-    m_dispatcher.sink<DeathEvent>().connect<&GamePlayScene::OnDeathEvent>(this);
     m_dispatcher.sink<HealthEvent>().connect<&HUD::OnHealthEvent>(m_hud);
+    m_dispatcher.sink<DestroyEvent>().connect<&CleanUpSystem::OnDestroyEvent>(m_cleanup_system);
+    m_dispatcher.sink<DestroyEvent>().connect<&GamePlayScene::OnDestroyEvent>(this);
 
     // Loads first level
     LoadLevel();
@@ -96,7 +97,7 @@ GamePlayScene::Render(const AssetManager& asset_manager, SDL_Renderer* renderer)
 void
 GamePlayScene::LoadLevel()
 {
-    // TODO: Creates a "player" entity (Maybe move this to it's own namespace/file/class
+    // TODO: Creates a "player" entity (Maybe move this to it's own namespace/file/class)
     m_player_entity = m_registry.create();
     spdlog::info("Creating player entity with id {}", static_cast<int>(m_player_entity));
     m_registry.emplace<Position>(m_player_entity, 402.f, 500.f);
@@ -108,12 +109,24 @@ GamePlayScene::LoadLevel()
     // HUD
     m_hud.Init(Config::kPlayerInitialHealth, m_player_entity);
 
-    // Creates 10 batches of enemies
-    for (int idx = 1; idx <= 10; ++idx)
+    // Creates batches of enemies
+    EnemyList enemy_list;
+    for (int idx = 1; idx <= 3; ++idx)
     {
-        auto entity = m_registry.create();
-        m_registry.emplace<EnemyHorde>(entity, EnemyType::PARAB, 40, 5, (idx - 1) * 500);
+        enemy_list.push_back(EnemyEntry{ EnemyType::SIMPLE, idx * 10, idx * 40, 0 });
     }
+   
+    for (int idx = 1; idx <= 3; ++idx)
+    {
+        enemy_list.push_back(EnemyEntry{ EnemyType::SIMPLE, (idx * 20) + 60, (idx * 40) + 200, 0 });
+    }
+
+    for (int idx = 1; idx <= 3; ++idx)
+    {
+        enemy_list.push_back(EnemyEntry{ EnemyType::SIMPLE, (idx * 20) + 120, (idx * 40) + 600, 0 });
+    }
+
+    m_enemy_system.SetEnemyList(std::move(enemy_list));
 }
 
 void
@@ -124,9 +137,9 @@ GamePlayScene::RestartLevel()
 }
 
 void
-GamePlayScene::OnDeathEvent(DeathEvent death_event)
+GamePlayScene::OnDestroyEvent(DestroyEvent destroy_event)
 {
-    if (death_event.entity == m_player_entity)
+    if (destroy_event.entity == m_player_entity)
     {
         m_restart_level = true;
     }

@@ -3,6 +3,7 @@
 #include "../AssetManager.hpp"
 #include "../Gamepad.hpp"
 #include "../HUD.hpp"
+#include "../systems/CleanUpSystem.hpp"
 #include "../systems/CollisionSystem.hpp"
 #include "../systems/CombatSystem.hpp"
 #include "../systems/EnemySystem.hpp"
@@ -27,7 +28,7 @@ public:
 private:
     void LoadLevel();
     void RestartLevel();
-    void OnDeathEvent(DeathEvent death_event);
+    void OnDestroyEvent(DestroyEvent destroy_event);
 
     entt::entity     m_player_entity;
     entt::registry   m_registry;
@@ -37,6 +38,7 @@ private:
     CombatSystem     m_combat_system;
     RenderSystem     m_render_system;
     EnemySystem      m_enemy_system;
+    CleanUpSystem    m_cleanup_system;
     HUD              m_hud;
     bool             m_restart_level;
 };

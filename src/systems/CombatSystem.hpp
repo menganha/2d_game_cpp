@@ -1,11 +1,10 @@
 #ifndef INC_2D_CPP_ECS_GAME_COMBATSYSTEM_HPP
 #define INC_2D_CPP_ECS_GAME_COMBATSYSTEM_HPP
 
-#include "../Events.hpp"
 #include "../Components.hpp"
+#include "../Events.hpp"
 
 #include <entt/fwd.hpp>
-#include <tuple>
 
 class CombatSystem
 {
@@ -20,7 +19,7 @@ public:
 private:
     entt::registry&   m_registry;
     entt::dispatcher& m_dispatcher;
-    void HandleDealingDamage(Health& health, entt::entity health_ent,  Weapon weapon, entt::entity weapont_ent);
+    void HandleDealingDamage(Health& health, entt::entity health_ent, Weapon weapon, entt::entity weapont_ent);
 };
 
 #endif // INC_2D_CPP_ECS_GAME_COMBATSYSTEM_HPP

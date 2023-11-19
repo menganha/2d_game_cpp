@@ -1,20 +1,24 @@
-#ifndef INC_2D_CPP_ECS_GAME_ENEMYSYSTEM_HPP
-#define INC_2D_CPP_ECS_GAME_ENEMYSYSTEM_HPP
+#pragma once
+
+#include "../Enemy.hpp"
 
 #include <entt/fwd.hpp>
 
+//
+// It takes care (in the moment) of the enemy loading for each level and some enemy behaviour
+//
 class EnemySystem
 {
-    // It takes care (in the moment) of the enemy loading for each level and some enemy behaviour
 
-  public:
+public:
     EnemySystem(entt::registry& registry, entt::dispatcher& dispatcher);
 
     void Update();
+    void SetEnemyList(EnemyList enemy_list);
 
-  private:
+private:
     entt::registry&   m_registry;
     entt::dispatcher& m_dispatcher;
+    EnemyList         m_enemy_stage_list;
+    int               m_enemy_stage_counter;
 };
-
-#endif // INC_2D_CPP_ECS_GAME_ENEMYSYSTEM_HPP

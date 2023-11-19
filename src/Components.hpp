@@ -17,7 +17,7 @@ struct Text
 {
     std::string text;
     std::string font_id;
-    SDL_Color color;
+    SDL_Color   color;
 };
 
 struct Velocity
@@ -28,7 +28,7 @@ struct Velocity
 
 class Counter
 {
-  public:
+public:
     Counter() = default;
     Counter(int goal_count) : m_goal_count{ goal_count }, m_current_count{ 0 } {}
     void Tick() { m_current_count += 1; }
@@ -36,7 +36,7 @@ class Counter
     void Reset() { m_current_count = 0; }
     int  GetCurrentCount() { return m_current_count; }
 
-  private:
+private:
     int m_goal_count;
     int m_current_count;
 };
@@ -62,7 +62,7 @@ struct Collider
     int  height;
     int  x_offset = 0;
     int  y_offset = 0;
-    bool solid = false;  // Means it cannot go over the external boundary
+    bool solid = false; // Means it cannot go over the external boundary
 };
 
 struct Health
