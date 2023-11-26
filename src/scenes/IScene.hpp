@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../AssetManager.hpp"
 #include "../Gamepad.hpp"
 
 #include <SDL2/SDL.h>
@@ -21,7 +20,7 @@ public:
     virtual ~IScene() = default;
     virtual void ProcessEvents(const Gamepad& gamepad) = 0;
     virtual void Update() = 0;
-    virtual void Render(const AssetManager& asset_manager, SDL_Renderer* renderer) = 0;
+    virtual void Render(SDL_Renderer* renderer) = 0;
 
     SceneType GetNextScene() { return m_next_scene; }
     bool      HasEnded() { return m_has_ended; }

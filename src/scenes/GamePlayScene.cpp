@@ -3,16 +3,16 @@
 #include "../Colors.hpp"
 #include "../Components.hpp"
 #include "../Config.hpp"
-#include "../Enemy.hpp"
 #include "../Events.hpp"
 
 #include <SDL2/SDL_ttf.h>
 #include <spdlog/spdlog.h>
 
-GamePlayScene::GamePlayScene() 
+GamePlayScene::GamePlayScene(const AssetManager& asset_manager) 
   : m_player_entity{}
   , m_registry{}
   , m_dispatcher{}
+  , m_asset_manager{asset_manager}
   , m_movement_system{ m_registry, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y }
   , m_collision_system{ 
       m_registry, 
@@ -22,6 +22,7 @@ GamePlayScene::GamePlayScene()
   , m_render_system{ m_registry }
   , m_enemy_system{ m_registry, m_dispatcher}
   , m_cleanup_system{m_registry}
+  , m_level_loader_system{m_registry, m_dispatcher}
   , m_hud{m_registry}
   , m_restart_level{false}
 {
@@ -58,15 +59,15 @@ GamePlayScene::ProcessEvents(const Gamepad& gamepad)
 
     // Input processing
     if (gamepad.IsButtonDown(Gamepad::UP))
-        m_movement_system.MoveEntity(Position{ 0.0f, -Config::kPlayerVelocity }, m_player_entity);
+        m_movement_system.MoveEntity(Position{0.0f, -Config::kPlayerVelocity}, m_player_entity);
     if (gamepad.IsButtonDown(Gamepad::DOWN))
-        m_movement_system.MoveEntity(Position{ 0.0f, Config::kPlayerVelocity }, m_player_entity);
+        m_movement_system.MoveEntity(Position{0.0f, Config::kPlayerVelocity}, m_player_entity);
     if (gamepad.IsButtonDown(Gamepad::LEFT))
-        m_movement_system.MoveEntity(Position{ -Config::kPlayerVelocity, 0.0f }, m_player_entity);
+        m_movement_system.MoveEntity(Position{-Config::kPlayerVelocity, 0.0f}, m_player_entity);
     if (gamepad.IsButtonDown(Gamepad::RIGHT))
-        m_movement_system.MoveEntity(Position{ Config::kPlayerVelocity, 0.0f }, m_player_entity);
+        m_movement_system.MoveEntity(Position{Config::kPlayerVelocity, 0.0f}, m_player_entity);
     if (gamepad.IsButtonPressed(Gamepad::A))
-        m_combat_system.OnShootEvent(ShootEvent{ m_player_entity });
+        m_combat_system.OnShootEvent(ShootEvent{m_player_entity});
     if (gamepad.IsButtonPressed(Gamepad::START))
         RequestChangeScene(SceneType::PAUSE_SCENE);
 }
@@ -76,20 +77,21 @@ GamePlayScene::Update()
 {
     m_movement_system.Update();
     m_collision_system.Update();
-    m_dispatcher.update<CollisionEvent>(); // Process all collision events once we pick them up
+    m_dispatcher.update<CollisionEvent>(); // Process all collision events once we pick them up from the collision system
     m_dispatcher.update<OutOfBoundariesEvent>();
-    m_combat_system.Update();
+    m_level_loader_system.Update();
     m_enemy_system.Update();
+    m_combat_system.Update();
 }
 
 void
-GamePlayScene::Render(const AssetManager& asset_manager, SDL_Renderer* renderer)
+GamePlayScene::Render(SDL_Renderer* renderer)
 {
     SDL_SetRenderDrawColor(renderer, Colors::WHITE.r, Colors::WHITE.g, Colors::WHITE.b, Colors::WHITE.a);
 
     SDL_RenderClear(renderer);
 
-    m_render_system.Update(asset_manager, renderer);
+    m_render_system.Update(m_asset_manager, renderer);
 
     SDL_RenderPresent(renderer);
 }
@@ -109,24 +111,8 @@ GamePlayScene::LoadLevel()
     // HUD
     m_hud.Init(Config::kPlayerInitialHealth, m_player_entity);
 
-    // Creates batches of enemies
-    EnemyList enemy_list;
-    for (int idx = 1; idx <= 3; ++idx)
-    {
-        enemy_list.push_back(EnemyEntry{ EnemyType::SIMPLE, idx * 10, idx * 40, 0 });
-    }
-   
-    for (int idx = 1; idx <= 3; ++idx)
-    {
-        enemy_list.push_back(EnemyEntry{ EnemyType::SIMPLE, (idx * 20) + 60, (idx * 40) + 200, 0 });
-    }
-
-    for (int idx = 1; idx <= 3; ++idx)
-    {
-        enemy_list.push_back(EnemyEntry{ EnemyType::SIMPLE, (idx * 20) + 120, (idx * 40) + 600, 0 });
-    }
-
-    m_enemy_system.SetEnemyList(std::move(enemy_list));
+    // Level Loader
+    m_level_loader_system.LoadLevel(m_asset_manager.GetAbsolutePathStr("data/level_1"));
 }
 
 void

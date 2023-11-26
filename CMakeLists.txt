@@ -46,6 +46,8 @@ add_executable(app
         src/systems/CollisionSystem.hpp
         src/systems/CleanUpSystem.cpp
         src/systems/CleanUpSystem.hpp
+        src/systems/LevelLoaderSystem.cpp
+        src/systems/LevelLoaderSystem.hpp
         src/HUD.cpp
         src/HUD.hpp
         src/systems/RenderSystem.cpp
@@ -69,6 +71,7 @@ set_target_properties(app PROPERTIES OUTPUT_NAME "app")
 add_subdirectory(libs/entt)
 add_subdirectory(libs/spdlog)
 
+
 # Compile features and options
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 target_compile_definitions(EnTT INTERFACE ENTT_DISABLE_ASSERT)  # Improves compilation time by disabling the assert
@@ -77,6 +80,7 @@ target_compile_options(app PRIVATE
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
 )
 target_compile_features(app PRIVATE cxx_std_17)
+
 
 # Link libraries
 if (TARGET SDL2::SDL2main)
@@ -87,3 +91,10 @@ endif ()
 
 target_link_libraries(app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf EnTT::EnTT spdlog::spdlog)
 
+# Custom commands. Create symlinks for bin directories
+add_custom_command(
+    TARGET app
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:app>/assets 
+    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/data $<TARGET_FILE_DIR:app>/data 
+    VERBATIM)

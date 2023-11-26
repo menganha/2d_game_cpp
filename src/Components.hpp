@@ -1,9 +1,9 @@
-#ifndef INC_2D_CPP_ECS_GAME_COMPONENTS_HPP
-#define INC_2D_CPP_ECS_GAME_COMPONENTS_HPP
+#pragma once
 
 #include <SDL2/SDL.h>
 #include <entt/entt.hpp>
 #include <string>
+#include <cstring>
 
 using namespace entt::literals;
 
@@ -30,7 +30,7 @@ class Counter
 {
 public:
     Counter() = default;
-    Counter(int goal_count) : m_goal_count{ goal_count }, m_current_count{ 0 } {}
+    Counter(int goal_count) : m_goal_count{goal_count}, m_current_count{0} {}
     void Tick() { m_current_count += 1; }
     bool IsDone() const { return m_current_count >= m_goal_count; }
     void Reset() { m_current_count = 0; }
@@ -77,4 +77,19 @@ struct Weapon
     bool disposable = true;
 };
 
-#endif // INC_2D_CPP_ECS_GAME_COMPONENTS_HPP
+enum class EnemyType : int
+{
+    NOTYPE = 0,
+    SIMPLE, // Just moves Down
+    PARAB,
+};
+
+
+struct Enemy
+{
+    EnemyType type;
+    float     lifetime; // Keeps track of the time alive for deriving movement
+    Position  reach;
+    float     parametric_vel;
+    float     spread;
+};

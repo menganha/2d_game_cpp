@@ -9,12 +9,12 @@
 
 class Game
 {
-  public:
+public:
     Game(std::string_view root_path);
     ~Game();
     void Run();
 
-  private:
+private:
     Window                              m_window;
     AssetManager                        m_asset_manager;
     Gamepad                             m_gamepad;

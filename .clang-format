@@ -3,7 +3,7 @@ Language:        Cpp
 # BasedOnStyle:  Mozilla
 AccessModifierOffset: -4
 AlignArrayOfStructures: Right
-AlignAfterOpenBracket: Align
+AlignAfterOpenBracket: BlockIndent
 AlignConsecutiveMacros: false
 AlignConsecutiveAssignments: false
 AlignConsecutiveBitFields: false
@@ -62,7 +62,7 @@ CompactNamespaces: false
 PackConstructorInitializers: CurrentLine
 ConstructorInitializerIndentWidth: 2
 ContinuationIndentWidth: 2
-Cpp11BracedListStyle: false
+Cpp11BracedListStyle: true
 DeriveLineEnding: true
 DerivePointerAlignment: false
 DisableFormat:   false

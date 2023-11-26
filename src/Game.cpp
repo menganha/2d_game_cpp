@@ -5,7 +5,7 @@
 #include "scenes/GamePlayScene.hpp"
 #include "scenes/PauseScene.hpp"
 
-#include <filesystem>
+#include "filesystem"
 
 Game::Game(std::string_view root_path_str) : m_window{}, m_asset_manager{}, m_gamepad{}, m_scene_stack{}
 {
@@ -23,14 +23,14 @@ Game::Game(std::string_view root_path_str) : m_window{}, m_asset_manager{}, m_ga
     m_window = Window(Config::WINDOW_NAME, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y, Config::FLAGS);
 
     // Asset manager
-    std::filesystem::path root_path{ root_path_str };
-    m_asset_manager = AssetManager((root_path.parent_path() / "assets").c_str());
+    std::filesystem::path root_path{root_path_str};
+    m_asset_manager = AssetManager(root_path.parent_path().c_str());
 
     // Load resources
     m_asset_manager.AddFont("fonts/PressStart2P.ttf", 20, m_window.GetRenderer());
 
-    // Start the stack of scenes
-    m_scene_stack.push(std::make_shared<GamePlayScene>()); // Why Shared
+    // Start the stack of scenes. Make it a shared ptr as not to worry about freeing it later
+    m_scene_stack.push(std::make_shared<GamePlayScene>(m_asset_manager));
 }
 
 Game::~Game()
@@ -54,7 +54,7 @@ Game::Run()
         auto current_scene = m_scene_stack.top();
         current_scene->ProcessEvents(m_gamepad);
         current_scene->Update();
-        current_scene->Render(m_asset_manager, m_window.GetRenderer());
+        current_scene->Render(m_window.GetRenderer());
         if (current_scene->HasEnded())
         {
             m_scene_stack.pop();
@@ -68,7 +68,7 @@ Game::Run()
             else
             {
                 current_scene->ResetSceneStatus();
-                m_scene_stack.push(std::make_shared<PauseScene>());
+                m_scene_stack.push(std::make_shared<PauseScene>(m_asset_manager));
             }
         }
     }
