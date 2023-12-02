@@ -1,5 +1,4 @@
-#ifndef INC_2D_CPP_ECS_GAME_COLLISIONSYSTEM_HPP
-#define INC_2D_CPP_ECS_GAME_COLLISIONSYSTEM_HPP
+#pragma once
 
 #include <entt/fwd.hpp>
 #include <vector>
@@ -21,12 +20,12 @@ class CollisionSystem
     // boxes intersect within each cell. Afterward, the collision checks between entities can be
     // reduced to only those that are within one cell
 
-  public:
+public:
     CollisionSystem(entt::registry& registry, entt::dispatcher& dispatcher, Grid grid);
 
     void Update();
 
-  private:
+private:
     using Cells = std::vector<std::vector<entt::entity>>;
     entt::registry&   m_registry;
     entt::dispatcher& m_dispatcher;
@@ -34,5 +33,3 @@ class CollisionSystem
     Cells             m_cells;
     int               m_num_cells_x, m_num_cells_y;
 };
-
-#endif // INC_2D_CPP_ECS_GAME_COLLISIONSYSTEM_HPP

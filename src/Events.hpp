@@ -10,15 +10,19 @@ struct DestroyEvent
     entt::entity entity;
 };
 
+// Triggered when health is gained or lost
 struct HealthEvent
 {
-    entt::entity victim_entity;
+    entt::entity entity;
     int          health;
 };
 
-struct ShootEvent
+struct BulletEvent
 {
-    entt::entity shooter_entity;
+    Position  position;
+    Velocity  velocity;
+    SDL_Color color;
+    Size      collider_size;
 };
 
 struct CollisionEvent

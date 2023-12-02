@@ -1,41 +1,36 @@
 #include "GamePlayScene.hpp"
 
 #include "../Colors.hpp"
-#include "../Components.hpp"
 #include "../Config.hpp"
 #include "../Events.hpp"
 
 #include <SDL2/SDL_ttf.h>
 #include <spdlog/spdlog.h>
 
-GamePlayScene::GamePlayScene(const AssetManager& asset_manager) 
-  : m_player_entity{}
-  , m_registry{}
-  , m_dispatcher{}
-  , m_asset_manager{asset_manager}
-  , m_movement_system{ m_registry, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y }
-  , m_collision_system{ 
-      m_registry, 
-      m_dispatcher, 
-      Grid{ 0, 0, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y, Config::COLLISION_GRID_CELL_WIDTH, Config::COLLISION_GRID_CELL_HEIGHT } }
-  , m_combat_system{ m_registry, m_dispatcher }
-  , m_render_system{ m_registry }
-  , m_enemy_system{ m_registry, m_dispatcher}
-  , m_cleanup_system{m_registry}
-  , m_level_loader_system{m_registry, m_dispatcher}
-  , m_hud{m_registry}
-  , m_restart_level{false}
+GamePlayScene::GamePlayScene(const AssetManager &asset_manager)
+    : m_registry{}, m_dispatcher{}, m_player{m_registry}
+    , m_asset_manager{asset_manager}
+    , m_movement_system{m_registry, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y}
+    , m_collision_system{m_registry, m_dispatcher, 
+        Grid{0, 0, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y, 
+            Config::COLLISION_GRID_CELL_WIDTH, Config::COLLISION_GRID_CELL_HEIGHT}}
+    , m_combat_system{m_registry, m_dispatcher}
+    , m_render_system{m_registry}
+    , m_enemy_system{m_registry, m_dispatcher}
+    , m_cleanup_system{m_registry}
+    , m_level_loader_system{m_registry, m_dispatcher}
+    , m_hud{m_registry}
+    , m_restart_level{false}
 {
     // Sets some event listeners
     m_dispatcher.sink<SetEntityPositionEvent>().connect<&MovementSystem::OnSetEntityPositionEvent>(m_movement_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&MovementSystem::OnOutOfBoundariesEvent>(m_movement_system);
-    m_dispatcher.sink<ShootEvent>().connect<&CombatSystem::OnShootEvent>(m_combat_system);
+    m_dispatcher.sink<BulletEvent>().connect<&CombatSystem::OnShootEvent>(m_combat_system);
     m_dispatcher.sink<CollisionEvent>().connect<&CombatSystem::OnCollisionEvent>(m_combat_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&CombatSystem::OnOutOfBoundariesEvent>(m_combat_system);
     m_dispatcher.sink<HealthEvent>().connect<&HUD::OnHealthEvent>(m_hud);
     m_dispatcher.sink<DestroyEvent>().connect<&CleanUpSystem::OnDestroyEvent>(m_cleanup_system);
     m_dispatcher.sink<DestroyEvent>().connect<&GamePlayScene::OnDestroyEvent>(this);
-
     // Loads first level
     LoadLevel();
 }
@@ -59,15 +54,15 @@ GamePlayScene::ProcessEvents(const Gamepad& gamepad)
 
     // Input processing
     if (gamepad.IsButtonDown(Gamepad::UP))
-        m_movement_system.MoveEntity(Position{0.0f, -Config::kPlayerVelocity}, m_player_entity);
+        m_movement_system.MoveEntity(Position{0.0f, -m_player.kPlayerVelocity}, m_player.GetEntity());
     if (gamepad.IsButtonDown(Gamepad::DOWN))
-        m_movement_system.MoveEntity(Position{0.0f, Config::kPlayerVelocity}, m_player_entity);
+        m_movement_system.MoveEntity(Position{0.0f, m_player.kPlayerVelocity}, m_player.GetEntity());
     if (gamepad.IsButtonDown(Gamepad::LEFT))
-        m_movement_system.MoveEntity(Position{-Config::kPlayerVelocity, 0.0f}, m_player_entity);
+        m_movement_system.MoveEntity(Position{-m_player.kPlayerVelocity, 0.0f}, m_player.GetEntity());
     if (gamepad.IsButtonDown(Gamepad::RIGHT))
-        m_movement_system.MoveEntity(Position{Config::kPlayerVelocity, 0.0f}, m_player_entity);
+        m_movement_system.MoveEntity(Position{m_player.kPlayerVelocity, 0.0f}, m_player.GetEntity());
     if (gamepad.IsButtonPressed(Gamepad::A))
-        m_combat_system.OnShootEvent(ShootEvent{m_player_entity});
+        m_player.Shoot();
     if (gamepad.IsButtonPressed(Gamepad::START))
         RequestChangeScene(SceneType::PAUSE_SCENE);
 }
@@ -77,10 +72,10 @@ GamePlayScene::Update()
 {
     m_movement_system.Update();
     m_collision_system.Update();
-    m_dispatcher.update<CollisionEvent>(); // Process all collision events once we pick them up from the collision system
+    m_dispatcher.update<CollisionEvent>(); // Process all collision events after pick them from the collision system
     m_dispatcher.update<OutOfBoundariesEvent>();
     m_level_loader_system.Update();
-    m_enemy_system.Update();
+    m_enemy_system.Update(m_player.GetEntity());
     m_combat_system.Update();
 }
 
@@ -99,18 +94,11 @@ GamePlayScene::Render(SDL_Renderer* renderer)
 void
 GamePlayScene::LoadLevel()
 {
-    // TODO: Creates a "player" entity (Maybe move this to it's own namespace/file/class)
-    m_player_entity = m_registry.create();
-    spdlog::info("Creating player entity with id {}", static_cast<int>(m_player_entity));
-    m_registry.emplace<Position>(m_player_entity, 402.f, 500.f);
-    m_registry.emplace<SquarePrimitive>(m_player_entity, 10, 10, Colors::RED);
-    m_registry.emplace<Velocity>(m_player_entity, 0.f, 0.f);
-    m_registry.emplace<Collider>(m_player_entity, 10, 10, 0, 0, true);
-    m_registry.emplace<Health>(m_player_entity, Config::kPlayerInitialHealth);
-
+    // player
+    m_player.Create();
     // HUD
-    m_hud.Init(Config::kPlayerInitialHealth, m_player_entity);
-
+    m_hud.Create(m_player.GetEntity());
+    m_hud.Refresh(m_player.kPlayerInitialHealth);
     // Level Loader
     m_level_loader_system.LoadLevel(m_asset_manager.GetAbsolutePathStr("data/level_1"));
 }
@@ -119,13 +107,14 @@ void
 GamePlayScene::RestartLevel()
 {
     m_registry.clear();
+
     LoadLevel();
 }
 
 void
 GamePlayScene::OnDestroyEvent(DestroyEvent destroy_event)
 {
-    if (destroy_event.entity == m_player_entity)
+    if (destroy_event.entity == m_player.GetEntity())
     {
         m_restart_level = true;
     }

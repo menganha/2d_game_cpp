@@ -1,14 +1,10 @@
 #include "MovementSystem.hpp"
 
-#include "../Collision.hpp"
-
 #include <entt/entt.hpp>
 #include <spdlog/spdlog.h>
 
 MovementSystem::MovementSystem(entt::registry& registry, int screen_width, int screen_height)
-  : m_registry{ registry }
-  , m_screen_width{ screen_width }
-  , m_screen_height{ screen_height } {};
+    : m_registry{registry}, m_screen_width{screen_width}, m_screen_height{screen_height} {};
 
 void
 MovementSystem::Update()
@@ -19,8 +15,8 @@ MovementSystem::Update()
     {
         auto& pos = m_registry.get<Position>(entity);
         auto  vel = m_registry.get<Velocity>(entity);
-        pos.x = pos.x + vel.dx;
-        pos.y = pos.y + vel.dy;
+        pos.x = pos.x + vel.x;
+        pos.y = pos.y + vel.y;
     }
 }
 
@@ -66,24 +62,23 @@ MovementSystem::OnOutOfBoundariesEvent(const OutOfBoundariesEvent& out_of_bounda
         auto& pos = m_registry.get<Position>(out_of_boundaries_event.entity);
 
         int a_min, a_max, b_min, b_max;
-        a_min = static_cast<int>(out_of_boundaries_event.bound_pos.x) + out_of_boundaries_event.bound_coll.x_offset;
-        a_max = a_min + out_of_boundaries_event.bound_coll.width;
-        b_min = static_cast<int>(pos.x) + coll_ptr->x_offset;
-        b_max = b_min + coll_ptr->width;
-        // spdlog::info("boundaries {}, {}, {}, {}", a_min, a_max, b_min, b_max);
+        a_min = static_cast<int>(out_of_boundaries_event.bound_pos.x) + out_of_boundaries_event.bound_coll.offset.x;
+        a_max = a_min + out_of_boundaries_event.bound_coll.size.x;
+        b_min = static_cast<int>(pos.x) + coll_ptr->offset.x;
+        b_max = b_min + coll_ptr->size.x;
 
         if (b_min < a_min)
-            pos.x = a_min - coll_ptr->x_offset;
+            pos.x = a_min - coll_ptr->offset.x;
         else if (b_max > a_max)
-            pos.x = a_max - coll_ptr->x_offset - coll_ptr->width;
+            pos.x = a_max - coll_ptr->offset.x - coll_ptr->size.x;
 
-        a_min = static_cast<int>(out_of_boundaries_event.bound_pos.y) + out_of_boundaries_event.bound_coll.y_offset;
-        a_max = a_min + out_of_boundaries_event.bound_coll.height;
-        b_min = static_cast<int>(pos.y) + coll_ptr->y_offset;
-        b_max = b_min + coll_ptr->height;
+        a_min = static_cast<int>(out_of_boundaries_event.bound_pos.y) + out_of_boundaries_event.bound_coll.offset.y;
+        a_max = a_min + out_of_boundaries_event.bound_coll.size.y;
+        b_min = static_cast<int>(pos.y) + coll_ptr->offset.y;
+        b_max = b_min + coll_ptr->size.y;
         if (b_min < a_min)
-            pos.y = a_min - coll_ptr->y_offset;
+            pos.y = a_min - coll_ptr->offset.y;
         else if (b_max > a_max)
-            pos.y = a_max - coll_ptr->y_offset - coll_ptr->height;
+            pos.y = a_max - coll_ptr->offset.y - coll_ptr->size.x;
     }
 }

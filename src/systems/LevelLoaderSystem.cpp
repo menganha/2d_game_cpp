@@ -54,9 +54,14 @@ LevelLoaderSystem::LoadLevel(std::string_view level_data_path)
         std::string line_str;
         while (std::getline(file_stream, line_str))
         {
-            if (line_str.empty())
+            if (std::all_of(line_str.cbegin(), line_str.cend(), [](char c) { return std::isspace(c); }))
             {
                 spdlog::debug("Skipping empty line");
+                continue;
+            }
+            else if (auto loc = line_str.find_first_not_of(" \n\t\r"); loc != std::string::npos and line_str[loc] == '#')
+            {
+                spdlog::debug("Skipping comment line: {}", line_str);
                 continue;
             }
 

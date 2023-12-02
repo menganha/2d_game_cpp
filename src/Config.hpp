@@ -10,7 +10,4 @@ namespace Config {
     inline constexpr int    COLLISION_GRID_CELL_WIDTH = 40;
     inline constexpr Uint32 FLAGS =
       SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_ALLOW_HIGHDPI;
-    // Player
-    inline constexpr int   kPlayerInitialHealth = 40;
-    inline constexpr float kPlayerVelocity = 2.0f;
 }

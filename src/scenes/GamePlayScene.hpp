@@ -3,6 +3,7 @@
 #include "../AssetManager.hpp"
 #include "../Gamepad.hpp"
 #include "../HUD.hpp"
+#include "../Player.hpp"
 #include "../systems/CleanUpSystem.hpp"
 #include "../systems/CollisionSystem.hpp"
 #include "../systems/CombatSystem.hpp"
@@ -29,9 +30,9 @@ private:
     void RestartLevel();
     void OnDestroyEvent(DestroyEvent destroy_event);
 
-    entt::entity      m_player_entity;
     entt::registry    m_registry;
     entt::dispatcher  m_dispatcher;
+    Player            m_player;
     AssetManager      m_asset_manager;
     MovementSystem    m_movement_system;
     CollisionSystem   m_collision_system;

@@ -19,7 +19,7 @@ RenderSystem::Update(const AssetManager& asset_manager, SDL_Renderer* renderer)
     auto view_primitive = m_registry.view<const Position, const SquarePrimitive>();
     view_primitive.each([renderer](auto& pos, const auto& ren) {
         SDL_SetRenderDrawColor(renderer, ren.color.r, ren.color.g, ren.color.b, ren.color.a);
-        SDL_Rect rectangle{ static_cast<int>(pos.x), static_cast<int>(pos.y), ren.width, ren.height };
+        SDL_Rect rectangle{ static_cast<int>(pos.x), static_cast<int>(pos.y), ren.size.x, ren.size.y };
         SDL_RenderFillRect(renderer, &rectangle);
     });
 

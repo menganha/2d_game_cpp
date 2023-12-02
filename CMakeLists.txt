@@ -50,6 +50,8 @@ add_executable(app
         src/systems/LevelLoaderSystem.hpp
         src/HUD.cpp
         src/HUD.hpp
+        src/Player.cpp
+        src/Player.hpp
         src/systems/RenderSystem.cpp
         src/systems/RenderSystem.hpp
         src/systems/CombatSystem.cpp

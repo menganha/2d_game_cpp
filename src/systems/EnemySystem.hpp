@@ -10,7 +10,7 @@ class EnemySystem
 
 public:
     EnemySystem(entt::registry& registry, entt::dispatcher& dispatcher);
-    void Update();
+    void Update(entt::entity player_entity);
 
 private:
     entt::registry&   m_registry;

@@ -2,10 +2,16 @@
 
 #include <SDL2/SDL.h>
 #include <entt/entt.hpp>
+#include <cmath>
 #include <string>
-#include <cstring>
 
 using namespace entt::literals;
+
+struct Velocity
+{
+    float x;
+    float y;
+};
 
 struct Position
 {
@@ -13,17 +19,25 @@ struct Position
     float y;
 };
 
+struct Size
+{
+    int x;
+    int y;
+};
+
+template<typename T>
+T UnitDifference(T vector1, T vector2){
+    auto x = vector1.x - vector2.x;
+    auto y = vector1.y = vector2.y;
+    auto mod = std::sqrt(x*x + y*y);
+    return T{x/mod, y/mod}; 
+}
+
 struct Text
 {
     std::string text;
     std::string font_id;
     SDL_Color   color;
-};
-
-struct Velocity
-{
-    float dx;
-    float dy;
 };
 
 class Counter
@@ -43,25 +57,21 @@ private:
 
 struct Renderable
 {
-    int       height;
-    int       width;
+    Size      size;
     SDL_Color color;
 };
 
 // Primitive square shape of SDL
 struct SquarePrimitive
 {
-    int       height;
-    int       width;
+    Size      size;
     SDL_Color color;
 };
 
 struct Collider
 {
-    int  width;
-    int  height;
-    int  x_offset = 0;
-    int  y_offset = 0;
+    Size size;
+    Size offset;
     bool solid = false; // Means it cannot go over the external boundary
 };
 
@@ -70,7 +80,7 @@ struct Health
     int points;
 };
 
-// Something that make damage
+// Something that can make damage
 struct Weapon
 {
     int  power;
@@ -83,7 +93,6 @@ enum class EnemyType : int
     SIMPLE, // Just moves Down
     PARAB,
 };
-
 
 struct Enemy
 {
