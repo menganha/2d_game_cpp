@@ -25,8 +25,6 @@ add_executable(app
         src/Gamepad.hpp
         src/Game.cpp
         src/Game.hpp
-        src/Enemy.cpp
-        src/Enemy.hpp
         src/Font.cpp
         src/Font.hpp
         src/Components.hpp

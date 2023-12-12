@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../AssetManager.hpp"
 #include "../Components.hpp"
 
 #include <entt/entt.hpp>
@@ -17,6 +16,7 @@ private:
     //
     //  Enemy entry for when we want to specify the enemies on a given level
     //
+    void CreateEnemy(entt::registry& registry, EnemyType enemy_type, int pos_x, int pos_y);
     struct EnemyEntry
     {
         EnemyType type;
@@ -28,5 +28,5 @@ private:
     entt::registry&   m_registry;
     entt::dispatcher& m_dispatcher;
     EnemyList         m_enemy_list_to_dispatch;
-    int m_level_counter; // FIXME: Could this cause an overflow at some point? Levels should not be so large I guess (?)
+    int  m_level_counter; // FIXME: Could this cause an overflow at some point? Levels should not be so large I guess (?)
 };

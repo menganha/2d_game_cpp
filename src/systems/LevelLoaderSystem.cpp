@@ -1,7 +1,7 @@
 #include "LevelLoaderSystem.hpp"
 
-#include "../Enemy.hpp"
 #include "../Events.hpp"
+#include "../Colors.hpp"
 
 #include <algorithm> // std::transform
 #include <cctype>    // std::tolower
@@ -14,12 +14,10 @@
 static EnemyType
 StrToEnemyType(std::string& enemy_type_str)
 {
-    std::transform(
-      enemy_type_str.begin(),
-      enemy_type_str.end(),
-      enemy_type_str.begin(), //
-      [](unsigned char c) { return std::toupper(c); }
-    );
+    std::transform(enemy_type_str.begin(),
+                   enemy_type_str.end(),
+                   enemy_type_str.begin(), //
+                   [](unsigned char c) { return std::toupper(c); });
 
     if (enemy_type_str.compare("simple"))
         return EnemyType::SIMPLE;
@@ -33,9 +31,9 @@ StrToEnemyType(std::string& enemy_type_str)
 }
 
 LevelLoaderSystem::LevelLoaderSystem(entt::registry& registry, entt::dispatcher& dispatcher)
-  : m_registry{registry}
-  , m_dispatcher{dispatcher}
-  , m_enemy_list_to_dispatch{}
+    : m_registry{registry}
+    , m_dispatcher{dispatcher}
+    , m_enemy_list_to_dispatch{}
 {}
 
 void
@@ -77,11 +75,9 @@ LevelLoaderSystem::LoadLevel(std::string_view level_data_path)
             }
         }
         // Sort vector
-        std::sort(
-          m_enemy_list_to_dispatch.begin(),
-          m_enemy_list_to_dispatch.end(), //
-          [](const auto& a, const auto& b) { return a.delay > b.delay; }
-        );
+        std::sort(m_enemy_list_to_dispatch.begin(),
+                  m_enemy_list_to_dispatch.end(), //
+                  [](const auto& a, const auto& b) { return a.delay > b.delay; });
     }
     else
     {
@@ -99,7 +95,7 @@ LevelLoaderSystem::Update()
         auto last = m_enemy_list_to_dispatch.back();
         while (last.delay <= m_level_counter)
         {
-            enemy::CreateEnemy(m_registry, last.type, last.pos_x, last.pos_y);
+            CreateEnemy(m_registry, last.type, last.pos_x, last.pos_y);
             m_enemy_list_to_dispatch.pop_back();
             if (m_enemy_list_to_dispatch.empty())
                 break;
@@ -114,5 +110,27 @@ LevelLoaderSystem::Update()
         {
             m_dispatcher.enqueue(EndLevelEvent());
         }
+    }
+}
+
+void
+LevelLoaderSystem::CreateEnemy(entt::registry& registry, EnemyType enemy_type, int pos_x, int pos_y)
+{
+    switch (enemy_type)
+    {
+        case EnemyType::SIMPLE: {
+            auto entity = registry.create();
+            // TODO: Put them initialy outside of the screen
+            registry.emplace<Position>(entity, static_cast<float>(pos_x), static_cast<float>(pos_y));
+            registry.emplace<Collider>(entity, 20, 20);
+            registry.emplace<SquarePrimitive>(entity, 20, 20, Colors::BLUE);
+            registry.emplace<Health>(entity, 5);
+            registry.emplace<Weapon>(entity, 5);
+            registry.emplace<Enemy>(entity, EnemyType::SIMPLE);
+            spdlog::info("Creating new enemy entity {} of type SIMPLE", static_cast<int>(entity));
+            break;
+        }
+        default:
+            spdlog::error("Enemy Type = {} Case not implemented", static_cast<int>(enemy_type));
     }
 }

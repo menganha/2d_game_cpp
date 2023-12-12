@@ -33,5 +33,5 @@ Player::Shoot()
     m_registry.emplace<Velocity>(bullet_entity, 0.f, -6.f);
     m_registry.emplace<SquarePrimitive>(bullet_entity, 4, 7, Colors::BLACK);
     m_registry.emplace<Collider>(bullet_entity, 4, 7, 0, 0, false);
-    m_registry.emplace<Weapon>(bullet_entity, 5);
+    m_registry.emplace<Weapon>(bullet_entity, 5, true, false);
 }

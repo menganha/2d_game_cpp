@@ -29,7 +29,9 @@ GamePlayScene::GamePlayScene(const AssetManager &asset_manager)
     m_dispatcher.sink<CollisionEvent>().connect<&CombatSystem::OnCollisionEvent>(m_combat_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&CombatSystem::OnOutOfBoundariesEvent>(m_combat_system);
     m_dispatcher.sink<HealthEvent>().connect<&HUD::OnHealthEvent>(m_hud);
-    m_dispatcher.sink<DestroyEvent>().connect<&CleanUpSystem::OnDestroyEvent>(m_cleanup_system);
+    m_dispatcher.sink<DestroyEvent>().connect<&CleanUpSystem::OnDestroyEvent>(m_cleanup_system); // No additional cleanup
+                                                                                                 // system needed here. Could
+                                                                                                 // we put it in here?
     m_dispatcher.sink<DestroyEvent>().connect<&GamePlayScene::OnDestroyEvent>(this);
     // Loads first level
     LoadLevel();

@@ -32,8 +32,7 @@ CombatSystem::OnShootEvent(BulletEvent bullet_event)
     m_registry.emplace<Position>(bullet_entity, bullet_event.position.x, bullet_event.position.y);
     m_registry.emplace<Velocity>(bullet_entity, bullet_event.velocity.x, bullet_event.velocity.y);
     m_registry.emplace<SquarePrimitive>(
-      bullet_entity, bullet_event.collider_size.x, bullet_event.collider_size.y, bullet_event.color
-    );
+      bullet_entity, bullet_event.collider_size.x, bullet_event.collider_size.y, bullet_event.color);
     m_registry.emplace<Collider>(bullet_entity, bullet_event.collider_size.x, bullet_event.collider_size.y, 0, 0, false);
     m_registry.emplace<Weapon>(bullet_entity, 5);
 }
@@ -41,29 +40,20 @@ CombatSystem::OnShootEvent(BulletEvent bullet_event)
 void
 CombatSystem::OnCollisionEvent(CollisionEvent collision_event)
 {
-
-    // Ignore if both are weapons
-    if (m_registry.all_of<Weapon>(collision_event.entity_a) and m_registry.all_of<Weapon>(collision_event.entity_b))
-        return;
-
     if (m_registry.all_of<Health>(collision_event.entity_a) and m_registry.all_of<Weapon>(collision_event.entity_b))
     {
-        HandleDealingDamage(
-          m_registry.get<Health>(collision_event.entity_a),
-          collision_event.entity_a,
-          m_registry.get<Weapon>(collision_event.entity_b),
-          collision_event.entity_b
-        );
+        HandleDealingDamage(m_registry.get<Health>(collision_event.entity_a),
+                            collision_event.entity_a,
+                            m_registry.get<Weapon>(collision_event.entity_b),
+                            collision_event.entity_b);
     }
 
     if (m_registry.all_of<Weapon>(collision_event.entity_a) and m_registry.all_of<Health>(collision_event.entity_b))
     {
-        HandleDealingDamage(
-          m_registry.get<Health>(collision_event.entity_b),
-          collision_event.entity_b,
-          m_registry.get<Weapon>(collision_event.entity_a),
-          collision_event.entity_a
-        );
+        HandleDealingDamage(m_registry.get<Health>(collision_event.entity_b),
+                            collision_event.entity_b,
+                            m_registry.get<Weapon>(collision_event.entity_a),
+                            collision_event.entity_a);
     }
 }
 
@@ -80,6 +70,11 @@ CombatSystem::OnOutOfBoundariesEvent(OutOfBoundariesEvent out_of_boundaries_even
 void
 CombatSystem::HandleDealingDamage(Health& health, entt::entity health_ent, Weapon weapon, entt::entity weapon_ent)
 {
+
+    // Ignores friendly fire
+    if (m_registry.all_of<Enemy>(health_ent) and weapon.from_enemy)
+        return;
+
     health.points -= weapon.power;
     m_dispatcher.enqueue<HealthEvent>(health_ent, health.points);
     if (weapon.disposable)

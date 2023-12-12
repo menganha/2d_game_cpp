@@ -10,7 +10,7 @@ main([[maybe_unused]] int argc, char* argv[])
     spdlog::cfg::load_env_levels();
     try
     {
-        Game game{ argv[0] };
+        Game game{argv[0]};
         game.Run();
     }
     catch (std::exception& exception)

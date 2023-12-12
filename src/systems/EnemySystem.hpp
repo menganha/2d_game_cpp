@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Components.hpp"
+
 #include <entt/fwd.hpp>
 
 //
@@ -16,4 +18,6 @@ private:
     entt::registry&   m_registry;
     entt::dispatcher& m_dispatcher;
     int               m_enemy_stage_counter;
+    Velocity          GetBulletVel(float abs_value_vel, Position pos_player, Position pos_initial);
+    Position          GetPosition(const Enemy& enemy, const Position& previous_position);
 };

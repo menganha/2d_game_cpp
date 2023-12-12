@@ -2,10 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <entt/entt.hpp>
-#include <cmath>
 #include <string>
-
-using namespace entt::literals;
 
 struct Velocity
 {
@@ -24,14 +21,6 @@ struct Size
     int x;
     int y;
 };
-
-template<typename T>
-T UnitDifference(T vector1, T vector2){
-    auto x = vector1.x - vector2.x;
-    auto y = vector1.y = vector2.y;
-    auto mod = std::sqrt(x*x + y*y);
-    return T{x/mod, y/mod}; 
-}
 
 struct Text
 {
@@ -71,7 +60,7 @@ struct SquarePrimitive
 struct Collider
 {
     Size size;
-    Size offset;
+    Size offset = {0, 0};
     bool solid = false; // Means it cannot go over the external boundary
 };
 
@@ -84,21 +73,22 @@ struct Health
 struct Weapon
 {
     int  power;
-    bool disposable = true;
+    bool disposable = true; // Destroyed when dealing damage
+    bool from_enemy = true;
 };
 
 enum class EnemyType : int
 {
-    NOTYPE = 0,
-    SIMPLE, // Just moves Down
+    NOTYPE = 0, // Serves just as a flag
+    SIMPLE,     // Just moves Down
     PARAB,
 };
 
 struct Enemy
 {
     EnemyType type;
-    float     lifetime; // Keeps track of the time alive for deriving movement
-    Position  reach;
-    float     parametric_vel;
-    float     spread;
+    float     lifetime = 0.f; // Keeps track of the time alive for deriving movement
+    Position  reach = {0.f, 0.f};
+    float     parametric_vel = 0.f;
+    float     spread = 0.f;
 };
