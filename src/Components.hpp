@@ -67,6 +67,7 @@ struct Collider
 struct Health
 {
     int points;
+    int invincivility = 0;
 };
 
 // Something that can make damage

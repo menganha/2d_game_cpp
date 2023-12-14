@@ -1,5 +1,4 @@
-#ifndef INC_2D_CPP_ECS_GAME_RENDERSYSTEM_HPP
-#define INC_2D_CPP_ECS_GAME_RENDERSYSTEM_HPP
+#pragma once
 
 #include "../AssetManager.hpp"
 
@@ -9,13 +8,12 @@
 class RenderSystem
 {
 
-  public:
+public:
+    constexpr static int BLINKING_PERIOD = 8;
     explicit RenderSystem(const entt::registry& registry);
     void Update(const AssetManager& asset_manager, SDL_Renderer* renderer);
 
-  private:
+private:
     const entt::registry& m_registry;
     SDL_Renderer*         m_renderer;
 };
-
-#endif // INC_2D_CPP_ECS_GAME_RENDERSYSTEM_HPP

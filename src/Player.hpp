@@ -2,6 +2,7 @@
 
 #include "Components.hpp"
 
+#include "Events.hpp"
 #include <entt/entt.hpp>
 
 //
@@ -10,13 +11,15 @@
 class Player
 {
 public:
+    constexpr static int   PLAYER_INITIAL_HEALTH = 40;
+    constexpr static float PLAYER_VELOCITY = 2.0f;
+    constexpr static int   PLAYER_INVINCIBILITY = 120;  // in frames
     Player(entt::registry& registry);
-    constexpr static int   kPlayerInitialHealth = 40;
-    constexpr static float kPlayerVelocity = 2.0f;
     Position&              GetPosition() const;
     entt::entity           GetEntity() const { return m_entity; }
     void                   Create();
     void                   Shoot();
+    void                   OnDamageEvent(DamageEvent health_event);
 
 private:
     entt::registry& m_registry;

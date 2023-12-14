@@ -28,7 +28,8 @@ GamePlayScene::GamePlayScene(const AssetManager &asset_manager)
     m_dispatcher.sink<BulletEvent>().connect<&CombatSystem::OnShootEvent>(m_combat_system);
     m_dispatcher.sink<CollisionEvent>().connect<&CombatSystem::OnCollisionEvent>(m_combat_system);
     m_dispatcher.sink<OutOfBoundariesEvent>().connect<&CombatSystem::OnOutOfBoundariesEvent>(m_combat_system);
-    m_dispatcher.sink<HealthEvent>().connect<&HUD::OnHealthEvent>(m_hud);
+    m_dispatcher.sink<DamageEvent>().connect<&HUD::OnHealthEvent>(m_hud);
+    m_dispatcher.sink<DamageEvent>().connect<&Player::OnDamageEvent>(m_player);
     m_dispatcher.sink<DestroyEvent>().connect<&CleanUpSystem::OnDestroyEvent>(m_cleanup_system); // No additional cleanup
                                                                                                  // system needed here. Could
                                                                                                  // we put it in here?
@@ -56,13 +57,13 @@ GamePlayScene::ProcessEvents(const Gamepad& gamepad)
 
     // Input processing
     if (gamepad.IsButtonDown(Gamepad::UP))
-        m_movement_system.MoveEntity(Position{0.0f, -m_player.kPlayerVelocity}, m_player.GetEntity());
+        m_movement_system.MoveEntity(Position{0.0f, -m_player.PLAYER_VELOCITY}, m_player.GetEntity());
     if (gamepad.IsButtonDown(Gamepad::DOWN))
-        m_movement_system.MoveEntity(Position{0.0f, m_player.kPlayerVelocity}, m_player.GetEntity());
+        m_movement_system.MoveEntity(Position{0.0f, m_player.PLAYER_VELOCITY}, m_player.GetEntity());
     if (gamepad.IsButtonDown(Gamepad::LEFT))
-        m_movement_system.MoveEntity(Position{-m_player.kPlayerVelocity, 0.0f}, m_player.GetEntity());
+        m_movement_system.MoveEntity(Position{-m_player.PLAYER_VELOCITY, 0.0f}, m_player.GetEntity());
     if (gamepad.IsButtonDown(Gamepad::RIGHT))
-        m_movement_system.MoveEntity(Position{m_player.kPlayerVelocity, 0.0f}, m_player.GetEntity());
+        m_movement_system.MoveEntity(Position{m_player.PLAYER_VELOCITY, 0.0f}, m_player.GetEntity());
     if (gamepad.IsButtonPressed(Gamepad::A))
         m_player.Shoot();
     if (gamepad.IsButtonPressed(Gamepad::START))
@@ -100,7 +101,7 @@ GamePlayScene::LoadLevel()
     m_player.Create();
     // HUD
     m_hud.Create(m_player.GetEntity());
-    m_hud.Refresh(m_player.kPlayerInitialHealth);
+    m_hud.Refresh(m_player.PLAYER_INITIAL_HEALTH);
     // Level Loader
     m_level_loader_system.LoadLevel(m_asset_manager.GetAbsolutePathStr("data/level_1"));
 }

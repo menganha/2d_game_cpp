@@ -16,10 +16,13 @@ CombatSystem::Update()
     auto view = m_registry.view<Health>();
     for (auto entity : view)
     {
-        auto health = view.get<Health>(entity);
+        auto& health = view.get<Health>(entity);
         if (health.points <= 0)
         {
             m_dispatcher.enqueue<DestroyEvent>(entity);
+        }
+        if (health.invincivility > 0){
+            health.invincivility -= 1;
         }
     }
 }
@@ -75,8 +78,11 @@ CombatSystem::HandleDealingDamage(Health& health, entt::entity health_ent, Weapo
     if (m_registry.all_of<Enemy>(health_ent) and weapon.from_enemy)
         return;
 
-    health.points -= weapon.power;
-    m_dispatcher.enqueue<HealthEvent>(health_ent, health.points);
-    if (weapon.disposable)
-        m_dispatcher.enqueue<DestroyEvent>(weapon_ent);
+    if (health.invincivility == 0)
+    {
+        health.points -= weapon.power;
+        m_dispatcher.enqueue<DamageEvent>(health_ent, health.points);
+        if (weapon.disposable)
+            m_dispatcher.enqueue<DestroyEvent>(weapon_ent);
+    }
 }

@@ -11,7 +11,7 @@ struct DestroyEvent
 };
 
 // Triggered when health is gained or lost
-struct HealthEvent
+struct DamageEvent
 {
     entt::entity entity;
     int          health;

@@ -15,7 +15,7 @@ Player::Create()
     m_registry.emplace<SquarePrimitive>(m_entity, 10, 10, Colors::RED);
     m_registry.emplace<Velocity>(m_entity, 0.f, 0.f);
     m_registry.emplace<Collider>(m_entity, 10, 10, 0, 0, true);
-    m_registry.emplace<Health>(m_entity, kPlayerInitialHealth);
+    m_registry.emplace<Health>(m_entity, PLAYER_INITIAL_HEALTH);
 }
 
 Position&
@@ -34,4 +34,13 @@ Player::Shoot()
     m_registry.emplace<SquarePrimitive>(bullet_entity, 4, 7, Colors::BLACK);
     m_registry.emplace<Collider>(bullet_entity, 4, 7, 0, 0, false);
     m_registry.emplace<Weapon>(bullet_entity, 5, true, false);
+}
+
+void
+Player::OnDamageEvent(DamageEvent damage_event)
+{
+    if (damage_event.entity == m_entity)
+    {
+        m_registry.patch<Health>(m_entity, [](auto& health) { health.invincivility = PLAYER_INVINCIBILITY; });
+    }
 }

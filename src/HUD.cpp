@@ -27,7 +27,7 @@ HUD::Refresh(int player_health)
 }
 
 void
-HUD::OnHealthEvent(HealthEvent health_event)
+HUD::OnHealthEvent(DamageEvent health_event)
 {
     if (health_event.entity == m_ent_player)
         Refresh(health_event.health);
