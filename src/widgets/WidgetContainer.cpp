@@ -1,25 +1,22 @@
 #include "WidgetContainer.hpp"
 
-WidgetContainer::WidgetContainer() : m_head{ nullptr }, m_tail{ nullptr }, m_current{ nullptr } {}
+WidgetContainer::WidgetContainer() : m_head{nullptr}, m_tail{nullptr}, m_current{nullptr} {}
 
 WidgetContainer::~WidgetContainer()
 {
-    auto* tmp_node = m_tail;
-    while (tmp_node != nullptr)
-    {
-        delete tmp_node;
-        tmp_node = tmp_node->next;
+    m_current = m_head;
+    while (m_current != nullptr){
+        m_current = m_current->previous;
+        delete m_head;
+        m_head = m_current;
     }
-    m_head = nullptr;
     m_tail = nullptr;
 }
 
 void
 WidgetContainer::AppendWidget(Widget& widget)
 {
-    auto node = new WidgetNode{ widget, nullptr, nullptr };
-    node->next = nullptr;
-    node->previous = nullptr;
+    auto node = new WidgetNode{widget, nullptr, nullptr};
     if (m_head == nullptr)
     {
         m_head = node;
@@ -29,9 +26,9 @@ WidgetContainer::AppendWidget(Widget& widget)
     }
     else
     {
-        node->previous = m_tail;
-        m_tail->next = node;
-        m_tail = node;
+        node->previous = m_head;
+        m_head->next = node;
+        m_head = node;
     }
 }
 

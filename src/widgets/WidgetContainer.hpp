@@ -15,7 +15,11 @@ class WidgetContainer
   public:
     WidgetContainer();
     ~WidgetContainer();
-    void AppendWidget(Widget& widget); // Always copy values if is an lvalue or move them if they are an rvalue
+
+    // This works as a linked list where we always append elements to the head of the list
+     // Always copy values if is an lvalue or move them if they are an rvalue
+    void AppendWidget(Widget& widget);
+
     void MoveToPrevious();
     void MoveToNext();
     void TriggerAction();

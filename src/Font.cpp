@@ -3,12 +3,12 @@
 #include <stdexcept>
 
 Font::Font(const std::string_view font_filepath, int point_size, SDL_Renderer* renderer)
-  : m_point_size{ point_size }
-  , m_glyphs{}
-  , m_texture{ nullptr }
+    : m_point_size{point_size}
+    , m_glyphs{}
+    , m_texture{nullptr}
 {
     // SDL_Color white_color{ 0xFF, 0xFF, 0xFF, 0xFF };
-    TTF_Font* font{ TTF_OpenFont(font_filepath.data(), point_size) };
+    TTF_Font* font{TTF_OpenFont(font_filepath.data(), point_size)};
     if (font == nullptr)
     {
         std::string err_msg = "SDL TTF Error: ";
@@ -17,15 +17,18 @@ Font::Font(const std::string_view font_filepath, int point_size, SDL_Renderer* r
     // TTF_SetFontHinting(font, TTF_HINTING_LIGHT);
     // TTF_SetFontStyle(font, TTF_STYLE_ITALIC);
 
-    SDL_Surface* surface{ SDL_CreateRGBSurface(0, FONT_ATLAS_SIZE, FONT_ATLAS_SIZE, 32, 0, 0, 0, 0xFF) };
-    SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGBA(surface->format, 0, 0, 0, 0));
+    // Creates a transparent surface with the color masks set as little endian
+    SDL_Surface* surface{
+      SDL_CreateRGBSurface(0, FONT_ATLAS_SIZE, FONT_ATLAS_SIZE, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF)};
 
-    SDL_Rect destination{ 0, 0, 0, 0 };
+    SDL_Rect destination{0, 0, 0, 0};
     for (char ascii_char = FIRST_ASCII_CHAR; ascii_char <= LAST_ASCII_CHAR; ++ascii_char)
     {
-        char char_to_store[2]{ ascii_char, 0 };
+        char char_to_store[2]{ascii_char, 0};
 
-        SDL_Surface* text_surface{ TTF_RenderUTF8_Blended(font, char_to_store, { 0xFF, 0xFF, 0xFF, 0xFF }) };
+        // This will render the text without antialiasing. Good if we want to have that 8-bit look on fonts. Otherwise 
+        //  we should use TTF_RenderUTF8_Blended instead
+        SDL_Surface* text_surface{TTF_RenderUTF8_Solid(font, char_to_store, {0xFF, 0xFF, 0xFF, 0xFF})};
 
         TTF_SizeText(font, char_to_store, &destination.w, &destination.h);
 
@@ -67,7 +70,7 @@ Font::DrawText(const std::string_view text, int x, int y, SDL_Color color, SDL_R
     {
         auto glyph = m_glyphs[character];
 
-        SDL_Rect dest{ x, y, glyph.w, glyph.h };
+        SDL_Rect dest{x, y, glyph.w, glyph.h};
 
         SDL_RenderCopy(renderer, m_texture, &glyph, &dest);
 
