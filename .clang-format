@@ -55,7 +55,7 @@ BraceWrapping:
   AfterClass:      true
   AfterControlStatement: Always
   AfterEnum:       true
-  AfterExternBlock: true
+  AfterExternBlock: false
   AfterFunction:   true
   AfterNamespace:  false
   AfterObjCDeclaration: false

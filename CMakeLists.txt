@@ -7,7 +7,7 @@ option(MYGAME_VENDORED "Use vendored libraries" OFF)
 if (MYGAME_VENDORED)
     add_subdirectory(vendored/sdl EXCLUDE_FROM_ALL)
 else ()
-    # 1. Look for a SDL2 package, 2. look for the SDL2 component and 3. fail if none can be found
+    # 1. Look for a SDL2 package, 2. look for the SDL2 component and 3. fail if any of them cannnot be found
     find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2)
     find_package(SDL2_image REQUIRED CONFIG COMPONENTS SDL2_image)
     find_package(SDL2_mixer REQUIRED CONFIG COMPONENTS SDL2_mixer)
@@ -15,6 +15,18 @@ else ()
     # 1. Look for a SDL2 package, 2. Look for the SDL2main component and 3. DO NOT fail when SDL2main is not available
     find_package(SDL2 CONFIG COMPONENTS SDL2main)
 endif ()
+
+# FFMPEG section
+find_library(AVCODEC_LIBRARY avcodec)
+find_path(AVCODEC_INCLUDE_DIR libavcodec/avcodec.h)
+find_library(AVFORMAT_LIBRARY avformat)
+find_path(AVFORMAT_INCLUDE_DIR libavformat/avformat.h)
+find_library(AVUTIL_LIBRARY avutil)
+find_path(AVUTIL_INCLUDE_DIR libavutil/avutil.h)
+find_library(SWSCALE_LIBRARY swscale)
+find_path(SWSCALE_INCLUDE_DIR libswscale/swscale.h)
+# find_path(AVDEVICE_INCLUDE_DIR libavdevice/avdevice.h)
+# find_library(AVDEVICE_LIBRARY avdevice)nd_library(AVFORMAT_LIBRARY avformat)
 
 add_executable(app 
         src/main.cpp
@@ -70,7 +82,7 @@ set_target_properties(app PROPERTIES OUTPUT_NAME "app")
 # Include or add directories
 add_subdirectory(libs/entt)
 add_subdirectory(libs/spdlog)
-
+target_include_directories(app PUBLIC ${AVCODEC_INCLUDE_DIR} ${AVFORMAT_INCLUDE_DIR} ${AVUTIL_INCLUDE_DIR} ${SWSCALE_INCLUDE_DIR})
 
 # Compile features and options
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -89,7 +101,7 @@ if (TARGET SDL2::SDL2main)
     target_link_libraries(app PRIVATE SDL2::SDL2main)
 endif ()
 
-target_link_libraries(app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf EnTT::EnTT spdlog::spdlog)
+target_link_libraries(app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf EnTT::EnTT spdlog::spdlog ${AVCODEC_LIBRARY} ${AVFORMAT_LIBRARY} ${AVUTIL_LIBRARY} ${SWSCALE_LIBRARY})
 
 # Custom commands. Create symlinks for bin directories
 add_custom_command(

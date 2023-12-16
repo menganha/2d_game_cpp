@@ -5,18 +5,18 @@
 
 class Window
 {
-  public:
+public:
     Window(const char* title, int screen_width, int screen_height, Uint32 flags);
     Window() = default;
     ~Window();
     Window& operator=(Window&& window) noexcept;
 
     bool          IsOpen() const { return m_is_open; }
-    void          Close() { m_is_open = false; };
+    void          Close() { m_is_open = false; }
     void          ProcessEvents();
-    SDL_Renderer* GetRenderer() const { return m_renderer; };
+    SDL_Renderer* GetRenderer() const { return m_renderer; }
 
-  private:
+private:
     SDL_Window*   m_window;
     SDL_Renderer* m_renderer;
     bool          m_is_open;
