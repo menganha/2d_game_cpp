@@ -15,6 +15,19 @@ AssetManager::GetFont(std::string_view relative_path) const
     return m_text_cache.at(entt::hashed_string::value(relative_path.data()));
 }
 
+void
+AssetManager::AddVideo(std::string_view relative_path, SDL_Renderer* renderer)
+{
+    auto video_path = m_root_dir / "assets" / relative_path;
+    m_video_cache.try_emplace(entt::hashed_string::value(relative_path.data()), video_path.c_str(), renderer);
+}
+
+Video
+AssetManager::GetVideo(std::string_view relative_path) const
+{
+    return m_video_cache.at(entt::hashed_string::value(relative_path.data()));
+}
+
 std::filesystem::path
 AssetManager::GetAbsolutePath(std::string_view relative_path) const
 {

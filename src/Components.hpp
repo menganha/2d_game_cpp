@@ -46,8 +46,7 @@ private:
 
 struct Renderable
 {
-    Size      size;
-    SDL_Color color;
+    SDL_Texture* texture;
 };
 
 // Primitive square shape of SDL

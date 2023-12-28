@@ -4,6 +4,7 @@
 #include "../Gamepad.hpp"
 #include "../HUD.hpp"
 #include "../Player.hpp"
+#include "../Video.hpp"
 #include "../systems/CleanUpSystem.hpp"
 #include "../systems/CollisionSystem.hpp"
 #include "../systems/CombatSystem.hpp"
@@ -30,17 +31,18 @@ private:
     void RestartLevel();
     void OnDestroyEvent(DestroyEvent destroy_event);
 
-    entt::registry    m_registry;
-    entt::dispatcher  m_dispatcher;
-    Player            m_player;
-    AssetManager      m_asset_manager;
-    MovementSystem    m_movement_system;
-    CollisionSystem   m_collision_system;
-    CombatSystem      m_combat_system;
-    RenderSystem      m_render_system;
-    EnemySystem       m_enemy_system;
-    CleanUpSystem     m_cleanup_system;
-    LevelLoaderSystem m_level_loader_system;
-    HUD               m_hud;
-    bool              m_restart_level;
+    entt::registry      m_registry;
+    entt::dispatcher    m_dispatcher;
+    Player              m_player;
+    const AssetManager& m_asset_manager;
+    MovementSystem      m_movement_system;
+    CollisionSystem     m_collision_system;
+    CombatSystem        m_combat_system;
+    RenderSystem        m_render_system;
+    EnemySystem         m_enemy_system;
+    CleanUpSystem       m_cleanup_system;
+    LevelLoaderSystem   m_level_loader_system;
+    HUD                 m_hud;
+    bool                m_restart_level;
+    Video               m_video;
 };

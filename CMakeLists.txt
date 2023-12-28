@@ -39,6 +39,8 @@ add_executable(app
         src/Game.hpp
         src/Font.cpp
         src/Font.hpp
+        src/Video.cpp
+        src/Video.hpp
         src/Components.hpp
         src/Events.hpp
         src/Window.cpp

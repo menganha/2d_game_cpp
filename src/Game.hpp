@@ -5,6 +5,7 @@
 #include "Window.hpp"
 #include "scenes/IScene.hpp"
 
+#include <filesystem>
 #include <stack>
 
 class Game
@@ -15,6 +16,7 @@ public:
     void Run();
 
 private:
+    std::filesystem::path               m_root_path;
     Window                              m_window;
     AssetManager                        m_asset_manager;
     Gamepad                             m_gamepad;

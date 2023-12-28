@@ -7,7 +7,8 @@ HUD::HUD(entt::registry& registry) : m_registry{registry}, m_ent_health{} {}
 
 HUD::~HUD()
 {
-    m_registry.destroy(m_ent_health);
+    if (m_registry.valid(m_ent_health))
+        m_registry.destroy(m_ent_health);
 }
 
 void

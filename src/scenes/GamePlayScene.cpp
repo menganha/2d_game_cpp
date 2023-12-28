@@ -7,7 +7,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <spdlog/spdlog.h>
 
-GamePlayScene::GamePlayScene(const AssetManager &asset_manager)
+GamePlayScene::GamePlayScene(const AssetManager& asset_manager)
     : m_registry{}, m_dispatcher{}, m_player{m_registry}
     , m_asset_manager{asset_manager}
     , m_movement_system{m_registry, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y}
@@ -21,6 +21,7 @@ GamePlayScene::GamePlayScene(const AssetManager &asset_manager)
     , m_level_loader_system{m_registry, m_dispatcher}
     , m_hud{m_registry}
     , m_restart_level{false}
+    , m_video{m_asset_manager.GetVideo("videos/UFO.mp4")}
 {
     // Sets some event listeners
     m_dispatcher.sink<SetEntityPositionEvent>().connect<&MovementSystem::OnSetEntityPositionEvent>(m_movement_system);
@@ -39,6 +40,7 @@ GamePlayScene::GamePlayScene(const AssetManager &asset_manager)
 }
 
 GamePlayScene::~GamePlayScene()
+
 {
     m_dispatcher.clear();
 }
@@ -73,6 +75,7 @@ GamePlayScene::ProcessEvents(const Gamepad& gamepad)
 void
 GamePlayScene::Update()
 {
+    m_video.Update();
     m_movement_system.Update();
     m_collision_system.Update();
     m_dispatcher.update<CollisionEvent>(); // Process all collision events after pick them from the collision system
@@ -97,13 +100,20 @@ GamePlayScene::Render(SDL_Renderer* renderer)
 void
 GamePlayScene::LoadLevel()
 {
-    // player
+    // Player
     m_player.Create();
+
     // HUD
     m_hud.Create(m_player.GetEntity());
     m_hud.Refresh(m_player.PLAYER_INITIAL_HEALTH);
+
     // Level Loader
     m_level_loader_system.LoadLevel(m_asset_manager.GetAbsolutePathStr("data/level_1"));
+
+    // Add Video
+    auto entity = m_registry.create();
+    m_registry.emplace<Position>(entity, 0.f, 0.f);
+    m_registry.emplace<Renderable>(entity, m_video.GetTexture());
 }
 
 void
