@@ -12,14 +12,14 @@
 class PauseScene : public IScene
 {
 public:
-    PauseScene(const AssetManager& asset_manager);
+    PauseScene(AssetManager& asset_manager);
     void ProcessEvents(const Gamepad& gamepad) override;
     void Update() override;
     void Render(SDL_Renderer* renderer) override;
 
 private:
     void             StupidFunction();
-    AssetManager     m_asset_manager;
+    AssetManager&    m_asset_manager;
     WidgetContainer  m_widget_container;
     entt::registry   m_registry;
     entt::dispatcher m_dispatcher;

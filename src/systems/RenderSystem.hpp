@@ -10,8 +10,8 @@ class RenderSystem
 
 public:
     constexpr static int BLINKING_PERIOD = 8;
-    explicit RenderSystem(const entt::registry& registry);
-    void Update(const AssetManager& asset_manager, SDL_Renderer* renderer);
+    RenderSystem(const entt::registry& registry);
+    void Update(AssetManager& asset_manager, SDL_Renderer* renderer);
 
 private:
     const entt::registry& m_registry;

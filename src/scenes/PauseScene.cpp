@@ -4,7 +4,7 @@
 
 #include <spdlog/spdlog.h>
 
-PauseScene::PauseScene(const AssetManager& asset_manager)
+PauseScene::PauseScene(AssetManager& asset_manager)
   : m_asset_manager{asset_manager}
   , m_widget_container{}
   , m_registry{}

@@ -7,13 +7,14 @@
 #include <SDL2/SDL_ttf.h>
 #include <spdlog/spdlog.h>
 
-GamePlayScene::GamePlayScene(const AssetManager& asset_manager)
-    : m_registry{}, m_dispatcher{}, m_player{m_registry}
+GamePlayScene::GamePlayScene(AssetManager& asset_manager)
+    : m_registry{}
+    , m_dispatcher{}
+    , m_player{m_registry}
     , m_asset_manager{asset_manager}
     , m_movement_system{m_registry, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y}
-    , m_collision_system{m_registry, m_dispatcher, 
-        Grid{0, 0, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y, 
-            Config::COLLISION_GRID_CELL_WIDTH, Config::COLLISION_GRID_CELL_HEIGHT}}
+    , m_collision_system{m_registry, m_dispatcher,
+        Grid{0, 0, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y, Config::COLLISION_GRID_CELL_WIDTH, Config::COLLISION_GRID_CELL_HEIGHT}}
     , m_combat_system{m_registry, m_dispatcher}
     , m_render_system{m_registry}
     , m_enemy_system{m_registry, m_dispatcher}
@@ -21,7 +22,7 @@ GamePlayScene::GamePlayScene(const AssetManager& asset_manager)
     , m_level_loader_system{m_registry, m_dispatcher}
     , m_hud{m_registry}
     , m_restart_level{false}
-    , m_video{m_asset_manager.GetVideo("videos/UFO.mp4")}
+    , m_video{m_asset_manager.GetVideo("videos/UFO.mp4")} // Moving copying or just passing a reference?????????
 {
     // Sets some event listeners
     m_dispatcher.sink<SetEntityPositionEvent>().connect<&MovementSystem::OnSetEntityPositionEvent>(m_movement_system);
@@ -75,7 +76,7 @@ GamePlayScene::ProcessEvents(const Gamepad& gamepad)
 void
 GamePlayScene::Update()
 {
-    m_video.Update();
+    m_video.UpdateTexture();
     m_movement_system.Update();
     m_collision_system.Update();
     m_dispatcher.update<CollisionEvent>(); // Process all collision events after pick them from the collision system
@@ -111,9 +112,18 @@ GamePlayScene::LoadLevel()
     m_level_loader_system.LoadLevel(m_asset_manager.GetAbsolutePathStr("data/level_1"));
 
     // Add Video
+    m_video.StartDecodeThread();
     auto entity = m_registry.create();
     m_registry.emplace<Position>(entity, 0.f, 0.f);
-    m_registry.emplace<Renderable>(entity, m_video.GetTexture());
+    m_registry.emplace<Renderable>(entity, "videos/UFO.mp4", 100, 100);
+    
+    entity = m_registry.create();
+    m_registry.emplace<Position>(entity, 100.f, 100.f);
+    m_registry.emplace<Renderable>(entity, "videos/UFO.mp4", 200, 200);
+    
+    entity = m_registry.create();
+    m_registry.emplace<Position>(entity, 300.f, 50.f);
+    m_registry.emplace<Renderable>(entity, "videos/UFO.mp4", 200, 500);
 }
 
 void

@@ -2,32 +2,40 @@
 
 #include <spdlog/spdlog.h>
 #include <stdexcept>
+extern "C" {
+#include <libavutil/imgutils.h>
+}
 
 Video::~Video()
 {
+    m_stop_decoding = true; // This variable is not atomic meaning that the decoding thread might not stop
+                            // immediately and need more than one loop (2, 3 more, not sure... ???) to stop
+    if (m_decode_thread.joinable())
+        m_decode_thread.join();
     avcodec_free_context(&m_codec_ctx);
-    avformat_close_input(&m_format_ctx); // Why two "frees" on m_format_ctx
-    // avformat_free_context(m_format_ctx);
-    av_frame_free(&m_frame);
+    avformat_close_input(&m_format_ctx);
     av_packet_free(&m_packet);
+    sws_freeContext(m_sws_ctx);
+    av_freep(&m_frame->data[0]); // Frees buffer that was allocated with av_image_alloc
+    av_frame_free(&m_frame);
 }
 
-Video::Video(std::string_view file_name, SDL_Renderer* renderer)
+Video::Video(std::string_view file_name, Texture& texture, SDL_Renderer* renderer)
     : m_file_name{file_name}
     , m_video_stream_index{-1}
-    , m_texture{nullptr}
     , m_format_ctx{nullptr}
     , m_codec_ctx{nullptr}
     , m_packet{av_packet_alloc()}
-    , m_frame{av_frame_alloc()}
     , m_error_str_buffer{}
+    , m_decode_thread{}
+    , m_queue_mutex{}
+    , m_queue_frames{}
+    , m_stop_decoding{false}
+    , m_texture{texture}
+    , m_sws_ctx{nullptr}
 {
-
-    av_log_set_level(AV_LOG_TRACE);
     if (!m_packet)
         throw std::runtime_error("Faild to allocate memory for AVPacket");
-    if (!m_frame)
-        throw std::runtime_error("Failed to allocate memory for AVFrame");
 
     int return_code;
 
@@ -73,71 +81,119 @@ Video::Video(std::string_view file_name, SDL_Renderer* renderer)
     if (return_code < 0)
         throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, return_code));
 
-    // ACTUAL DECODING PART
-    AVFrame* p_frame = av_frame_alloc();
-    if (p_frame == nullptr)
-        throw std::runtime_error("Could not allocate frame AVFrame insatnce");
-
-    // alloc an AVPacket to read data from the AVFormatContext
-    AVPacket* p_packet = av_packet_alloc();
-    if (p_packet == nullptr)
-        throw std::runtime_error("Could not allocate frame AVPacket instance");
-
-    // Create texture
-    m_texture = SDL_CreateTexture(
-      renderer, SDL_PIXELFORMAT_YV12, SDL_TEXTUREACCESS_STREAMING, m_codec_ctx->width, m_codec_ctx->height);
-
-    // set up our SWSContext to convert the image data to YUV420
-    // struct SwsContext* sws_ctx = nullptr;
-    // sws_ctx = sws_getContext(m_codec_ctx->width,
-    //                          m_codec_ctx->height,
-    //                          m_codec_ctx->pix_fmt,
-    //                          m_codec_ctx->width,
-    //                          m_codec_ctx->height,
-    //                          AV_PIX_FMT_YUV420P,
-    //                          SWS_BILINEAR,
-    //                          nullptr,
-    //                          nullptr,
-    //                          nullptr);
+    // Set the default texture
+    SetTexture(m_codec_ctx->width, m_codec_ctx->height, renderer);
 }
 
 void
-Video::Update()
+Video::SetTexture(int width, int height, SDL_Renderer* renderer)
 {
-    if (av_read_frame(m_format_ctx, m_packet) >= 0)
+
+    m_texture = Texture{SDL_CreateTexture(renderer, SDL_PIXELFORMAT_YV12, SDL_TEXTUREACCESS_STREAMING, width, height)};
+
+    // Setup the data pointers and linesizes based on the specified image parameters and the provided array.
+    m_frame = av_frame_alloc(); // av_frame_alloc does not alloc the data buffers
+    int return_code = av_image_alloc(m_frame->data, m_frame->linesize, width, height, AV_PIX_FMT_YUV420P, 32);
+    if (return_code < 0)
+        throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, return_code));
+
+    // Scaling context
+    sws_freeContext(m_sws_ctx);
+    m_sws_ctx = sws_getContext(m_codec_ctx->width,
+                               m_codec_ctx->height,
+                               m_codec_ctx->pix_fmt,
+                               width,
+                               height,
+                               AV_PIX_FMT_YUV420P,
+                               SWS_BILINEAR,
+                               nullptr,
+                               nullptr,
+                               nullptr);
+}
+
+void
+Video::StartDecodeThread()
+{
+    m_decode_thread = std::thread(&Video::DecodeVideoStream, this, false);
+}
+
+void
+Video::UpdateTexture()
+{
+    std::unique_lock<std::mutex> guard{m_queue_mutex};
+    if (!m_queue_frames.empty())
     {
-        // if it's the video stream
-        if (m_packet->stream_index == m_video_stream_index)
+        AVFrame* frame = m_queue_frames.front();
+        m_queue_frames.pop();
+        guard.unlock();
+
+        sws_scale(m_sws_ctx,
+                  (const uint8_t* const*)frame->data,
+                  frame->linesize,
+                  0,
+                  m_codec_ctx->height,
+                  m_frame->data,
+                  m_frame->linesize);
+
+        av_frame_unref(frame);
+        av_frame_free(&frame);
+
+        SDL_UpdateYUVTexture(m_texture.GetTexture(),
+                             nullptr,
+                             m_frame->data[0],
+                             m_frame->linesize[0],
+                             m_frame->data[1],
+                             m_frame->linesize[1],
+                             m_frame->data[2],
+                             m_frame->linesize[2]);
+    }
+}
+
+void
+Video::DecodeVideoStream(bool loop)
+{
+    while (true)
+    {
+        int read_frame_error = av_read_frame(m_format_ctx, m_packet);
+
+        if (read_frame_error == AVERROR_EOF and loop)
+        {
+            avio_seek(m_format_ctx->pb, 0, SEEK_SET);
+            av_seek_frame(m_format_ctx, m_video_stream_index, 0, 0);
+            continue;
+        }
+        else if (read_frame_error < 0)
+        {
+            break;
+        }
+
+        if (m_stop_decoding) // Manual switch to break from the infinite loop
+            break;
+
+        if (m_packet->stream_index == m_video_stream_index) // If it's the video stream
         {
             int return_code = avcodec_send_packet(m_codec_ctx, m_packet);
 
             if (return_code < 0)
-            {
                 throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, return_code));
-            }
 
             while (return_code >= 0)
             {
-                return_code = avcodec_receive_frame(m_codec_ctx, m_frame);
+                AVFrame* frame{av_frame_alloc()};
+                if (!frame)
+                    throw std::runtime_error("Failed to allocate memory for AVFrame");
+
+                return_code = avcodec_receive_frame(m_codec_ctx, frame);
+
                 if (return_code == AVERROR(EAGAIN) || return_code == AVERROR_EOF)
-                {
                     break;
-                }
                 else if (return_code < 0)
-                {
                     throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, return_code));
-                }
-                SDL_UpdateYUVTexture(m_texture,
-                                     nullptr,
-                                     m_frame->data[0],
-                                     m_frame->linesize[0],
-                                     m_frame->data[1],
-                                     m_frame->linesize[1],
-                                     m_frame->data[2],
-                                     m_frame->linesize[2]);
-                av_frame_unref(m_frame);
+
+                std::lock_guard<std::mutex> guard{m_queue_mutex};
+                m_queue_frames.push(frame);
             }
         }
+        av_packet_unref(m_packet);
     }
-    av_packet_unref(m_packet);
 }

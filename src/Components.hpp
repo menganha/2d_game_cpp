@@ -46,7 +46,10 @@ private:
 
 struct Renderable
 {
-    SDL_Texture* texture;
+    std::string name;
+    Size        size;
+    Size        subsection_size{0, 0}; // size of the subsection we want to show
+    Size        offset{0, 0};          // x-y offset from (0, 0) of the subsection we want to whow
 };
 
 // Primitive square shape of SDL

@@ -41,6 +41,8 @@ add_executable(app
         src/Font.hpp
         src/Video.cpp
         src/Video.hpp
+        src/Texture.cpp
+        src/Texture.hpp
         src/Components.hpp
         src/Events.hpp
         src/Window.cpp
