@@ -1,6 +1,6 @@
 #include "AssetManager.hpp"
 
-AssetManager::AssetManager(std::string_view root_dir) : m_root_dir{root_dir} {}
+AssetManager::AssetManager(std::filesystem::path root_dir) : m_root_dir{root_dir} {}
 
 void
 AssetManager::AddFont(std::string_view relative_path, int size, SDL_Renderer* renderer)

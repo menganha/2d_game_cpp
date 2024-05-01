@@ -9,6 +9,7 @@ main([[maybe_unused]] int argc, char* argv[])
 {
     try
     {
+        spdlog::cfg::load_env_levels();
         Game game{argv[0]};
         game.Run();
     }

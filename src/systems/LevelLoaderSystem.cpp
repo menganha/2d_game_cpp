@@ -54,12 +54,12 @@ LevelLoaderSystem::LoadLevel(std::string_view level_data_path)
         {
             if (std::all_of(line_str.cbegin(), line_str.cend(), [](char c) { return std::isspace(c); }))
             {
-                spdlog::debug("Skipping empty line");
+                spdlog::trace("Skipping empty line");
                 continue;
             }
             else if (auto loc = line_str.find_first_not_of(" \n\t\r"); loc != std::string::npos and line_str[loc] == '#')
             {
-                spdlog::debug("Skipping comment line: {}", line_str);
+                spdlog::trace("Skipping comment line: {}", line_str);
                 continue;
             }
 
@@ -67,7 +67,7 @@ LevelLoaderSystem::LoadLevel(std::string_view level_data_path)
             if (string_stream >> enemy_type_str >> delay >> pos_x >> pos_y)
             {
                 m_enemy_list_to_dispatch.push_back(EnemyEntry{StrToEnemyType(enemy_type_str), delay, pos_x, pos_y});
-                spdlog::debug("Parsed line: {} {} {} {}", enemy_type_str, delay, pos_x, pos_y);
+                spdlog::trace("Parsed line: {} {} {} {}", enemy_type_str, delay, pos_x, pos_y);
             }
             else
             {
@@ -82,6 +82,7 @@ LevelLoaderSystem::LoadLevel(std::string_view level_data_path)
     else
     {
         spdlog::error("Error opening the level data file: {}", level_data_path);
+        // TODO: Throw error
     }
     file_stream.close();
 }

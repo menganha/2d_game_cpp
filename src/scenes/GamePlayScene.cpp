@@ -13,7 +13,8 @@ GamePlayScene::GamePlayScene(AssetManager& asset_manager)
     , m_player{m_registry}
     , m_asset_manager{asset_manager}
     , m_movement_system{m_registry, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y}
-    , m_collision_system{m_registry, m_dispatcher,
+    , m_collision_system{m_registry,
+        m_dispatcher, 
         Grid{0, 0, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y, Config::COLLISION_GRID_CELL_WIDTH, Config::COLLISION_GRID_CELL_HEIGHT}}
     , m_combat_system{m_registry, m_dispatcher}
     , m_render_system{m_registry}
@@ -116,11 +117,11 @@ GamePlayScene::LoadLevel()
     auto entity = m_registry.create();
     m_registry.emplace<Position>(entity, 0.f, 0.f);
     m_registry.emplace<Renderable>(entity, "videos/UFO.mp4", 100, 100);
-    
+
     entity = m_registry.create();
     m_registry.emplace<Position>(entity, 100.f, 100.f);
     m_registry.emplace<Renderable>(entity, "videos/UFO.mp4", 200, 200);
-    
+
     entity = m_registry.create();
     m_registry.emplace<Position>(entity, 300.f, 50.f);
     m_registry.emplace<Renderable>(entity, "videos/UFO.mp4", 200, 500);
@@ -130,7 +131,7 @@ void
 GamePlayScene::RestartLevel()
 {
     m_registry.clear();
-
+    m_video.StopDecodeThread();
     LoadLevel();
 }
 

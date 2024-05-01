@@ -8,7 +8,7 @@
 Game::Game(std::string_view root_path_str)
     : m_root_path{root_path_str}
     , m_window{}
-    , m_asset_manager{m_root_path.parent_path().c_str()}
+    , m_asset_manager{m_root_path.parent_path()}
     , m_gamepad{}
     , m_scene_stack{}
 {

@@ -31,7 +31,7 @@ void
 CombatSystem::OnShootEvent(BulletEvent bullet_event)
 {
     auto bullet_entity = m_registry.create();
-    spdlog::debug("Creating bullet entity {}", static_cast<int>(bullet_entity));
+    spdlog::trace("Creating bullet entity {}", static_cast<int>(bullet_entity));
     m_registry.emplace<Position>(bullet_entity, bullet_event.position.x, bullet_event.position.y);
     m_registry.emplace<Velocity>(bullet_entity, bullet_event.velocity.x, bullet_event.velocity.y);
     m_registry.emplace<SquarePrimitive>(

@@ -5,6 +5,7 @@
 //
 // Wrapper around and SDL2 texture in order to RAII
 //
+// TODO: Include a pointer to the renderer on each instance of this class.
 class Texture
 {
 public:

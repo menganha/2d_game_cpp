@@ -18,7 +18,7 @@ class AssetManager
 {
 
 public:
-    AssetManager(std::string_view root_dir);
+    AssetManager(std::filesystem::path root_dir);
 
     // Font
     void        AddFont(std::string_view relative_path, int size, SDL_Renderer* renderer);

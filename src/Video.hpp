@@ -21,10 +21,12 @@ public:
     ~Video();
     void     UpdateTexture();     // Updates the created texture with frame from the queue if present
     void     StartDecodeThread(); // Starts a decoding thread and updates frame queue
+    void     StopDecodeThread();
     Texture& GetTexture() const { return m_texture; }
 
 private:
     static constexpr int MAX_ERR_STR = 128;
+    static constexpr int MAX_VIDEOQ_SIZE = 1024;
     std::string          m_file_name;
     int                  m_video_stream_index;
     AVFormatContext*     m_format_ctx;
@@ -39,6 +41,6 @@ private:
     SwsContext*          m_sws_ctx;
     AVFrame*             m_frame;         // Frame that would contain the final transformed and "scaled image"
 
-    void DecodeVideoStream(bool loop);
+    void DecodeVideoStream();
     void SetTexture(int width, int height, SDL_Renderer* renderer);
 };
