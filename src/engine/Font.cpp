@@ -52,11 +52,13 @@ Font::Font(const std::string_view font_filepath, int point_size, SDL_Renderer* r
         destination.x += destination.w;
     }
     m_texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
     TTF_CloseFont(font);
 }
 
 Font::~Font()
 {
+    SDL_DestroyTexture(m_texture);
     // TTF_CloseFont(m_font);
 }
 

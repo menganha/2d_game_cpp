@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../AssetManager.hpp"
-#include "../Gamepad.hpp"
 #include "../HUD.hpp"
 #include "../Player.hpp"
-#include "../Video.hpp"
+#include "../engine/AssetManager.hpp"
+#include "../engine/Gamepad.hpp"
+#include "../engine/Video.hpp"
 #include "../systems/CleanUpSystem.hpp"
 #include "../systems/CollisionSystem.hpp"
 #include "../systems/CombatSystem.hpp"
@@ -12,7 +12,7 @@
 #include "../systems/LevelLoaderSystem.hpp"
 #include "../systems/MovementSystem.hpp"
 #include "../systems/RenderSystem.hpp"
-#include "IScene.hpp"
+#include "../engine/IScene.hpp"
 
 #include <SDL2/SDL.h>
 #include <entt/fwd.hpp>
@@ -22,7 +22,7 @@ class GamePlayScene : public IScene
 public:
     GamePlayScene(AssetManager& asset_manager);
     ~GamePlayScene();
-    void ProcessEvents(const Gamepad& gamepad) override;
+    void ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager) override;
     void Update() override;
     void Render(SDL_Renderer* renderer) override;
 

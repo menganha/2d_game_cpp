@@ -31,29 +31,20 @@ find_path(SWSCALE_INCLUDE_DIR libswscale/swscale.h)
 add_executable(app 
         src/main.cpp
         src/Config.hpp
-        src/AssetManager.hpp
-        src/AssetManager.cpp
-        src/Gamepad.cpp
-        src/Gamepad.hpp
-        src/Game.cpp
-        src/Game.hpp
-        src/Font.cpp
-        src/Font.hpp
-        src/Video.cpp
-        src/Video.hpp
-        src/Texture.cpp
-        src/Texture.hpp
         src/Components.hpp
         src/Events.hpp
-        src/Window.cpp
-        src/Window.hpp
         src/Collision.cpp
         src/Collision.hpp
+        src/HUD.cpp
+        src/HUD.hpp
+        src/Player.cpp
+        src/Player.hpp
+        src/scenes/IntroScene.cpp
+        src/scenes/IntroScene.hpp
         src/scenes/GamePlayScene.cpp
         src/scenes/GamePlayScene.hpp
         src/scenes/PauseScene.cpp
         src/scenes/PauseScene.hpp
-        src/scenes/IScene.hpp
         src/systems/MovementSystem.cpp
         src/systems/MovementSystem.hpp
         src/systems/CollisionSystem.cpp
@@ -62,10 +53,6 @@ add_executable(app
         src/systems/CleanUpSystem.hpp
         src/systems/LevelLoaderSystem.cpp
         src/systems/LevelLoaderSystem.hpp
-        src/HUD.cpp
-        src/HUD.hpp
-        src/Player.cpp
-        src/Player.hpp
         src/systems/RenderSystem.cpp
         src/systems/RenderSystem.hpp
         src/systems/CombatSystem.cpp
@@ -77,6 +64,22 @@ add_executable(app
         src/widgets/WidgetContainer.cpp
         src/widgets/ButtonWidget.hpp
         src/widgets/ButtonWidget.cpp
+        src/engine/AssetManager.hpp
+        src/engine/AssetManager.cpp
+        src/engine/IScene.hpp
+        src/engine/IScene.cpp
+        src/engine/Gamepad.cpp
+        src/engine/Gamepad.hpp
+        src/engine/GameLoop.cpp
+        src/engine/GameLoop.hpp
+        src/engine/Font.cpp
+        src/engine/Font.hpp
+        src/engine/Video.cpp
+        src/engine/Video.hpp
+        src/engine/Texture.cpp
+        src/engine/Texture.hpp
+        src/engine/Window.cpp
+        src/engine/Window.hpp
         )
 
 # Always set the name to app for easily passing this variable to vim

@@ -25,7 +25,7 @@ struct Size
 struct Text
 {
     std::string text;
-    std::string font_id;
+    std::string font_id;  // Is the font ID really necessary here? Maybe another component, maybe just the size?
     SDL_Color   color;
 };
 

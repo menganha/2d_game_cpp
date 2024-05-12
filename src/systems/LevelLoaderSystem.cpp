@@ -1,12 +1,11 @@
 #include "LevelLoaderSystem.hpp"
 
-#include "../Events.hpp"
 #include "../Colors.hpp"
+#include "../Events.hpp"
 
 #include <algorithm> // std::transform
 #include <cctype>    // std::tolower
 #include <fstream>
-#include <iostream>
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
@@ -25,7 +24,7 @@ StrToEnemyType(std::string& enemy_type_str)
         return EnemyType::PARAB;
     else
     {
-        spdlog::error("Enemy type {} not supported", enemy_type_str);
+        spdlog::error("Enemy type {} not supported", enemy_type_str.c_str());
         return EnemyType::NOTYPE;
     }
 }
@@ -59,7 +58,7 @@ LevelLoaderSystem::LoadLevel(std::string_view level_data_path)
             }
             else if (auto loc = line_str.find_first_not_of(" \n\t\r"); loc != std::string::npos and line_str[loc] == '#')
             {
-                spdlog::trace("Skipping comment line: {}", line_str);
+                spdlog::trace("Skipping comment line: {}", line_str.c_str());
                 continue;
             }
 
@@ -81,7 +80,7 @@ LevelLoaderSystem::LoadLevel(std::string_view level_data_path)
     }
     else
     {
-        spdlog::error("Error opening the level data file: {}", level_data_path);
+        spdlog::error("Error opening the level data file: {}", std::string(level_data_path));
         // TODO: Throw error
     }
     file_stream.close();

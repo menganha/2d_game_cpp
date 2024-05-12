@@ -1,15 +1,14 @@
-#ifndef INC_2D_CPP_ECS_GAME_WINDOW_HPP
-#define INC_2D_CPP_ECS_GAME_WINDOW_HPP
-
+#pragma once
 #include <SDL2/SDL.h>
 
+// Wraps the SDL window and SDL renderer
 class Window
 {
 public:
     Window(const char* title, int screen_width, int screen_height, Uint32 flags);
     Window() = default;
     ~Window();
-    Window& operator=(Window&& window) noexcept;
+    Window& operator=(Window&& window) noexcept;  // Move operator acts on r-value references
 
     bool          IsOpen() const { return m_is_open; }
     void          Close() { m_is_open = false; }
@@ -23,4 +22,3 @@ private:
     SDL_Event     m_event;
 };
 
-#endif // INC_2D_CPP_ECS_GAME_WINDOW_HPP

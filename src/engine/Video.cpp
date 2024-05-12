@@ -152,8 +152,9 @@ Video::DecodeVideoStream()
     while (true)
     {
 
-        // Keep the value limiterd of the debug queue
+        // Keep the value of the debug queue capped
         auto size = m_queue_frames.size();
+        int  ret{};
         if (size > MAX_VIDEOQ_SIZE)
         {
             // spdlog::debug("queue size {}", size);
@@ -161,17 +162,15 @@ Video::DecodeVideoStream()
             continue;
         }
 
-        int read_frame_error = av_read_frame(m_format_ctx, m_packet);
+        ret = av_read_frame(m_format_ctx, m_packet);
 
         // Handle end-of-file
-        if (read_frame_error == AVERROR_EOF) //
+        if (ret == AVERROR_EOF) //
         {
             if (loop > 0)
             {
                 spdlog::info("Looping video. loop = {}", loop);
-                spdlog::debug("read_frame_error {}", av_make_error_string(m_error_str_buffer, MAX_ERR_STR, read_frame_error));
-                int ret =
-                  avformat_seek_file(m_format_ctx, -1, INT64_MIN, m_format_ctx->start_time, m_format_ctx->start_time, 0);
+                ret = avformat_seek_file(m_format_ctx, -1, INT64_MIN, m_format_ctx->start_time, m_format_ctx->start_time, 0);
                 if (ret < 0)
                     throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, ret));
                 avcodec_flush_buffers(m_codec_ctx);
@@ -185,10 +184,8 @@ Video::DecodeVideoStream()
                 break;
             }
         }
-        else if (read_frame_error < 0)
-        {
-            throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, read_frame_error));
-        }
+        else if (ret < 0)
+            throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, ret));
 
         // Manual switch to break from decoding usually set in the destructor
         if (m_stop_decoding)
@@ -200,28 +197,28 @@ Video::DecodeVideoStream()
         // If it's the video stream, decode
         if (m_packet->stream_index == m_video_stream_index)
         {
-            int return_code = avcodec_send_packet(m_codec_ctx, m_packet);
+            ret = avcodec_send_packet(m_codec_ctx, m_packet);
 
-            if (return_code < 0)
-                throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, return_code));
+            if (ret < 0)
+                throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, ret));
 
-            while (return_code >= 0)
+            while (ret >= 0)
             {
 
                 AVFrame* frame{av_frame_alloc()};
                 if (!frame)
                     throw std::runtime_error("Failed to allocate memory for AVFrame");
 
-                return_code = avcodec_receive_frame(m_codec_ctx, frame);
+                ret = avcodec_receive_frame(m_codec_ctx, frame);
 
-                if (return_code == AVERROR(EAGAIN) or return_code == AVERROR_EOF)
+                if (ret == AVERROR(EAGAIN) or ret == AVERROR_EOF)
                 {
                     av_frame_unref(frame);
                     av_frame_free(&frame);
                     break;
                 }
-                else if (return_code < 0)
-                    throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, return_code));
+                else if (ret < 0)
+                    throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, ret));
 
                 std::lock_guard<std::mutex> guard{m_queue_mutex};
                 m_queue_frames.push(frame);

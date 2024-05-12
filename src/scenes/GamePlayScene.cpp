@@ -3,6 +3,7 @@
 #include "../Colors.hpp"
 #include "../Config.hpp"
 #include "../Events.hpp"
+#include "PauseScene.hpp"
 
 #include <SDL2/SDL_ttf.h>
 #include <spdlog/spdlog.h>
@@ -48,7 +49,7 @@ GamePlayScene::~GamePlayScene()
 }
 
 void
-GamePlayScene::ProcessEvents(const Gamepad& gamepad)
+GamePlayScene::ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager)
 {
     // Dispatch any game other event accumulated from the previous frame here
     m_dispatcher.update();
@@ -71,7 +72,10 @@ GamePlayScene::ProcessEvents(const Gamepad& gamepad)
     if (gamepad.IsButtonPressed(Gamepad::A))
         m_player.Shoot();
     if (gamepad.IsButtonPressed(Gamepad::START))
-        RequestChangeScene(SceneType::PAUSE_SCENE);
+    {
+        std::shared_ptr<IScene> pause_scene = std::make_shared<PauseScene>(m_asset_manager);
+        scene_manager.PushScene(pause_scene);
+    }
 }
 
 void
