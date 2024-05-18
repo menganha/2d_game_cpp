@@ -8,6 +8,7 @@
 #include "../Components.hpp"
 #include "../engine/Font.hpp"
 #include "../engine/IScene.hpp"
+#include "../IMGUI.hpp"
 
 #include <SDL2/SDL.h>
 // #include <entt/fwd.hpp>
@@ -25,6 +26,7 @@ private:
     AssetManager& m_asset_manager;
     Font          m_font;
     Text          m_title_text;
+    IMGUI         m_imgui;
 
     // WidgetContainer  m_widget_container;
     // entt::registry   m_registry;

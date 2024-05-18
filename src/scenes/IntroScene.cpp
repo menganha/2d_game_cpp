@@ -7,6 +7,7 @@ IntroScene::IntroScene(AssetManager& asset_manager)
     : m_asset_manager{asset_manager}
     , m_font{m_asset_manager.GetFont("f30")}
     , m_title_text{"Game Title", "f30", Colors::BLACK}
+    , m_imgui{} // should we pass here the gampad???
 {}
 
 void
@@ -15,15 +16,19 @@ IntroScene::ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager)
     // Design an IMGUI?
     // GUIState guistate{}
     // guistate.begin(frame):
+    m_imgui.UpdateGUIState(gamepad);
 
-    if (gamepad.IsButtonPressed(Gamepad::UP))
-        spdlog::info("Pressing Up");
-    if (gamepad.IsButtonPressed(Gamepad::A))
+    if (m_imgui.Button("Dummy Button 1", 20, 20))
+    {
+        spdlog::info("Pressing Dummy Button 1");
+    }
+    if (m_imgui.Button("Exit", 40, 20))
     {
         spdlog::info("Exiting Scene");
         scene_manager.PopScene();
     }
 }
+
 void
 IntroScene::Update()
 {}

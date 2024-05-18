@@ -6,7 +6,7 @@
 AssetManager::AssetManager(const char* assets_dir) : m_assets_dir{std::filesystem::path(assets_dir).parent_path()} {}
 
 void
-AssetManager::AddFont(const char* relative_path, int size, SDL_Renderer* renderer, const char * alias)
+AssetManager::AddFont(const char* relative_path, int size, SDL_Renderer* renderer, const char* alias)
 {
     auto font_path = m_assets_dir / "assets" / relative_path;
 
