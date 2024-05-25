@@ -6,34 +6,25 @@
 
 PauseScene::PauseScene(AssetManager& asset_manager)
     : m_asset_manager{asset_manager}
-    , m_widget_container{}
-    , m_registry{}
-    , m_dispatcher{}
-    , m_render_system{m_registry}
-    , m_return_button{"REGRESAR", 0, 100, m_registry}
-    , m_exit_button{"SALIR", 0, 200, m_registry}
-{
-    // m_return_button.Connect<&PauseScene::EndScene>(this);
-    // m_exit_button.Connect<&PauseScene::StupidFunction>(this);
-
-    m_widget_container.AppendWidget(m_return_button);
-    m_widget_container.AppendWidget(m_exit_button);
-}
+    , m_imgui{}
+{}
 
 void
 PauseScene::ProcessEvents(const Gamepad& gamepad, [[maybe_unused]] SceneManager& scene_manager)
 {
-    if (gamepad.IsButtonPressed(Gamepad::UP))
-        m_widget_container.MoveToPrevious();
-    if (gamepad.IsButtonPressed(Gamepad::DOWN))
-        m_widget_container.MoveToNext();
-    if (gamepad.IsButtonPressed(Gamepad::A))
-        m_widget_container.TriggerAction();
+    m_imgui.UpdateGUIState(gamepad);
+
+    if (m_imgui.Button("Continue Game", 20, 50))
+    {
+        scene_manager.PopScene();
+    }
+    if (m_imgui.Button("Exit", 20, 100))
+    {
+        scene_manager.PopScene();
+        scene_manager.PopScene();
+    }
 }
 
-void
-PauseScene::StupidFunction()
-{}
 
 void
 PauseScene::Update()
@@ -46,7 +37,7 @@ PauseScene::Render(SDL_Renderer* renderer)
 
     SDL_RenderClear(renderer);
 
-    m_render_system.Update(m_asset_manager, renderer);
+    m_imgui.Render(m_asset_manager.GetFont("f21"), renderer);
 
     SDL_RenderPresent(renderer);
 }

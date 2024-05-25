@@ -45,4 +45,5 @@ private:
     HUD               m_hud;
     bool              m_restart_level;
     Video&            m_video;
+    Video&            m_video2;
 };

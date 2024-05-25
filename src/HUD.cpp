@@ -23,7 +23,8 @@ void
 HUD::Refresh(int player_health)
 {
     m_registry.emplace_or_replace<Text>(
-      m_ent_health, "Health: " + std::to_string(player_health), "fonts/PressStart2P.ttf", Colors::BLUE
+      m_ent_health, "Health: " + std::to_string(player_health), "f21", Colors::BLUE
+      // TODO: BIG Do not specify here the font here!!!
     );
 }
 

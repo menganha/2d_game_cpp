@@ -80,12 +80,15 @@ Font::DrawText(const std::string_view text, int x, int y, SDL_Color color, SDL_R
     }
 }
 
-// SDL_Texture*
-// Font::RenderText(const std::string& text, SDL_Color color, SDL_Renderer* renderer)
-// {
-//     SDL_Surface* surface = TTF_RenderText_Solid(m_font, text.c_str(), color);
-//     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-//     // TODO: Have some error handling here!!!
-//     SDL_FreeSurface(surface);
-//     return texture;
-// }
+TextSize Font::GetSize(const std::string_view text){
+
+    TextSize size{0,0};
+    for (const char& character : text)
+    {
+        auto glyph = m_glyphs[character];
+        size.w += glyph.w;
+        size.h += glyph.h;
+    }
+    return size;
+}
+

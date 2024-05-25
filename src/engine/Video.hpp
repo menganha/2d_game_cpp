@@ -13,6 +13,9 @@ extern "C" {
 #include <libavutil/avutil.h>
 #include <libswscale/swscale.h>
 }
+    
+static constexpr int MAX_ERR_STR = 128;
+static constexpr int MAX_VIDEOQ_SIZE = 256;
 
 class Video
 {
@@ -25,8 +28,6 @@ public:
     Texture& GetTexture() const { return m_texture; }
 
 private:
-    static constexpr int MAX_ERR_STR = 128;
-    static constexpr int MAX_VIDEOQ_SIZE = 1024;
     std::string          m_file_name;
     int                  m_video_stream_index;
     AVFormatContext*     m_format_ctx;

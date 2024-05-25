@@ -1,10 +1,9 @@
 #pragma once
 
 #include "../engine/Gamepad.hpp"
-#include "../systems/RenderSystem.hpp"
-#include "../widgets/ButtonWidget.hpp"
-#include "../widgets/WidgetContainer.hpp"
+#include "../engine/IMGUI.hpp"
 #include "../engine/IScene.hpp"
+#include "../systems/RenderSystem.hpp"
 
 #include <SDL2/SDL.h>
 #include <entt/fwd.hpp>
@@ -18,12 +17,7 @@ public:
     void Render(SDL_Renderer* renderer) override;
 
 private:
-    void             StupidFunction();
-    AssetManager&    m_asset_manager;
-    WidgetContainer  m_widget_container;
-    entt::registry   m_registry;
-    entt::dispatcher m_dispatcher;
-    RenderSystem     m_render_system;
-    ButtonWidget     m_return_button;
-    ButtonWidget     m_exit_button;
+    void          StupidFunction();
+    AssetManager& m_asset_manager;
+    IMGUI         m_imgui;
 };

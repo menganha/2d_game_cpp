@@ -25,6 +25,7 @@ GamePlayScene::GamePlayScene(AssetManager& asset_manager)
     , m_hud{m_registry}
     , m_restart_level{false}
     , m_video{m_asset_manager.GetVideo("videos/UFO.mp4")} // Moving copying or just passing a reference?????????
+    , m_video2{m_asset_manager.GetVideo("videos/pokemon.mp4")} // Moving copying or just passing a reference?????????
 {
     // Sets some event listeners
     m_dispatcher.sink<SetEntityPositionEvent>().connect<&MovementSystem::OnSetEntityPositionEvent>(m_movement_system);
@@ -82,6 +83,7 @@ void
 GamePlayScene::Update()
 {
     m_video.UpdateTexture();
+    m_video2.UpdateTexture();
     m_movement_system.Update();
     m_collision_system.Update();
     m_dispatcher.update<CollisionEvent>(); // Process all collision events after pick them from the collision system
@@ -118,9 +120,12 @@ GamePlayScene::LoadLevel()
 
     // Add Video
     m_video.StartDecodeThread();
+    m_video2.StartDecodeThread();
+
     auto entity = m_registry.create();
     m_registry.emplace<Position>(entity, 0.f, 0.f);
     m_registry.emplace<Renderable>(entity, "videos/UFO.mp4", 100, 100);
+    // TODO: BIG todo. Do not refer to the specific handle here.It should be from the video
 
     entity = m_registry.create();
     m_registry.emplace<Position>(entity, 100.f, 100.f);
@@ -129,6 +134,10 @@ GamePlayScene::LoadLevel()
     entity = m_registry.create();
     m_registry.emplace<Position>(entity, 300.f, 50.f);
     m_registry.emplace<Renderable>(entity, "videos/UFO.mp4", 200, 500);
+    
+    entity = m_registry.create();
+    m_registry.emplace<Position>(entity, 400.f, 50.f);
+    m_registry.emplace<Renderable>(entity, "videos/pokemon.mp4", 400, 500);
 }
 
 void
@@ -136,6 +145,7 @@ GamePlayScene::RestartLevel()
 {
     m_registry.clear();
     m_video.StopDecodeThread();
+    m_video2.StopDecodeThread();
     LoadLevel();
 }
 

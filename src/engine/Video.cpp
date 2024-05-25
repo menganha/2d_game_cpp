@@ -100,7 +100,6 @@ Video::StopDecodeThread()
     while (not m_queue_frames.empty())
     {
         AVFrame* frame = m_queue_frames.front();
-        av_frame_unref(frame);
         av_frame_free(&frame);
         m_queue_frames.pop();
     }
@@ -131,7 +130,6 @@ Video::UpdateTexture()
                   m_frame->data,
                   m_frame->linesize);
 
-        av_frame_unref(frame);
         av_frame_free(&frame);
 
         SDL_UpdateYUVTexture(m_texture.GetTexture(),
@@ -152,7 +150,7 @@ Video::DecodeVideoStream()
     while (true)
     {
 
-        // Keep the value of the debug queue capped
+        // Keep the value of the packet queue capped
         auto size = m_queue_frames.size();
         int  ret{};
         if (size > MAX_VIDEOQ_SIZE)
@@ -174,7 +172,7 @@ Video::DecodeVideoStream()
                 if (ret < 0)
                     throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, ret));
                 avcodec_flush_buffers(m_codec_ctx);
-                loop -= 1;
+                loop--;
                 av_packet_unref(m_packet);
                 continue;
             }
@@ -205,6 +203,8 @@ Video::DecodeVideoStream()
             while (ret >= 0)
             {
 
+                // TODO: We are reallocating a bunch, i.e., on each decoding iteration. Consider having a fixed sized array
+                // for the frame queue with space allocated for all frames
                 AVFrame* frame{av_frame_alloc()};
                 if (!frame)
                     throw std::runtime_error("Failed to allocate memory for AVFrame");
@@ -213,7 +213,6 @@ Video::DecodeVideoStream()
 
                 if (ret == AVERROR(EAGAIN) or ret == AVERROR_EOF)
                 {
-                    av_frame_unref(frame);
                     av_frame_free(&frame);
                     break;
                 }

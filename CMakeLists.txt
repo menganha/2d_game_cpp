@@ -59,11 +59,6 @@ add_executable(app
         src/systems/CombatSystem.hpp
         src/systems/EnemySystem.cpp
         src/systems/EnemySystem.hpp
-        src/widgets/Widget.hpp
-        src/widgets/WidgetContainer.hpp
-        src/widgets/WidgetContainer.cpp
-        src/widgets/ButtonWidget.hpp
-        src/widgets/ButtonWidget.cpp
         src/engine/AssetManager.hpp
         src/engine/AssetManager.cpp
         src/engine/IScene.hpp
@@ -80,6 +75,8 @@ add_executable(app
         src/engine/Texture.hpp
         src/engine/Window.cpp
         src/engine/Window.hpp
+        src/engine/IMGUI.cpp
+        src/engine/IMGUI.hpp
         )
 
 # Always set the name to app for easily passing this variable to vim

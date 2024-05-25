@@ -44,6 +44,7 @@ main([[maybe_unused]] int argc, char* argv[])
         asset_manager.AddFont("fonts/PressStart2P.ttf", 21, window.GetRenderer(), "f21");
         asset_manager.AddFont("fonts/PressStart2P.ttf", 30, window.GetRenderer(), "f30");
         asset_manager.AddVideo("videos/UFO.mp4", window.GetRenderer());
+        asset_manager.AddVideo("videos/pokemon.mp4", window.GetRenderer());
 
         std::shared_ptr<IScene> game_play_scene{std::make_shared<IntroScene>(asset_manager)};
         scene_manager.PushScene(game_play_scene);

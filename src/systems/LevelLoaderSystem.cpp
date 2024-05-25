@@ -66,11 +66,11 @@ LevelLoaderSystem::LoadLevel(std::string_view level_data_path)
             if (string_stream >> enemy_type_str >> delay >> pos_x >> pos_y)
             {
                 m_enemy_list_to_dispatch.push_back(EnemyEntry{StrToEnemyType(enemy_type_str), delay, pos_x, pos_y});
-                spdlog::trace("Parsed line: {} {} {} {}", enemy_type_str, delay, pos_x, pos_y);
+                spdlog::trace("Parsed line: {} {} {} {}", enemy_type_str.c_str(), delay, pos_x, pos_y);
             }
             else
             {
-                spdlog::error("Could not parse line: {}", line_str);
+                spdlog::error("Could not parse line: {}", line_str.c_str());
             }
         }
         // Sort vector
@@ -80,7 +80,7 @@ LevelLoaderSystem::LoadLevel(std::string_view level_data_path)
     }
     else
     {
-        spdlog::error("Error opening the level data file: {}", std::string(level_data_path));
+        spdlog::error("Error opening the level data file: {}", level_data_path.data());
         // TODO: Throw error
     }
     file_stream.close();

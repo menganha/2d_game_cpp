@@ -1,7 +1,7 @@
 #include "IntroScene.hpp"
 
 #include "../Colors.hpp"
-#include "spdlog/spdlog.h"
+#include "GamePlayScene.hpp"
 
 IntroScene::IntroScene(AssetManager& asset_manager)
     : m_asset_manager{asset_manager}
@@ -13,18 +13,15 @@ IntroScene::IntroScene(AssetManager& asset_manager)
 void
 IntroScene::ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager)
 {
-    // Design an IMGUI?
-    // GUIState guistate{}
-    // guistate.begin(frame):
     m_imgui.UpdateGUIState(gamepad);
 
-    if (m_imgui.Button("Dummy Button 1", 20, 20))
+    if (m_imgui.Button("Start Game", 20, 50))
     {
-        spdlog::info("Pressing Dummy Button 1");
+        std::shared_ptr<IScene> gameplay_scene = std::make_shared<GamePlayScene>(m_asset_manager);
+        scene_manager.PushScene(gameplay_scene);
     }
-    if (m_imgui.Button("Exit", 40, 20))
+    if (m_imgui.Button("Exit", 20, 100))
     {
-        spdlog::info("Exiting Scene");
         scene_manager.PopScene();
     }
 }
@@ -39,6 +36,8 @@ IntroScene::Render(SDL_Renderer* renderer)
     SDL_SetRenderDrawColor(renderer, Colors::WHITE.r, Colors::WHITE.g, Colors::WHITE.b, Colors::WHITE.a);
 
     SDL_RenderClear(renderer);
+
+    m_imgui.Render(m_asset_manager.GetFont("f21"), renderer);
 
     m_font.DrawText("GameTitle", 10, 10, Colors::BLACK, renderer);
 
