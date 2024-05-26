@@ -1,6 +1,5 @@
 #include "Video.hpp"
 
-#include <chrono>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 extern "C" {
@@ -26,7 +25,7 @@ Video::Video(std::string_view file_name, Texture& texture, SDL_Renderer* rendere
     , m_packet{av_packet_alloc()}
     , m_error_str_buffer{}
     , m_decode_thread{}
-    , m_queue_mutex{}
+    , m_mutex_queue{}
     , m_queue_frames{}
     , m_stop_decoding{false}
     , m_texture{texture}
@@ -92,8 +91,9 @@ Video::StartDecodeThread()
 void
 Video::StopDecodeThread()
 {
-    m_stop_decoding = true; // The decoding thread might not stop immediately and would need more than
-                            // one loop (2, 3 more, not sure... ???) to stop
+    m_stop_decoding.store(true); // The decoding thread might not stop immediately and would need more than
+                                 // one loop (2, 3 more, not sure... ???) to stop
+    m_cond_var.notify_one();
     if (m_decode_thread.joinable())
         m_decode_thread.join();
 
@@ -109,18 +109,19 @@ Video::StopDecodeThread()
         throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, ret));
     avcodec_flush_buffers(m_codec_ctx);
 
-    m_stop_decoding = false;
+    m_stop_decoding.store(false);
 }
 
 void
 Video::UpdateTexture()
 {
-    std::unique_lock<std::mutex> guard{m_queue_mutex};
-    if (!m_queue_frames.empty())
+    std::unique_lock<std::mutex> guard{m_mutex_queue};
+    if (not m_queue_frames.empty())
     {
         AVFrame* frame = m_queue_frames.front();
         m_queue_frames.pop();
         guard.unlock();
+        m_cond_var.notify_one();
 
         sws_scale(m_sws_ctx,
                   (const uint8_t* const*)frame->data,
@@ -151,15 +152,14 @@ Video::DecodeVideoStream()
     {
 
         // Keep the value of the packet queue capped
-        auto size = m_queue_frames.size();
-        int  ret{};
-        if (size > MAX_VIDEOQ_SIZE)
-        {
-            // spdlog::debug("queue size {}", size);
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-            continue;
-        }
+        std::unique_lock<std::mutex> lock_cv{m_mutex_queue};
+        m_cond_var.wait(lock_cv, [&]() { return ((m_queue_frames.size() < MAX_VIDEOQ_SIZE) or m_stop_decoding); });
+        lock_cv.unlock();
 
+        if (m_stop_decoding)
+            break;
+
+        int ret{};
         ret = av_read_frame(m_format_ctx, m_packet);
 
         // Handle end-of-file
@@ -186,11 +186,6 @@ Video::DecodeVideoStream()
             throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, ret));
 
         // Manual switch to break from decoding usually set in the destructor
-        if (m_stop_decoding)
-        {
-            av_packet_unref(m_packet);
-            break;
-        }
 
         // If it's the video stream, decode
         if (m_packet->stream_index == m_video_stream_index)
@@ -219,7 +214,7 @@ Video::DecodeVideoStream()
                 else if (ret < 0)
                     throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, ret));
 
-                std::lock_guard<std::mutex> guard{m_queue_mutex};
+                std::lock_guard<std::mutex> guard{m_mutex_queue};
                 m_queue_frames.push(frame);
             }
         }
