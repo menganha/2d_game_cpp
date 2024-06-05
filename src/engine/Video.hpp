@@ -17,7 +17,7 @@ extern "C" {
 }
 
 static constexpr int MAX_ERR_STR = 128;
-static constexpr int MAX_VIDEOQ_SIZE = 256;
+static constexpr int MAX_VIDEOQ_SIZE = 64;
 
 class Video
 {

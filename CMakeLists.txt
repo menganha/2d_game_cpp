@@ -37,6 +37,8 @@ add_executable(app
         src/Collision.hpp
         src/HUD.cpp
         src/HUD.hpp
+        src/Enemy.cpp
+        src/Enemy.hpp
         src/Player.cpp
         src/Player.hpp
         src/scenes/IntroScene.cpp

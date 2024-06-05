@@ -27,7 +27,7 @@ SceneManager::PopScene()
     else
     {
         m_scene_stack[m_top_index] = nullptr;
-        m_top_index -= 1;
+        m_top_index--;
         return 1;
     }
 }

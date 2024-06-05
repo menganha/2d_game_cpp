@@ -1,4 +1,6 @@
 # Enemy type, delay, position x, position y
+seeker 40 300 0 
+seeker 40 400 0 
 simple 65 20 0 
 simple 60 40 0 
 simple 65 60 0 

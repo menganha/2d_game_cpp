@@ -8,6 +8,10 @@ PauseScene::PauseScene(AssetManager& asset_manager)
     : m_asset_manager{asset_manager}
     , m_imgui{}
 {}
+PauseScene::~PauseScene(){
+    int i = 0;
+    i++;
+}
 
 void
 PauseScene::ProcessEvents(const Gamepad& gamepad, [[maybe_unused]] SceneManager& scene_manager)

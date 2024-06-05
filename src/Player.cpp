@@ -15,7 +15,7 @@ Player::Create()
     m_registry.emplace<SquarePrimitive>(m_entity, 10, 10, Colors::RED);
     m_registry.emplace<Velocity>(m_entity, 0.f, 0.f);
     m_registry.emplace<Collider>(m_entity, 10, 10, 0, 0, true);
-    m_registry.emplace<Health>(m_entity, PLAYER_INITIAL_HEALTH);
+    m_registry.emplace<Health>(m_entity, PLAYER_INITIAL_HEALTH, 0, PLAYER_INVINCIBILITY_TIME);
 }
 
 Position&
@@ -24,6 +24,7 @@ Player::GetPosition() const
     return m_registry.get<Position>(m_entity);
 }
 
+//TODO: Put this in the enemy system and trigger immediatly. Create a generic function to create bullets
 void
 Player::Shoot()
 {
@@ -36,11 +37,3 @@ Player::Shoot()
     m_registry.emplace<Weapon>(bullet_entity, 5, true, false);
 }
 
-void
-Player::OnDamageEvent(DamageEvent damage_event)
-{
-    if (damage_event.entity == m_entity)
-    {
-        m_registry.patch<Health>(m_entity, [](auto& health) { health.invincivility = PLAYER_INVINCIBILITY; });
-    }
-}
