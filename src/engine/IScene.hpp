@@ -29,7 +29,6 @@ class IScene
 public:
   virtual ~IScene() = default;
   virtual void ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager) = 0;
-  virtual void Update() = 0;
+  virtual void Update(uint64_t ticks) = 0;
   virtual void Render(SDL_Renderer* renderer) = 0;
-  // Perhaps add on-enter on-exit methods?
 };

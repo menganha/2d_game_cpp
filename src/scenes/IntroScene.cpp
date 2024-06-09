@@ -27,7 +27,7 @@ IntroScene::ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager)
 }
 
 void
-IntroScene::Update()
+IntroScene::Update([[maybe_unused]] uint64_t ticks)
 {}
 
 void

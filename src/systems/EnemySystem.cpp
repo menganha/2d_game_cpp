@@ -2,8 +2,6 @@
 
 #include "cmath"
 
-#include <algorithm>
-#include <cstdlib>
 #include <spdlog/spdlog.h>
 
 EnemySystem::EnemySystem(entt::registry& registry, entt::dispatcher& dispatcher)
@@ -13,7 +11,7 @@ EnemySystem::EnemySystem(entt::registry& registry, entt::dispatcher& dispatcher)
 }
 
 void
-EnemySystem::Update(entt::entity player_entity)
+EnemySystem::Update(entt::entity player_entity, uint64_t ticks)
 {
 
   // Handle enemy behaviour
@@ -21,63 +19,31 @@ EnemySystem::Update(entt::entity player_entity)
   const auto& player_position = m_registry.get<Position>(player_entity);
 
   for (auto entity : enemies) {
-    const auto& enemy = enemies.get<Enemy>(entity);
-    const auto& position = enemies.get<Position>(entity);
-    Velocity    vector_to_player = GetDirectionToPlayer(player_position, position);
+    auto& enemy = enemies.get<Enemy>(entity);
+    auto& position = enemies.get<Position>(entity);
+    // auto& velocity = enemies.get<Velocity>(entity);
+    // EnemyUtils::OnUpdate(enemy, position, velocity, player_position);
+
+    int d_to_player_x = player_position.x - position.x;
+    int d_to_player_y = player_position.y - position.y;
+    int d_to_player = std::sqrt(d_to_player_x * d_to_player_x + d_to_player_y * d_to_player_y);
 
     switch (enemy.type) {
-      case EnemyType::SEEKER: {
-        auto& acc = m_registry.get<Acceleration>(entity);
-        auto& velocity = enemies.get<Velocity>(entity);
-
-        // Cap velocity
-        float velocity_abs = VecNorm(velocity);
-        if (velocity_abs > 2.0f) {
-          velocity.x = velocity.x * (2.0 / velocity_abs);
-          velocity.y = velocity.y * (2.0 / velocity_abs);
-        }
-        // Get desired acceleration
-        auto desired_velocity_x = vector_to_player.x * (2.0f / velocity_abs);
-        auto desired_velocity_y = vector_to_player.y * (2.0f / velocity_abs);
-        acc.x = desired_velocity_x - velocity.x;
-        acc.y = desired_velocity_y - velocity.y;
-
-        // cap accelereation
-        float abs_acc = VecNorm(acc);
-        if (abs_acc > 1.0f) {
-          acc.x = acc.x * (1.0f / abs_acc);
-          acc.y = acc.y * (1.0f / abs_acc);
-        }
+      case EnemyType::SEEKER:
+        position.x += 300.f * std::sin(static_cast<float>(ticks)/40)/40;
         break;
-      }
-      // default:
-      //   spdlog::error("Enemy Type = {} Case not implemented", static_cast<int>(enemy.type));
-    }
-
-    // Attack
-    // Switch statement for every enemy
-    if (rand() % 100 < 2) {
-      float bullet_velocity = 2.f;
-      int   bullet_size = 3;
-      int   bullet_power = 5;
-      auto  abs_val_vec = VecNorm(vector_to_player);
-      vector_to_player.x *= bullet_velocity / abs_val_vec;
-      vector_to_player.y *= bullet_velocity / abs_val_vec;
-      EnemyUtils::CreateBullet(
-        m_registry, position, vector_to_player,
-        Collider{
-          {bullet_size, bullet_size}
-      },
-        bullet_power);
+      case EnemyType::SIMPLE:
+        if (ticks % 60 == 0) {
+          float    bullet_vel = 2.f;
+          int      bullet_size = 3;
+          int      bullet_power = 5;
+          Velocity bullet_vel_vec{d_to_player_x * bullet_vel / d_to_player, d_to_player_y * bullet_vel / d_to_player};
+          EnemyUtils::CreateSimpleBullet(m_registry, position, bullet_vel_vec, bullet_size, bullet_power);
+          break;
+        }
+      default:
+        break;
     }
   }
-}
-
-Velocity
-EnemySystem::GetDirectionToPlayer(Position pos_player, Position pos_initial)
-{
-  float vel_x = pos_player.x - pos_initial.x;
-  float vel_y = pos_player.y - pos_initial.y;
-  return Velocity{vel_x, vel_y};
 }
 

@@ -81,7 +81,7 @@ GamePlayScene::ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager
 }
 
 void
-GamePlayScene::Update()
+GamePlayScene::Update(uint64_t ticks)
 {
   m_video.UpdateTexture();
   m_video2.UpdateTexture();
@@ -92,7 +92,7 @@ GamePlayScene::Update()
   m_dispatcher.update<OutOfBoundariesEvent>();
 
   m_level_loader_system.Update();
-  m_enemy_system.Update(m_player.GetEntity());
+  m_enemy_system.Update(m_player.GetEntity(), ticks);
   m_combat_system.Update();
 }
 

@@ -23,7 +23,7 @@ public:
   GamePlayScene(AssetManager& asset_manager);
   ~GamePlayScene();
   void ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager) override;
-  void Update() override;
+  void Update(uint64_t ticks) override;
   void Render(SDL_Renderer* renderer) override;
 
 private:

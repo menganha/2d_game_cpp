@@ -13,7 +13,7 @@ class EnemySystem
 
 public:
   EnemySystem(entt::registry& registry, entt::dispatcher& dispatcher);
-  void Update(entt::entity player_entity);
+  void Update(entt::entity player_entity, uint64_t ticks);
 
 private:
   entt::registry&   m_registry;

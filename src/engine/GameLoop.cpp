@@ -5,6 +5,7 @@
 void
 RunLoop(Gamepad& gamepad, Window& window, SceneManager& scene_manager)
 {
+    uint64_t ticks{};
     while (window.IsOpen())
     {
         window.ProcessEvents();
@@ -18,7 +19,8 @@ RunLoop(Gamepad& gamepad, Window& window, SceneManager& scene_manager)
             spdlog::info("No scenes in the stack. Exiting game loop");
         }
 
-        scene_manager.CurrentScene()->Update();
+        scene_manager.CurrentScene()->Update(ticks);
         scene_manager.CurrentScene()->Render(window.GetRenderer());
+        ticks++;
     }
 }
