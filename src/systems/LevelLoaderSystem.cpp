@@ -1,18 +1,17 @@
 #include "LevelLoaderSystem.hpp"
 
 #include "../Events.hpp"
+#include "../engine/Log.hpp"
 
-#include <algorithm> // std::transform
-#include <cctype>    // std::tolower
-#include <fstream>
-#include <spdlog/spdlog.h>
-#include <sstream>
+#include <cstring>
 #include <string_view>
 
 LevelLoaderSystem::LevelLoaderSystem(entt::registry& registry, entt::dispatcher& dispatcher)
   : m_registry{registry}
   , m_dispatcher{dispatcher}
+  , m_lua{}
   , m_enemy_list_to_dispatch{}
+  , m_level_counter{0}
 {
 }
 
@@ -22,54 +21,45 @@ LevelLoaderSystem::LoadLevel(std::string_view level_data_path)
 
   m_enemy_list_to_dispatch.clear();
   m_level_counter = 0;
+  m_lua = luaL_newstate();
 
-  std::ifstream file_stream{level_data_path.data()};
+  if (luaL_loadfile(m_lua, "/home/alvaro/games/2d_cpp_ecs_game/scripts/level1.lua") || lua_pcall(m_lua, 0, 0, 0))
+    LOGERROR("Cannot run configuration file: %s", lua_tostring(m_lua, -1));
+  lua_getglobal(m_lua, "level");     // TODO: Check if it's a table
+  lua_pushnil(m_lua);
+  while (lua_next(m_lua, -2) != 0) { // TODO: Check if top table
+    lua_rawgeti(m_lua, -1, 1);
+    const char* enemy_type_str = lua_tostring(m_lua, -1);
+    lua_pop(m_lua, 1);
 
-  if (file_stream.is_open()) {
-    std::string enemy_type_str, line_str;
-    int         delay, pos_x, pos_y;
-    while (std::getline(file_stream, line_str)) {
+    lua_rawgeti(m_lua, -1, 2);
+    int delay = (int)lua_tonumber(m_lua, -1);
+    lua_pop(m_lua, 1);
 
-      // Skip empty lines and comments (beggining with #)
-      if (std::all_of(line_str.cbegin(), line_str.cend(), [](char c) { return std::isspace(c); })) {
-        spdlog::trace("Skipping empty line");
-        continue;
-      } else if (auto loc = line_str.find_first_not_of(" \n\t\r"); loc != std::string::npos and line_str[loc] == '#') {
-        spdlog::trace("Skipping comment line: {}", line_str.c_str());
-        continue;
-      }
+    lua_rawgeti(m_lua, -1, 3);
+    int pos_x = (int)lua_tonumber(m_lua, -1);
+    lua_pop(m_lua, 1);
 
-      // Parse the stream
-      std::stringstream string_stream{line_str};
-      if (string_stream >> enemy_type_str >> delay >> pos_x >> pos_y) {
-        std::transform(enemy_type_str.begin(), enemy_type_str.end(), enemy_type_str.begin(), ::toupper);
+    lua_rawgeti(m_lua, -1, 4);
+    int pos_y = (int)lua_tonumber(m_lua, -1);
+    lua_pop(m_lua, 1);
 
-        if (enemy_type_str == "SIMPLE") {
-          m_enemy_list_to_dispatch.push_back({EnemyType::SIMPLE, delay, pos_x, pos_y});
-        } else if (enemy_type_str == "SEEKER") {
-          m_enemy_list_to_dispatch.push_back({EnemyType::SEEKER, delay, pos_x, pos_y});
-        } else {
-          spdlog::error("Enemy type {} not supported", enemy_type_str.data());
-          m_enemy_list_to_dispatch.push_back({EnemyType::NOTYPE, delay, pos_x, pos_y});
-        }
-        spdlog::trace("Parsed line: {} {} {} {}", enemy_type_str.c_str(), delay, pos_x, pos_y);
-
-      } else {
-        spdlog::error("Could not parse line: {}", line_str.c_str());
-      }
+    LOGINFO("Reading line %s %i %i %i", enemy_type_str, delay, pos_x, pos_y);
+    if (std::strcmp(enemy_type_str, "simple") == 0)
+      m_enemy_list_to_dispatch.push_back({EnemyType::SIMPLE, delay, pos_x, pos_y});
+    else if (std::strcmp(enemy_type_str, "seeker") == 0)
+      m_enemy_list_to_dispatch.push_back({EnemyType::SEEKER, delay, pos_x, pos_y});
+    else {
+      LOGINFO("Enemy type %s not supported setting it to NOTYPE", enemy_type_str);
+      m_enemy_list_to_dispatch.push_back({EnemyType::NOTYPE, delay, pos_x, pos_y});
     }
-
-    // Sort vector
-    std::sort(
-      m_enemy_list_to_dispatch.begin(),
-      m_enemy_list_to_dispatch.end(), //
-      [](const auto& a, const auto& b) { return a.delay > b.delay; });
-
-  } else {
-    // TODO: Throw error. Transform this into an assert
-    spdlog::error("Error opening the level data file: {}", level_data_path.data());
+    lua_pop(m_lua, 1);
   }
-  file_stream.close();
+  // Sort vector
+  std::sort(
+    m_enemy_list_to_dispatch.begin(),
+    m_enemy_list_to_dispatch.end(), //
+    [](const auto& a, const auto& b) { return a.delay > b.delay; });
 }
 
 void
@@ -86,8 +76,8 @@ LevelLoaderSystem::Update()
       else
         last = m_enemy_list_to_dispatch.back();
     }
-  } else // if all enemies have been dispatched, check if there are still enemies alive and if so send the end level
-         // signal
+  } else // if all enemies have been dispatched, check if there are still
+         // enemies alive and if so send the end level signal
   {
     if (not m_registry.view<Enemy>()) {
       m_dispatcher.enqueue(EndLevelEvent());
@@ -95,4 +85,3 @@ LevelLoaderSystem::Update()
   }
   m_level_counter++;
 }
-

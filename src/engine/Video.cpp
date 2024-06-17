@@ -83,9 +83,9 @@ Video::Video(std::string_view file_name, Texture& texture, SDL_Renderer* rendere
 }
 
 void
-Video::StartDecodeThread()
+Video::StartDecodeThread(int loop)
 {
-  m_decode_thread = std::thread(&Video::DecodeVideoStream, this);
+  m_decode_thread = std::thread(&Video::DecodeVideoStream, this, loop);
 }
 
 void
@@ -134,9 +134,9 @@ Video::UpdateTexture()
 }
 
 void
-Video::DecodeVideoStream()
+Video::DecodeVideoStream(int loop)
 {
-  int loop{2};
+
   while (true) {
 
     // Keep the value of the packet queue capped
@@ -153,13 +153,13 @@ Video::DecodeVideoStream()
     // Handle end-of-file
     if (ret == AVERROR_EOF) //
     {
-      if (loop > 0) {
-        spdlog::info("Looping video. loop = {}", loop);
+      if (loop != 0) {
+        loop--;
+        spdlog::info("Looping video. loops left = {}", loop);
         ret = avformat_seek_file(m_format_ctx, -1, INT64_MIN, m_format_ctx->start_time, m_format_ctx->start_time, 0);
         if (ret < 0)
           throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, ret));
         avcodec_flush_buffers(m_codec_ctx);
-        loop--;
         av_packet_unref(m_packet);
         continue;
       } else {

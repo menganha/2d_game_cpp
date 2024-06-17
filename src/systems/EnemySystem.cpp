@@ -1,5 +1,7 @@
 #include "EnemySystem.hpp"
 
+#include "../Components.hpp"
+#include "../Enemy.hpp"
 #include "cmath"
 
 #include <spdlog/spdlog.h>
@@ -30,7 +32,8 @@ EnemySystem::Update(entt::entity player_entity, uint64_t ticks)
 
     switch (enemy.type) {
       case EnemyType::SEEKER:
-        position.x += 300.f * std::sin(static_cast<float>(ticks)/40)/40;
+        position.x += 200.f * std::sin(static_cast<float>(ticks) / (3.1416 * 4)) / (3.1416 * 4);
+        // TODO: Think about starting always from the same phase!!!!
         break;
       case EnemyType::SIMPLE:
         if (ticks % 60 == 0) {

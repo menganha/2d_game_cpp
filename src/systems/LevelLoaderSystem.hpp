@@ -3,6 +3,8 @@
 #include "../Enemy.hpp"
 
 #include <entt/entt.hpp>
+// #include <sol/sol.hpp>
+#include <lua.hpp>
 #include <string_view>
 #include <vector>
 
@@ -27,6 +29,7 @@ private:
   };
   entt::registry&         m_registry;
   entt::dispatcher&       m_dispatcher;
+  lua_State*              m_lua;
   std::vector<EnemyEntry> m_enemy_list_to_dispatch;
   int m_level_counter; // FIXME: Could this cause an overflow at some point? Levels should not be so large I guess (?)
 };

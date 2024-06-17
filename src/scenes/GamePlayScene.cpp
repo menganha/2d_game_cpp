@@ -25,10 +25,10 @@ GamePlayScene::GamePlayScene(AssetManager& asset_manager)
   , m_level_loader_system{m_registry, m_dispatcher}
   , m_hud{m_registry}
   , m_restart_level{false}
-  , m_video{m_asset_manager.GetVideo("videos/UFO.mp4")}      // Moving copying or just passing a reference?????????
-  , m_video2{m_asset_manager.GetVideo("videos/pokemon.mp4")} // Moving copying or just passing a reference?????????
+  , m_video{m_asset_manager.GetVideo("videos/clouds.mp4")}      // Moving copying or just passing a reference?????????
 {
   // Sets some event listeners
+  // TODO: Good desing here would be that the systems themselves connect the handlers. The handles should be within the system
   m_dispatcher.sink<SetEntityPositionEvent>().connect<&MovementSystem::OnSetEntityPositionEvent>(m_movement_system);
   m_dispatcher.sink<OutOfBoundariesEvent>().connect<&MovementSystem::OnOutOfBoundariesEvent>(m_movement_system);
   m_dispatcher.sink<CollisionEvent>().connect<&CombatSystem::OnCollisionEvent>(m_combat_system);
@@ -46,7 +46,6 @@ GamePlayScene::GamePlayScene(AssetManager& asset_manager)
 GamePlayScene::~GamePlayScene()
 {
   m_video.StopDecodeThread();
-  m_video2.StopDecodeThread();
   m_dispatcher.clear();
 }
 
@@ -84,7 +83,6 @@ void
 GamePlayScene::Update(uint64_t ticks)
 {
   m_video.UpdateTexture();
-  m_video2.UpdateTexture();
   m_movement_system.Update();
   m_collision_system.Update();
 
@@ -122,25 +120,17 @@ GamePlayScene::LoadLevel()
   m_level_loader_system.LoadLevel(m_asset_manager.GetAbsolutePathStr("data/level_1"));
 
   // Add Video
-  m_video.StartDecodeThread();
-  m_video2.StartDecodeThread();
+  m_video.StartDecodeThread(-1);
+
+  // Start playing music
+  auto music = m_asset_manager.GetMusic("music/penso_positivo.wav");
+  Mix_PlayMusic(music, -1);
 
   auto entity = m_registry.create();
   m_registry.emplace<Position>(entity, 0.f, 0.f);
-  m_registry.emplace<Renderable>(entity, "videos/UFO.mp4", 100, 100);
-  // TODO: BIG todo. Do not refer to the specific handle here.It should be from the video
+  m_registry.emplace<Renderable>(entity, "videos/clouds.mp4", 800, 600);
+  // TODO: BIG todo. Do not refer to the specific handle here. It should be from the video
 
-  entity = m_registry.create();
-  m_registry.emplace<Position>(entity, 100.f, 100.f);
-  m_registry.emplace<Renderable>(entity, "videos/UFO.mp4", 200, 200);
-
-  entity = m_registry.create();
-  m_registry.emplace<Position>(entity, 300.f, 50.f);
-  m_registry.emplace<Renderable>(entity, "videos/UFO.mp4", 200, 500);
-
-  entity = m_registry.create();
-  m_registry.emplace<Position>(entity, 400.f, 50.f);
-  m_registry.emplace<Renderable>(entity, "videos/pokemon.mp4", 400, 500);
 }
 
 void
@@ -148,7 +138,6 @@ GamePlayScene::RestartLevel()
 {
   m_registry.clear();
   m_video.StopDecodeThread();
-  m_video2.StopDecodeThread();
   LoadLevel();
 }
 

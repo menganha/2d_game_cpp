@@ -1,8 +1,5 @@
 #pragma once
 
-#include "../Components.hpp"
-#include "../Enemy.hpp"
-
 #include <entt/fwd.hpp>
 
 //
@@ -19,7 +16,4 @@ private:
   entt::registry&   m_registry;
   entt::dispatcher& m_dispatcher;
   int               m_enemy_stage_counter;
-  Velocity          GetDirectionToPlayer(Position pos_player, Position pos_initial);
-  Position          GetPosition(const Enemy& enemy, const Position& previous_position);
-  void              ScaleVelocity(Velocity& velocity, float scale);
 };

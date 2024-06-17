@@ -2,73 +2,93 @@
 
 #include <cassert>
 #include <filesystem>
+#include <spdlog/spdlog.h>
 
-AssetManager::AssetManager(const char* assets_dir) : m_assets_dir{std::filesystem::path(assets_dir).parent_path()} {}
+AssetManager::AssetManager(const char* assets_dir)
+  : m_assets_dir{std::filesystem::path(assets_dir).parent_path()}
+{
+}
 
 void
 AssetManager::AddFont(const char* relative_path, int size, SDL_Renderer* renderer, const char* alias)
 {
-    auto font_path = m_assets_dir / "assets" / relative_path;
+  auto font_path = m_assets_dir / "assets" / relative_path;
 
-    if (alias)
-        m_text_cache.try_emplace(alias, font_path.c_str(), size, renderer);
-    else
-        m_text_cache.try_emplace(relative_path, font_path.c_str(), size, renderer);
+  if (alias)
+    m_text_cache.try_emplace(alias, font_path.c_str(), size, renderer);
+  else
+    m_text_cache.try_emplace(relative_path, font_path.c_str(), size, renderer);
 }
 
 const Font&
 AssetManager::GetFont(std::string_view relative_path) const
 {
-    auto it = m_text_cache.find(relative_path);
-    assert(it != m_text_cache.end());
-    return it->second;
+  auto it = m_text_cache.find(relative_path);
+  assert(it != m_text_cache.end());
+  return it->second;
 }
 
 void
 AssetManager::AddVideo(const char* relative_path, SDL_Renderer* renderer)
 {
-    AddTexture(relative_path); // adds a texture with the same ID containing the streaming texture
-    auto video_path = m_assets_dir / "assets" / relative_path;
-    m_video_cache.try_emplace(relative_path, video_path.c_str(), GetTexture(relative_path), renderer);
+  AddTexture(relative_path); // adds an empty texture with the same ID containing the streaming texture
+  auto video_path = m_assets_dir / "assets" / relative_path;
+  m_video_cache.try_emplace(relative_path, video_path.c_str(), GetTexture(relative_path), renderer);
 }
 
 Video&
 AssetManager::GetVideo(std::string_view relative_path)
 {
-    auto it = m_video_cache.find(relative_path);
-    assert(it != m_video_cache.end());
-    return it->second;
+  auto it = m_video_cache.find(relative_path);
+  assert(it != m_video_cache.end());
+  return it->second;
 }
 
 void
 AssetManager::AddTexture(const char* id, SDL_Texture* sdl_texture)
 {
-    m_texture_cache.try_emplace(id, sdl_texture);
+  m_texture_cache.try_emplace(id, sdl_texture);
 }
 
+// Adds an empty texture (default texture constructor)
 void
-
 AssetManager::AddTexture(const char* id)
 {
-    m_texture_cache.try_emplace(id);
+  m_texture_cache.try_emplace(id);
 }
 
 Texture&
 AssetManager::GetTexture(std::string_view relative_path)
 {
-    auto it = m_texture_cache.find(relative_path);
-    assert(it != m_texture_cache.end());
-    return it->second;
+  auto it = m_texture_cache.find(relative_path);
+  assert(it != m_texture_cache.end());
+  return it->second;
 }
 
 std::filesystem::path
 AssetManager::GetAbsolutePath(const char* relative_path) const
 {
-    return m_assets_dir / relative_path;
+  return m_assets_dir / relative_path;
+}
+
+void
+AssetManager::AddMusic(const char* relative_path)
+{
+  auto music_path = m_assets_dir / "assets" / relative_path;
+  auto music = Mix_LoadMUS(music_path.c_str());
+  m_music_cache.try_emplace(relative_path, music);
+}
+
+Mix_Music*
+AssetManager::GetMusic(std::string_view relative_path)
+{
+  auto it = m_music_cache.find(relative_path);
+  assert(it != m_music_cache.end());
+  return it->second;
 }
 
 std::string
 AssetManager::GetAbsolutePathStr(const char* relative_path) const
 {
-    return (m_assets_dir / relative_path).string();
+  return (m_assets_dir / relative_path).string();
 }

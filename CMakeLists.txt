@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.26)
 project(2d_cpp_ecs_game)
 
-# Create an option to switch between a system sdl library and a vendored sdl library
+# Switch toggling between a systems library (usually linux) and a vendored (included) library. The latter is still not supported!
 option(MYGAME_VENDORED "Use vendored libraries" OFF)
 
+
+# SDL Library ========================================
 if (MYGAME_VENDORED)
-    add_subdirectory(vendored/sdl EXCLUDE_FROM_ALL)
+    add_subdirectory(libs/sdl EXCLUDE_FROM_ALL)
 else ()
     # 1. Look for a SDL2 package, 2. look for the SDL2 component and 3. fail if any of them cannnot be found
     find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2)
@@ -16,7 +18,17 @@ else ()
     find_package(SDL2 CONFIG COMPONENTS SDL2main)
 endif ()
 
-# FFMPEG section
+
+# Lua Librarysection =====================================
+if (MYGAME_VENDORED)
+    add_subdirectory(libs/lua EXCLUDE_FROM_ALL)
+else ()
+  find_package(Lua REQUIRED)
+endif ()
+
+
+# FFMPEG section ======================================
+# NOTE: We still do not have a solution for a vendored (included) ffmpeg library
 find_library(AVCODEC_LIBRARY avcodec)
 find_path(AVCODEC_INCLUDE_DIR libavcodec/avcodec.h)
 find_library(AVFORMAT_LIBRARY avformat)
@@ -25,9 +37,9 @@ find_library(AVUTIL_LIBRARY avutil)
 find_path(AVUTIL_INCLUDE_DIR libavutil/avutil.h)
 find_library(SWSCALE_LIBRARY swscale)
 find_path(SWSCALE_INCLUDE_DIR libswscale/swscale.h)
-# find_path(AVDEVICE_INCLUDE_DIR libavdevice/avdevice.h)
-# find_library(AVDEVICE_LIBRARY avdevice)nd_library(AVFORMAT_LIBRARY avformat)
 
+
+# Main sources =================================================
 add_executable(app 
         src/main.cpp
         src/Config.hpp
@@ -63,6 +75,8 @@ add_executable(app
         src/systems/EnemySystem.hpp
         src/engine/AssetManager.hpp
         src/engine/AssetManager.cpp
+        src/engine/Log.hpp
+        src/engine/Log.cpp
         src/engine/IScene.hpp
         src/engine/IScene.cpp
         src/engine/Gamepad.cpp
@@ -88,15 +102,14 @@ set_target_properties(app PROPERTIES OUTPUT_NAME "app")
 # Include or add directories
 add_subdirectory(libs/entt)
 add_subdirectory(libs/spdlog)
+add_subdirectory(libs/sol2/single)
 target_include_directories(app PUBLIC ${AVCODEC_INCLUDE_DIR} ${AVFORMAT_INCLUDE_DIR} ${AVUTIL_INCLUDE_DIR} ${SWSCALE_INCLUDE_DIR})
+
 
 # Compile features and options
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 target_compile_definitions(EnTT INTERFACE ENTT_DISABLE_ASSERT)  # Improves compilation time by disabling the assert
-target_compile_options(app PRIVATE
-        $<$<CXX_COMPILER_ID:MSVC>:/W4>
-        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
-)
+target_compile_options(app PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4> $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>)
 target_compile_features(app PRIVATE cxx_std_17)
 
 
@@ -107,12 +120,20 @@ if (TARGET SDL2::SDL2main)
     target_link_libraries(app PRIVATE SDL2::SDL2main)
 endif ()
 
-target_link_libraries(app PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf EnTT::EnTT spdlog::spdlog ${AVCODEC_LIBRARY} ${AVFORMAT_LIBRARY} ${AVUTIL_LIBRARY} ${SWSCALE_LIBRARY})
+target_link_libraries(app PRIVATE 
+    SDL2::SDL2 SDL2_image::SDL2_image SDL2_mixer::SDL2_mixer SDL2_ttf::SDL2_ttf 
+    EnTT::EnTT 
+    spdlog::spdlog 
+    sol2::sol2::single 
+    ${LUA_LIBRARIES}
+    ${AVCODEC_LIBRARY} ${AVFORMAT_LIBRARY} ${AVUTIL_LIBRARY} ${SWSCALE_LIBRARY}
+)
 
-# Custom commands. Create symlinks for bin directories
+# Custom commands. Create symlinks for bin directories. This can be latter added to a post build (install script)
 add_custom_command(
     TARGET app
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:app>/assets 
     COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/data $<TARGET_FILE_DIR:app>/data 
     VERBATIM)
+

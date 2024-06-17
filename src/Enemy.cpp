@@ -2,6 +2,7 @@
 
 #include "Colors.hpp"
 #include "Components.hpp"
+
 #include <spdlog/spdlog.h>
 
 void
@@ -23,7 +24,6 @@ EnemyUtils::CreateEnemy(entt::registry& registry, EnemyType enemy_type, int init
       auto entity = registry.create();
       registry.emplace<Position>(entity, static_cast<float>(initial_pos_x), static_cast<float>(initial_pos_y));
       registry.emplace<Velocity>(entity, 0.f, 1.f);
-      // registry.emplace<Acceleration>(entity, 0.0f, 0.0f);
       registry.emplace<Collider>(entity, 20, 20);
       registry.emplace<SquarePrimitive>(entity, 20, 20, Colors::BLUE);
       registry.emplace<Health>(entity, 5);
