@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Font.hpp"
+#include "Music.hpp"
 #include "Texture.hpp"
 #include "Video.hpp"
 
@@ -28,8 +29,8 @@ public:
   Video& GetVideo(std::string_view relative_path);
 
   // Music and audio
-  void       AddMusic(const char* relative_path);
-  Mix_Music* GetMusic(std::string_view relative_path);
+  void   AddMusic(const char* relative_path);
+  Music& GetMusic(std::string_view relative_path);
 
   // Texture
   void     AddTexture(const char* id, SDL_Texture* sdl_texture); // Adds texture by copying the raw SDL texture pointer
@@ -38,11 +39,12 @@ public:
 
   std::filesystem::path GetAbsolutePath(const char* relative_path) const;
   std::string           GetAbsolutePathStr(const char* relative_path) const;
+  std::string           GetAbsolutePathStr(std::string_view relative_path) const;
 
 private:
-  std::filesystem::path                          m_assets_dir;
-  std::map<std::string, Font, std::less<>>       m_text_cache;
-  std::map<std::string, Video, std::less<>>      m_video_cache;
-  std::map<std::string, Texture, std::less<>>    m_texture_cache;
-  std::map<std::string, Mix_Music*, std::less<>> m_music_cache;
+  std::filesystem::path                       m_assets_dir;
+  std::map<std::string, Font, std::less<>>    m_text_cache;
+  std::map<std::string, Video, std::less<>>   m_video_cache;
+  std::map<std::string, Texture, std::less<>> m_texture_cache;
+  std::map<std::string, Music, std::less<>>   m_music_cache;
 };

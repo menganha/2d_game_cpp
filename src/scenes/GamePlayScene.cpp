@@ -5,10 +5,7 @@
 #include "../Events.hpp"
 #include "PauseScene.hpp"
 
-#include <SDL2/SDL_ttf.h>
-#include <spdlog/spdlog.h>
-
-GamePlayScene::GamePlayScene(AssetManager& asset_manager)
+GamePlayScene::GamePlayScene(AssetManager& asset_manager, std::string_view initial_level_path)
   : m_registry{}
   , m_dispatcher{}
   , m_player{m_registry}
@@ -21,31 +18,30 @@ GamePlayScene::GamePlayScene(AssetManager& asset_manager)
   , m_combat_system{m_registry, m_dispatcher}
   , m_render_system{m_registry}
   , m_enemy_system{m_registry, m_dispatcher}
-  , m_cleanup_system{m_registry}
-  , m_level_loader_system{m_registry, m_dispatcher}
+  , m_cleanup_system{m_registry, m_dispatcher}
   , m_hud{m_registry}
   , m_restart_level{false}
-  , m_video{m_asset_manager.GetVideo("videos/clouds.mp4")}      // Moving copying or just passing a reference?????????
+  , m_level_data{}
+  , m_lua_context{}
 {
+  // TODO:
+  // Good desing here would be that the systems themselves connect the handler. The handles should be within the system
   // Sets some event listeners
-  // TODO: Good desing here would be that the systems themselves connect the handlers. The handles should be within the system
   m_dispatcher.sink<SetEntityPositionEvent>().connect<&MovementSystem::OnSetEntityPositionEvent>(m_movement_system);
   m_dispatcher.sink<OutOfBoundariesEvent>().connect<&MovementSystem::OnOutOfBoundariesEvent>(m_movement_system);
   m_dispatcher.sink<CollisionEvent>().connect<&CombatSystem::OnCollisionEvent>(m_combat_system);
   m_dispatcher.sink<OutOfBoundariesEvent>().connect<&CombatSystem::OnOutOfBoundariesEvent>(m_combat_system);
   m_dispatcher.sink<DamageEvent>().connect<&HUD::OnHealthEvent>(m_hud);
-
-  // No additional cleanup system needed here. Could we put it in here?
-  m_dispatcher.sink<DestroyEvent>().connect<&CleanUpSystem::OnDestroyEvent>(m_cleanup_system);
   m_dispatcher.sink<DestroyEvent>().connect<&GamePlayScene::OnDestroyEvent>(this);
 
   // Loads first level
+  m_level_data = m_lua_context.GetLevelData(initial_level_path.data()); // Sets the level data
   LoadLevel();
 }
 
 GamePlayScene::~GamePlayScene()
 {
-  m_video.StopDecodeThread();
+  m_asset_manager.GetVideo(m_level_data.video).StopDecodeThread();
   m_dispatcher.clear();
 }
 
@@ -59,7 +55,6 @@ GamePlayScene::ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager
     RestartLevel();
     m_restart_level = false;
   }
-
   // Input processing
   if (gamepad.IsButtonDown(Gamepad::UP))
     m_movement_system.MoveEntity(Position{0.0f, -m_player.PLAYER_VELOCITY}, m_player.GetEntity());
@@ -80,18 +75,18 @@ GamePlayScene::ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager
 }
 
 void
-GamePlayScene::Update(uint64_t ticks)
+GamePlayScene::Update([[maybe_unused]] uint64_t ticks)
 {
-  m_video.UpdateTexture();
+  m_asset_manager.GetVideo(m_level_data.video).UpdateTexture();
   m_movement_system.Update();
   m_collision_system.Update();
 
   m_dispatcher.update<CollisionEvent>(); // Process all collision events after pick them from the collision system
   m_dispatcher.update<OutOfBoundariesEvent>();
 
-  m_level_loader_system.Update();
-  m_enemy_system.Update(m_player.GetEntity(), ticks);
+  m_enemy_system.Update(m_player.GetEntity());
   m_combat_system.Update();
+  m_cleanup_system.Update();
 }
 
 void
@@ -107,6 +102,18 @@ GamePlayScene::Render(SDL_Renderer* renderer)
 }
 
 void
+GamePlayScene::OnEnter()
+{
+  m_asset_manager.GetMusic(m_level_data.music).Resume();
+}
+
+void
+GamePlayScene::OnExit()
+{
+  m_asset_manager.GetMusic(m_level_data.music).Pause();
+}
+
+void
 GamePlayScene::LoadLevel()
 {
   // Player
@@ -117,27 +124,24 @@ GamePlayScene::LoadLevel()
   m_hud.Refresh(m_player.PLAYER_INITIAL_HEALTH);
 
   // Level Loader
-  m_level_loader_system.LoadLevel(m_asset_manager.GetAbsolutePathStr("data/level_1"));
+  m_enemy_system.SetEnemyList(m_level_data.enemy_list_to_dispatch);
 
   // Add Video
-  m_video.StartDecodeThread(-1);
+  m_asset_manager.GetVideo(m_level_data.video).StartDecodeThread(-1);
 
   // Start playing music
-  auto music = m_asset_manager.GetMusic("music/penso_positivo.wav");
-  Mix_PlayMusic(music, -1);
+  m_asset_manager.GetMusic(m_level_data.music).Play();
 
   auto entity = m_registry.create();
   m_registry.emplace<Position>(entity, 0.f, 0.f);
-  m_registry.emplace<Renderable>(entity, "videos/clouds.mp4", 800, 600);
-  // TODO: BIG todo. Do not refer to the specific handle here. It should be from the video
-
+  m_registry.emplace<Renderable>(entity, m_level_data.video, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y);
 }
 
 void
 GamePlayScene::RestartLevel()
 {
   m_registry.clear();
-  m_video.StopDecodeThread();
+  m_asset_manager.GetVideo(m_level_data.video).StopDecodeThread();
   LoadLevel();
 }
 

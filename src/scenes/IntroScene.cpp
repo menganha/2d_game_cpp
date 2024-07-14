@@ -17,7 +17,7 @@ IntroScene::ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager)
 
     if (m_imgui.Button("Start Game", 20, 50))
     {
-        std::shared_ptr<IScene> gameplay_scene = std::make_shared<GamePlayScene>(m_asset_manager);
+        std::shared_ptr<IScene> gameplay_scene = std::make_shared<GamePlayScene>(m_asset_manager, "scripts/level1.lua");
         scene_manager.PushScene(gameplay_scene);
     }
     if (m_imgui.Button("Exit", 20, 100))

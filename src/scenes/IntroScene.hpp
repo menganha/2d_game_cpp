@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../engine/AssetManager.hpp"
-#include "../engine/Gamepad.hpp"
+#include "engine/AssetManager.hpp"
+#include "engine/Gamepad.hpp"
+#include "engine/Font.hpp"
+#include "engine/IScene.hpp"
+#include "engine/IMGUI.hpp"
 #include "../Components.hpp"
-#include "../engine/Font.hpp"
-#include "../engine/IScene.hpp"
-#include "../engine/IMGUI.hpp"
 
 #include <SDL2/SDL.h>
 

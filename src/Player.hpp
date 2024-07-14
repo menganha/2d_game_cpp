@@ -2,7 +2,6 @@
 
 #include "Components.hpp"
 
-#include "Events.hpp"
 #include <entt/entt.hpp>
 
 //
@@ -19,7 +18,6 @@ public:
     entt::entity           GetEntity() const { return m_entity; }
     void                   Create();
     void                   Shoot();
-    void                   OnDamageEvent(DamageEvent health_event);
 
 private:
     entt::registry& m_registry;

@@ -2,14 +2,14 @@
 
 #include "Colors.hpp"
 #include "Components.hpp"
+#include "engine/Log.hpp"
 
-#include <spdlog/spdlog.h>
 
 void
-EnemyUtils::CreateEnemy(entt::registry& registry, EnemyType enemy_type, int initial_pos_x, int initial_pos_y)
+EnemyUtils::CreateEnemy(entt::registry& registry, EnemyBreed enemy_type, int initial_pos_x, int initial_pos_y)
 {
   switch (enemy_type) {
-    case EnemyType::SIMPLE: {
+    case EnemyBreed::SIMPLE: {
       auto entity = registry.create();
       registry.emplace<Position>(entity, static_cast<float>(initial_pos_x), static_cast<float>(initial_pos_y));
       registry.emplace<Velocity>(entity, 0.f, 2.f);
@@ -20,7 +20,7 @@ EnemyUtils::CreateEnemy(entt::registry& registry, EnemyType enemy_type, int init
       registry.emplace<Enemy>(entity, enemy_type);
       break;
     }
-    case EnemyType::SEEKER: {
+    case EnemyBreed::SEEKER: {
       auto entity = registry.create();
       registry.emplace<Position>(entity, static_cast<float>(initial_pos_x), static_cast<float>(initial_pos_y));
       registry.emplace<Velocity>(entity, 0.f, 1.f);
@@ -32,7 +32,7 @@ EnemyUtils::CreateEnemy(entt::registry& registry, EnemyType enemy_type, int init
       break;
     }
     default:
-      spdlog::error("Enemy Type = {} Case not implemented", static_cast<int>(enemy_type));
+      LERROR("Enemy Type = %i Case not implemented", static_cast<int>(enemy_type));
   }
 }
 
@@ -44,7 +44,7 @@ EnemyUtils::CreateEnemy(entt::registry& registry, EnemyType enemy_type, int init
 
 //   Velocity vector_to_player{player_position.x - position.x, player_position.y - position.y};
 //   switch (enemy.type) {
-//     case EnemyType::SEEKER: {
+//     case EnemyBreed::SEEKER: {
 //       auto& acc = registry.get<Acceleration>(entity);
 //       // Cap velocity
 //       float velocity_abs = VecNorm(velocity);
@@ -76,7 +76,7 @@ EnemyUtils::CreateSimpleBullet(
 {
   auto bullet_entity = registry.create();
 
-  registry.emplace<Enemy>(bullet_entity, EnemyType::SIMPLEBULLET);
+  registry.emplace<Enemy>(bullet_entity, EnemyBreed::SIMPLEBULLET);
   registry.emplace<Position>(bullet_entity, position);
   registry.emplace<Velocity>(bullet_entity, velocity);
   registry.emplace<SquarePrimitive>(bullet_entity, collider.size, SDL_Color{0x00, 0x00, 0x00, 0xFF});
@@ -90,7 +90,7 @@ EnemyUtils::CreateSimpleBullet(
 {
   auto bullet_entity = registry.create();
 
-  registry.emplace<Enemy>(bullet_entity, EnemyType::SIMPLEBULLET);
+  registry.emplace<Enemy>(bullet_entity, EnemyBreed::SIMPLEBULLET);
   registry.emplace<Position>(bullet_entity, position);
   registry.emplace<Velocity>(bullet_entity, velocity);
   registry.emplace<SquarePrimitive>(bullet_entity, Size{size, size}, SDL_Color{0x00, 0x00, 0x00, 0xFF});

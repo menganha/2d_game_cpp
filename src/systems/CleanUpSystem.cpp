@@ -1,9 +1,18 @@
 #include "CleanUpSystem.hpp"
 
-CleanUpSystem::CleanUpSystem(entt::registry& registry) : m_registry{ registry } {};
+#include "../Components.hpp"
+#include "../Events.hpp"
+
+CleanUpSystem::CleanUpSystem(entt::registry& registry, entt::dispatcher& dispatcher)
+  : m_registry{registry}
+  , m_dispatcher{dispatcher} {};
 
 void
-CleanUpSystem::OnDestroyEvent(DestroyEvent destroy_event)
+CleanUpSystem::Update()
 {
-    m_registry.destroy(destroy_event.entity);
+  auto to_destroy_view = m_registry.view<Death>();
+  for (auto entity : to_destroy_view) {
+    m_dispatcher.enqueue(DestroyEvent{entity});
+  }
+  m_registry.destroy(to_destroy_view.begin(), to_destroy_view.end());
 }

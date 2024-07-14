@@ -1,6 +1,7 @@
 #include "Video.hpp"
 
-#include <spdlog/spdlog.h>
+#include "Log.hpp"
+
 #include <stdexcept>
 extern "C"
 {
@@ -14,8 +15,8 @@ Video::~Video()
   avformat_close_input(&m_format_ctx);
   av_packet_free(&m_packet);
   sws_freeContext(m_sws_ctx);
-  av_freep(&m_frame->data[0]); // Frees buffer that was allocated with av_image_alloc
-  av_frame_free(&m_frame);
+  av_freep(&m_frame_scaled->data[0]); // Frees buffer that was allocated with av_image_alloc
+  av_frame_free(&m_frame_scaled);
 }
 
 Video::Video(std::string_view file_name, Texture& texture, SDL_Renderer* renderer)
@@ -24,13 +25,14 @@ Video::Video(std::string_view file_name, Texture& texture, SDL_Renderer* rendere
   , m_format_ctx{nullptr}
   , m_codec_ctx{nullptr}
   , m_packet{av_packet_alloc()}
+  , m_sws_ctx{nullptr}
+  , m_frame_scaled{av_frame_alloc()} // av_frame_alloc does not alloc the data buffers
   , m_error_str_buffer{}
   , m_decode_thread{}
   , m_mutex_queue{}
   , m_queue_frames{}
   , m_stop_decoding{false}
   , m_texture{texture}
-  , m_sws_ctx{nullptr}
 {
   if (!m_packet)
     throw std::runtime_error("Faild to allocate memory for AVPacket");
@@ -122,14 +124,14 @@ Video::UpdateTexture()
     m_cond_var.notify_one();
 
     sws_scale(
-      m_sws_ctx, (const uint8_t* const*)frame->data, frame->linesize, 0, m_codec_ctx->height, m_frame->data,
-      m_frame->linesize);
+      m_sws_ctx, (const uint8_t* const*)frame->data, frame->linesize, 0, m_codec_ctx->height, m_frame_scaled->data,
+      m_frame_scaled->linesize);
 
     av_frame_free(&frame);
 
     SDL_UpdateYUVTexture(
-      m_texture.GetTexture(), nullptr, m_frame->data[0], m_frame->linesize[0], m_frame->data[1], m_frame->linesize[1],
-      m_frame->data[2], m_frame->linesize[2]);
+      m_texture.GetTexture(), nullptr, m_frame_scaled->data[0], m_frame_scaled->linesize[0], m_frame_scaled->data[1],
+      m_frame_scaled->linesize[1], m_frame_scaled->data[2], m_frame_scaled->linesize[2]);
   }
 }
 
@@ -155,7 +157,7 @@ Video::DecodeVideoStream(int loop)
     {
       if (loop != 0) {
         loop--;
-        spdlog::info("Looping video. loops left = {}", loop);
+        LINFO("Looping video. loops left = %i", loop);
         ret = avformat_seek_file(m_format_ctx, -1, INT64_MIN, m_format_ctx->start_time, m_format_ctx->start_time, 0);
         if (ret < 0)
           throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, ret));
@@ -209,8 +211,8 @@ Video::SetTexture(int width, int height, SDL_Renderer* renderer)
   m_texture = Texture{SDL_CreateTexture(renderer, SDL_PIXELFORMAT_YV12, SDL_TEXTUREACCESS_STREAMING, width, height)};
 
   // Setup the data pointers and linesizes based on the specified image parameters and the provided array.
-  m_frame = av_frame_alloc(); // av_frame_alloc does not alloc the data buffers
-  int return_code = av_image_alloc(m_frame->data, m_frame->linesize, width, height, AV_PIX_FMT_YUV420P, 32);
+  int return_code =
+    av_image_alloc(m_frame_scaled->data, m_frame_scaled->linesize, width, height, AV_PIX_FMT_YUV420P, 32);
   if (return_code < 0)
     throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, return_code));
 

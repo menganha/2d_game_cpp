@@ -1,6 +1,6 @@
 #include "GameLoop.hpp"
+#include "Log.hpp"
 
-#include <spdlog/spdlog.h>
 
 void
 RunLoop(Gamepad& gamepad, Window& window, SceneManager& scene_manager)
@@ -16,7 +16,7 @@ RunLoop(Gamepad& gamepad, Window& window, SceneManager& scene_manager)
         if (scene_manager.IsEmpty())
         {
             break;
-            spdlog::info("No scenes in the stack. Exiting game loop");
+            LINFO("No scenes in the stack. Exiting game loop");
         }
 
         scene_manager.CurrentScene()->Update(ticks);

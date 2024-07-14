@@ -3,37 +3,32 @@
 #include "engine/GameLoop.hpp"
 #include "engine/Gamepad.hpp"
 #include "engine/IScene.hpp"
+#include "engine/Log.hpp"
 #include "scenes/IntroScene.hpp"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
-#include <sol/sol.hpp>
-#include <spdlog/cfg/env.h>
-#include <spdlog/spdlog.h>
+#include <SDL2/SDL_ttf.h>
 
 int
 main([[maybe_unused]] int argc, char* argv[])
 {
-  try {
-    spdlog::cfg::load_env_levels(); // Checks the env variables to set the LOG levels. TODO: Take it away and replace
-                                    // calls to log function by it macros so that we can disable them in the game logs
-    // Initialize SDL Video and TTF
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
-      std::string err_msg = "SDL2 could not initialize! SDL Error: ";
-      spdlog::error(err_msg + SDL_GetError());
-      return EXIT_FAILURE;
-    }
-    if (TTF_Init() < 0) {
-      std::string err_msg = "SDL2_ttf could not initialize! SDL Error: ";
-      spdlog::error(err_msg + SDL_GetError());
-      return EXIT_FAILURE;
-    }
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-      std::string err_msg = "SDL_mixer could not initialize! SDL_mixer Error: ";
-      spdlog::error(err_msg + Mix_GetError());
-      return EXIT_FAILURE;
-    }
 
+  // Initialize SDL Video and TTF
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+    LERROR("SDL2 could not initialize! SDL Error: %s", SDL_GetError());
+    return EXIT_FAILURE;
+  }
+  if (TTF_Init() < 0) {
+    LERROR("SDL2_ttf could not initialize! SDL Error: %s", SDL_GetError());
+    return EXIT_FAILURE;
+  }
+  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+    LERROR("SDL2_mixer could not initialize! SDL Error: %s", Mix_GetError());
+    return EXIT_FAILURE;
+  }
+
+  try {
     // Asset manager and scene manager.
     // It is important to instantiate the window before the asset manager so that the renderer destructor is called last
     // when it goes out of scope. If called earlier then all all textured are free'd and then textures on the asset
@@ -43,15 +38,9 @@ main([[maybe_unused]] int argc, char* argv[])
     SceneManager scene_manager{};
     Gamepad      gamepad{};
 
-    // sol::state lua;
-    // lua.open_libraries(sol::lib::base);
-    // lua.script("print('bark bark bark!')");
-
     // Load data
     asset_manager.AddFont("fonts/PressStart2P.ttf", 21, window.GetRenderer(), "f21");
     asset_manager.AddFont("fonts/PressStart2P.ttf", 30, window.GetRenderer(), "f30");
-    asset_manager.AddVideo("videos/UFO.mp4", window.GetRenderer());
-    asset_manager.AddVideo("videos/pokemon.mp4", window.GetRenderer());
     asset_manager.AddVideo("videos/clouds.mp4", window.GetRenderer());
     asset_manager.AddMusic("music/penso_positivo.wav");
 
@@ -63,10 +52,10 @@ main([[maybe_unused]] int argc, char* argv[])
     SDL_Quit();
 
   } catch (std::exception& exception) {
-    spdlog::error("Application crashed with Exception: {}", exception.what());
+    LERROR("Application crashed with Exception: %s", exception.what());
     return EXIT_FAILURE;
   } catch (...) {
-    spdlog::error("Application crashed with unknown exception!");
+    LERROR("Application crashed with unknown exception!");
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

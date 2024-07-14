@@ -35,15 +35,15 @@ private:
     AVFormatContext*        m_format_ctx;
     AVCodecContext*         m_codec_ctx;
     AVPacket*               m_packet;
+    SwsContext*             m_sws_ctx;
+    AVFrame*                m_frame_scaled;   // Frame that would contain the final transformed and "scaled image"
+    std::queue<AVFrame*>    m_queue_frames;
     char                    m_error_str_buffer[MAX_ERR_STR];
     std::thread             m_decode_thread;
     std::mutex              m_mutex_queue;
     std::condition_variable m_cond_var;
-    std::queue<AVFrame*>    m_queue_frames;
     std::atomic_bool        m_stop_decoding;
     Texture&                m_texture; // Not owned, just a reference
-    SwsContext*             m_sws_ctx;
-    AVFrame*                m_frame;   // Frame that would contain the final transformed and "scaled image"
 
     void DecodeVideoStream(int loop);
     void SetTexture(int width, int height, SDL_Renderer* renderer);

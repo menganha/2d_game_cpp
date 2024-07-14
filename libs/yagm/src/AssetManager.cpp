@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <filesystem>
-#include <spdlog/spdlog.h>
 
 AssetManager::AssetManager(const char* assets_dir)
   : m_assets_dir{std::filesystem::path(assets_dir).parent_path()}
@@ -27,6 +26,22 @@ AssetManager::GetFont(std::string_view relative_path) const
   assert(it != m_text_cache.end());
   return it->second;
 }
+
+void
+AssetManager::AddMusic(const char* relative_path)
+{
+  auto music_path = m_assets_dir / "assets" / relative_path;
+  m_music_cache.try_emplace(relative_path, music_path.c_str());
+}
+
+Music&
+AssetManager::GetMusic(std::string_view relative_path)
+{
+  auto it = m_music_cache.find(relative_path);
+  assert(it != m_music_cache.end());
+  return it->second;
+}
+
 
 void
 AssetManager::AddVideo(const char* relative_path, SDL_Renderer* renderer)
@@ -71,24 +86,14 @@ AssetManager::GetAbsolutePath(const char* relative_path) const
   return m_assets_dir / relative_path;
 }
 
-void
-AssetManager::AddMusic(const char* relative_path)
+std::string
+AssetManager::GetAbsolutePathStr(const char* relative_path) const
 {
-  auto music_path = m_assets_dir / "assets" / relative_path;
-  auto music = Mix_LoadMUS(music_path.c_str());
-  m_music_cache.try_emplace(relative_path, music);
-}
-
-Mix_Music*
-AssetManager::GetMusic(std::string_view relative_path)
-{
-  auto it = m_music_cache.find(relative_path);
-  assert(it != m_music_cache.end());
-  return it->second;
+  return (m_assets_dir / relative_path).string();
 }
 
 std::string
-AssetManager::GetAbsolutePathStr(const char* relative_path) const
+AssetManager::GetAbsolutePathStr(std::string_view relative_path) const
 {
   return (m_assets_dir / relative_path).string();
 }

@@ -1,7 +1,7 @@
 #include "MovementSystem.hpp"
 
 #include <entt/entt.hpp>
-#include <spdlog/spdlog.h>
+#include "engine/Log.hpp"
 
 MovementSystem::MovementSystem(entt::registry& registry, int screen_width, int screen_height)
   : m_registry{registry}
@@ -34,7 +34,7 @@ MovementSystem::SetEntityPosition(const Position& new_position, entt::entity ent
 {
   auto* position = m_registry.try_get<Position>(entity);
   if (position == nullptr)
-    spdlog::error("Trying to set the position of entity {} without position component", static_cast<int>(entity));
+    LERROR("Trying to set the position of entity %i without position component", static_cast<int>(entity));
   else {
     position->x = new_position.x;
     position->y = new_position.y;
@@ -46,7 +46,7 @@ MovementSystem::MoveEntity(const Position& displacement, entt::entity entity)
 {
   auto* position = m_registry.try_get<Position>(entity);
   if (position == nullptr)
-    spdlog::error("Trying to move entity {} without position component", static_cast<int>(entity));
+    LERROR("Trying to move entity %i without position component", static_cast<int>(entity));
   else {
     position->x += displacement.x;
     position->y += displacement.y;

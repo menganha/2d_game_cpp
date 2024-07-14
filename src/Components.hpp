@@ -96,6 +96,7 @@ struct Weapon
 {
   int  power;
   bool disposable = true; // Destroyed when dealing damage
-  bool from_enemy = true;
 };
+
+struct Death {}; // Empty tag component signaling that the entity is to be destroyed
 

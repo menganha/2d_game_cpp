@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../engine/AssetManager.hpp"
+#include "engine/AssetManager.hpp"
 
 #include <SDL2/SDL.h>
 #include <entt/fwd.hpp>

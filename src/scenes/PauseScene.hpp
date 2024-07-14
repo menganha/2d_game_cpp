@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../engine/Gamepad.hpp"
-#include "../engine/IMGUI.hpp"
-#include "../engine/IScene.hpp"
-#include "../engine/AssetManager.hpp"
+#include "engine/Gamepad.hpp"
+#include "engine/IMGUI.hpp"
+#include "engine/IScene.hpp"
+#include "engine/AssetManager.hpp"
 
 #include <SDL2/SDL.h>
 #include <entt/fwd.hpp>

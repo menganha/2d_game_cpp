@@ -1,5 +1,6 @@
 #include "Font.hpp"
 
+#include <SDL2/SDL_ttf.h>
 #include <stdexcept>
 
 Font::Font(const std::string_view font_filepath, int point_size, SDL_Renderer* renderer)

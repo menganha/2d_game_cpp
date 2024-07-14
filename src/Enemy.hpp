@@ -3,7 +3,7 @@
 
 #include <entt/entt.hpp>
 
-enum class EnemyType
+enum class EnemyBreed
 {
   NOTYPE = 0,   // Serves just as a flag
   SIMPLE,       // Just moves Down
@@ -13,24 +13,32 @@ enum class EnemyType
 
 };
 
-struct Enemy
+struct EnemyEntry
 {
-  EnemyType type;
+  EnemyBreed breed;
+  int        delay;
+  int        pos_x;
+  int        pos_y;
 };
 
-namespace EnemyUtils {
-// void
-// OnUpdate(
-//   entt::registry& regristry, Enemy& enemy, Position& position, Velocity& velocity, const Position& player_position,
-//   uint64_t ticks);
+struct Enemy
+{
+  EnemyBreed breed;
+  int        lifetime = 0;
+};
 
-void
-CreateEnemy(entt::registry& registry, EnemyType enemy_type, int initial_pos_x, int initial_pos_y);
 
-void
-CreateSimpleBullet(
-  entt::registry& registry, const Position& position, const Velocity& velocity, const Collider& collider, int power);
-void
-CreateSimpleBullet(entt::registry& registry, const Position& position, const Velocity& velocity, int size, int power);
+namespace EnemyUtils
+{
+  // void
+  // OnUpdate(
+  //   entt::registry& regristry, Enemy& enemy, Position& position, Velocity& velocity, const Position& player_position,
+  //   uint64_t ticks);
 
+  void CreateEnemy(entt::registry & registry, EnemyBreed enemy_type, int initial_pos_x, int initial_pos_y);
+
+  void CreateSimpleBullet(
+    entt::registry & registry, const Position& position, const Velocity& velocity, const Collider& collider, int power);
+  void CreateSimpleBullet(
+    entt::registry & registry, const Position& position, const Velocity& velocity, int size, int power);
 }

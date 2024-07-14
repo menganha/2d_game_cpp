@@ -2,8 +2,6 @@
 
 #include "../Colors.hpp"
 
-#include <spdlog/spdlog.h>
-
 PauseScene::PauseScene(AssetManager& asset_manager)
   : m_asset_manager{asset_manager}
   , m_imgui{}
