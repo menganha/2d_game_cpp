@@ -30,19 +30,14 @@ main([[maybe_unused]] int argc, char* argv[])
 
   try {
     // Asset manager and scene manager.
-    // It is important to instantiate the window before the asset manager so that the renderer destructor is called last
-    // when it goes out of scope. If called earlier then all all textured are free'd and then textures on the asset
-    // manager are tried free'd again when we destroy the object
     Window       window{Config::WINDOW_NAME, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y, Config::FLAGS};
-    AssetManager asset_manager{argv[0]};
+    AssetManager asset_manager{argv[0], window.GetRenderer()};
     SceneManager scene_manager{};
     Gamepad      gamepad{};
 
     // Load data
-    asset_manager.AddFont("fonts/PressStart2P.ttf", 21, window.GetRenderer(), "f21");
-    asset_manager.AddFont("fonts/PressStart2P.ttf", 30, window.GetRenderer(), "f30");
-    asset_manager.AddVideo("videos/clouds.mp4", window.GetRenderer());
-    asset_manager.AddMusic("music/penso_positivo.wav");
+    asset_manager.AddFont("fonts/PressStart2P.ttf", 21, Config::font_s);
+    asset_manager.AddFont("fonts/PressStart2P.ttf", 30, Config::font_l);
 
     std::shared_ptr<IScene> game_play_scene{std::make_shared<IntroScene>(asset_manager)};
     scene_manager.PushScene(game_play_scene);

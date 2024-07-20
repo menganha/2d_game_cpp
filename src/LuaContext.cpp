@@ -100,3 +100,18 @@ LuaContext::add_enemy(lua_State* state)
   level_info->enemy_list_to_dispatch.push_back({breed_enum, delay, pos_x, pos_y});
   return 0;
 }
+
+int
+LuaContext::add_text(lua_State* state)
+{
+  const char* text = lua_tostring(state, 1);
+
+  lua_getfield(state, LUA_REGISTRYINDEX, k_level_data_key);
+  LevelData* level_info = static_cast<LevelData*>(lua_touserdata(state, -1));
+  if (text)
+    level_info->text = text;
+  else
+    level_info->text = "";
+  return 0;
+}
+

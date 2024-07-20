@@ -17,9 +17,11 @@ Video::~Video()
   sws_freeContext(m_sws_ctx);
   av_freep(&m_frame_scaled->data[0]); // Frees buffer that was allocated with av_image_alloc
   av_frame_free(&m_frame_scaled);
+  if (m_texture)
+    SDL_DestroyTexture(m_texture);
 }
 
-Video::Video(std::string_view file_name, Texture& texture, SDL_Renderer* renderer)
+Video::Video(std::string_view file_name, SDL_Renderer* renderer)
   : m_file_name{file_name}
   , m_video_stream_index{-1}
   , m_format_ctx{nullptr}
@@ -32,7 +34,7 @@ Video::Video(std::string_view file_name, Texture& texture, SDL_Renderer* rendere
   , m_mutex_queue{}
   , m_queue_frames{}
   , m_stop_decoding{false}
-  , m_texture{texture}
+  , m_texture{nullptr}
 {
   if (!m_packet)
     throw std::runtime_error("Faild to allocate memory for AVPacket");
@@ -130,7 +132,7 @@ Video::UpdateTexture()
     av_frame_free(&frame);
 
     SDL_UpdateYUVTexture(
-      m_texture.GetTexture(), nullptr, m_frame_scaled->data[0], m_frame_scaled->linesize[0], m_frame_scaled->data[1],
+      m_texture, nullptr, m_frame_scaled->data[0], m_frame_scaled->linesize[0], m_frame_scaled->data[1],
       m_frame_scaled->linesize[1], m_frame_scaled->data[2], m_frame_scaled->linesize[2]);
   }
 }
@@ -164,11 +166,13 @@ Video::DecodeVideoStream(int loop)
         avcodec_flush_buffers(m_codec_ctx);
         av_packet_unref(m_packet);
         continue;
-      } else {
+      }
+      else {
         av_packet_unref(m_packet);
         break;
       }
-    } else if (ret < 0)
+    }
+    else if (ret < 0)
       throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, ret));
 
     // Manual switch to break from decoding usually set in the destructor
@@ -193,7 +197,8 @@ Video::DecodeVideoStream(int loop)
         if (ret == AVERROR(EAGAIN) or ret == AVERROR_EOF) {
           av_frame_free(&frame);
           break;
-        } else if (ret < 0)
+        }
+        else if (ret < 0)
           throw std::runtime_error(av_make_error_string(m_error_str_buffer, MAX_ERR_STR, ret));
 
         std::lock_guard<std::mutex> guard{m_mutex_queue};
@@ -208,7 +213,7 @@ void
 Video::SetTexture(int width, int height, SDL_Renderer* renderer)
 {
 
-  m_texture = Texture{SDL_CreateTexture(renderer, SDL_PIXELFORMAT_YV12, SDL_TEXTUREACCESS_STREAMING, width, height)};
+  m_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_YV12, SDL_TEXTUREACCESS_STREAMING, width, height);
 
   // Setup the data pointers and linesizes based on the specified image parameters and the provided array.
   int return_code =

@@ -20,6 +20,7 @@ struct Position
 {
   float x;
   float y;
+  int z{0}; // On 2 games this represent the order of drawing. Larger integers mean to draw last (closer to the camera)
 };
 
 struct Size
@@ -35,12 +36,21 @@ VecNorm(T vector)
   return std::sqrt(vector.x * vector.x + vector.y * vector.y);
 }
 
-
-struct Text
+struct FullText
 {
-  std::string text;
-  std::string font_id; // Is the font ID really necessary here? Maybe another component, maybe just the size?
+  std::string string;
+  std::string font_id;
   SDL_Color   color;
+};
+
+struct TypedText
+{
+  FullText full_text;
+  int      type_delay = 5; // amount of frames to print each character
+  int      index = 0;      // Cursor index, i.e., under which character we are in the list
+  int      pos_x = 0;      // relative position of the current glyph
+  int      pos_y = 0;
+  int      delay_counter = 0;
 };
 
 class Counter
@@ -64,10 +74,10 @@ private:
 
 struct Renderable
 {
-  std::string name;
-  Size        size;
-  Size        subsection_size{0, 0}; // size of the subsection we want to show
-  Size        offset{0, 0};          // x-y offset from (0, 0) of the subsection we want to whow
+  std::string name;                   // Id of the SDL texture to be rendered
+  Size        size;                   // Destination square size in pixels
+  SDL_Rect    subsection{0, 0, 0, 0}; // Rect of the texture subsection we want to show
+  SDL_Color   color_mod{0, 0, 0, 0};  // Last byte != 0 would represent if one wants to modify the color
 };
 
 // Primitive square shape of SDL
@@ -98,5 +108,6 @@ struct Weapon
   bool disposable = true; // Destroyed when dealing damage
 };
 
-struct Death {}; // Empty tag component signaling that the entity is to be destroyed
+struct Death
+{}; // Empty tag component signaling that the entity is to be destroyed
 

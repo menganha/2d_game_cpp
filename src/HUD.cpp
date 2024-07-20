@@ -2,6 +2,7 @@
 
 #include "Colors.hpp"
 #include "Components.hpp"
+#include "Config.hpp"
 
 HUD::HUD(entt::registry& registry) : m_registry{registry}, m_ent_health{} {}
 
@@ -22,8 +23,8 @@ HUD::Create(entt::entity player_entity)
 void
 HUD::Refresh(int player_health)
 {
-    m_registry.emplace_or_replace<Text>(
-      m_ent_health, "Health: " + std::to_string(player_health), "f21", Colors::BLUE
+    m_registry.emplace_or_replace<FullText>(
+      m_ent_health, "Health: " + std::to_string(player_health), Config::font_s, Colors::BLUE
       // TODO: BIG Do not specify here the font here!!!
     );
 }

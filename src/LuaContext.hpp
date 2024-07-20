@@ -21,9 +21,10 @@ private:
 
   // Functions to export
   using FunctionExportedToLua = int(lua_State* state);
-  static FunctionExportedToLua     add_enemy, set_music, set_video, luaopen_yage_level;
+  static FunctionExportedToLua     add_enemy, set_music, set_video, add_text, luaopen_yage_level;
   static constexpr struct luaL_Reg yage_level_library[] = {
     {"add_enemy", add_enemy},
+    { "add_text",  add_text},
     {"set_music", set_music},
     {"set_video", set_video},
     {       NULL,      NULL}

@@ -1,6 +1,7 @@
 #include "PauseScene.hpp"
 
 #include "../Colors.hpp"
+#include "../Config.hpp"
 
 PauseScene::PauseScene(AssetManager& asset_manager)
   : m_asset_manager{asset_manager}
@@ -34,7 +35,7 @@ PauseScene::Render(SDL_Renderer* renderer)
 
   SDL_RenderClear(renderer);
 
-  m_imgui.Render(m_asset_manager.GetFont("f21"), renderer);
+  m_imgui.Render(m_asset_manager.GetFont(Config::font_s), renderer);
 
   SDL_RenderPresent(renderer);
 }

@@ -19,6 +19,7 @@ add_executable(app
         src/systems/RenderSystem.cpp
         src/systems/CombatSystem.cpp
         src/systems/EnemySystem.cpp
+        src/systems/TextSystem.cpp
     )
 
 # Always set the name to app for easily passing this variable to vim

@@ -1,22 +1,26 @@
+// Option 1: Add renderer to the class variables of asset manager. Con -> we have to live with this reference in this
+// class (not beautiful) Option 2: Do some if/else whenever we're updating the texture. Con -> we have to check every
+// frame for this function (not beautiful) Option 3: I don't know. 
+// Best option so far is Option 1 and is the one implemented
+
 #include "AssetManager.hpp"
 
 #include <cassert>
 #include <filesystem>
 
-AssetManager::AssetManager(const char* assets_dir)
+AssetManager::AssetManager(const char* assets_dir, SDL_Renderer* renderer)
   : m_assets_dir{std::filesystem::path(assets_dir).parent_path()}
+  , m_renderer{renderer}
 {
 }
 
 void
-AssetManager::AddFont(const char* relative_path, int size, SDL_Renderer* renderer, const char* alias)
+AssetManager::AddFont(const char* relative_path, int size, const char* alias)
 {
   auto font_path = m_assets_dir / "assets" / relative_path;
-
-  if (alias)
-    m_text_cache.try_emplace(alias, font_path.c_str(), size, renderer);
-  else
-    m_text_cache.try_emplace(relative_path, font_path.c_str(), size, renderer);
+  auto font_id = alias ? alias : relative_path;
+  m_text_cache.try_emplace(font_id, font_path.c_str(), size, m_renderer);
+  m_texture_cache.try_emplace(font_id, GetFont(font_id).GetTexturePtr());
 }
 
 const Font&
@@ -42,13 +46,12 @@ AssetManager::GetMusic(std::string_view relative_path)
   return it->second;
 }
 
-
 void
-AssetManager::AddVideo(const char* relative_path, SDL_Renderer* renderer)
+AssetManager::AddVideo(const char* relative_path)
 {
-  AddTexture(relative_path); // adds an empty texture with the same ID containing the streaming texture
   auto video_path = m_assets_dir / "assets" / relative_path;
-  m_video_cache.try_emplace(relative_path, video_path.c_str(), GetTexture(relative_path), renderer);
+  m_video_cache.try_emplace(relative_path, video_path.c_str(), m_renderer);
+  m_texture_cache.try_emplace(relative_path, GetVideo(relative_path).GetTexturePtr());
 }
 
 Video&
@@ -59,20 +62,7 @@ AssetManager::GetVideo(std::string_view relative_path)
   return it->second;
 }
 
-void
-AssetManager::AddTexture(const char* id, SDL_Texture* sdl_texture)
-{
-  m_texture_cache.try_emplace(id, sdl_texture);
-}
-
-// Adds an empty texture (default texture constructor)
-void
-AssetManager::AddTexture(const char* id)
-{
-  m_texture_cache.try_emplace(id);
-}
-
-Texture&
+SDL_Texture*
 AssetManager::GetTexture(std::string_view relative_path)
 {
   auto it = m_texture_cache.find(relative_path);

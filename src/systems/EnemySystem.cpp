@@ -61,7 +61,7 @@ EnemySystem::Update(entt::entity player_entity)
       else
         last = m_enemy_list_to_dispatch.back();
     }
-  } else if (not m_registry.view<Enemy>()) {
+  } else if (m_registry.view<Enemy>().empty()) {
     // If all enemies have been dispatched, check if there are still enemies alive and if so send the end level signal
     m_dispatcher.enqueue(EndLevelEvent());
   }

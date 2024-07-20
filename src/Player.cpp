@@ -24,7 +24,7 @@ Player::GetPosition() const
     return m_registry.get<Position>(m_entity);
 }
 
-//TODO: Put this in the enemy system and trigger immediatly. Create a generic function to create bullets
+//TODO: Create a generic function to create bullets
 void
 Player::Shoot()
 {

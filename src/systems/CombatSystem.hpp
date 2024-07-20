@@ -11,7 +11,6 @@ class CombatSystem
 public:
     CombatSystem(entt::registry& registry, entt::dispatcher& dispatcher);
     void Update();
-    void OnShootEvent(BulletEvent shoot_event);
     void OnCollisionEvent(CollisionEvent collision_event);
     void OnOutOfBoundariesEvent(OutOfBoundariesEvent out_of_boundaries_event);
 

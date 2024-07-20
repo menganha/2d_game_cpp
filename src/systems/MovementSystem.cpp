@@ -1,7 +1,8 @@
 #include "MovementSystem.hpp"
 
-#include <entt/entt.hpp>
 #include "engine/Log.hpp"
+
+#include <entt/entt.hpp>
 
 MovementSystem::MovementSystem(entt::registry& registry, int screen_width, int screen_height)
   : m_registry{registry}
@@ -14,16 +15,16 @@ MovementSystem::Update()
 
   auto accelerables = m_registry.view<Velocity, Acceleration>();
   for (auto entity : accelerables) {
-    auto& vel = m_registry.get<Velocity>(entity);
-    auto acc = m_registry.get<Acceleration>(entity);
+    auto& vel = accelerables.get<Velocity>(entity);
+    auto  acc = accelerables.get<Acceleration>(entity);
     vel.x += acc.x;
     vel.y += acc.y;
   }
 
-  auto movables = m_registry.view<Position, Velocity>();
+  auto movables = m_registry.view<Position, const Velocity>();
   for (auto entity : movables) {
-    auto& pos = m_registry.get<Position>(entity);
-    auto  vel = m_registry.get<Velocity>(entity);
+    auto& pos = movables.get<Position>(entity);
+    const auto& vel = movables.get<Velocity>(entity);
     pos.x += vel.x;
     pos.y += vel.y;
   }

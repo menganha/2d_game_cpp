@@ -5,7 +5,7 @@
 
 Font::Font(const std::string_view font_filepath, int point_size, SDL_Renderer* renderer)
   : m_point_size{point_size}
-  , m_glyphs{}
+  , glyph_map{}
   , m_texture{nullptr}
 {
   // SDL_Color white_color{ 0xFF, 0xFF, 0xFF, 0xFF };
@@ -41,7 +41,7 @@ Font::Font(const std::string_view font_filepath, int point_size, SDL_Renderer* r
         throw std::runtime_error("Out of glyph space in the font atlas texture map");
       }
     }
-    m_glyphs[ascii_char] = destination;
+    glyph_map[ascii_char] = destination;
 
     SDL_BlitSurface(text_surface, NULL, surface, &destination);
 
@@ -49,16 +49,13 @@ Font::Font(const std::string_view font_filepath, int point_size, SDL_Renderer* r
 
     destination.x += destination.w;
   }
+  glyph_map['\n'] = glyph_map[' ']; // Copy the properties to the new line feed from the space
   m_texture = SDL_CreateTextureFromSurface(renderer, surface);
   SDL_FreeSurface(surface);
   TTF_CloseFont(font);
 }
 
-Font::~Font()
-{
-  SDL_DestroyTexture(m_texture);
-  // TTF_CloseFont(m_font);
-}
+Font::~Font() { SDL_DestroyTexture(m_texture); }
 
 void
 Font::DrawText(const std::string_view text, int x, int y, SDL_Color color, SDL_Renderer* renderer) const
@@ -67,7 +64,7 @@ Font::DrawText(const std::string_view text, int x, int y, SDL_Color color, SDL_R
   SDL_SetTextureColorMod(m_texture, color.r, color.g, color.b);
 
   for (const char& character : text) {
-    auto glyph = m_glyphs[character];
+    auto glyph = glyph_map[character];
 
     SDL_Rect dest{x, y, glyph.w, glyph.h};
 
@@ -77,16 +74,38 @@ Font::DrawText(const std::string_view text, int x, int y, SDL_Color color, SDL_R
   }
 }
 
+void
+Font::DrawChar(const char character, int x, int y, SDL_Color color, SDL_Renderer* renderer) const
+{
+
+  SDL_SetTextureColorMod(m_texture, color.r, color.g, color.b);
+
+  auto     glyph = glyph_map[character];
+  SDL_Rect dest{x, y, glyph.w, glyph.h};
+  SDL_RenderCopy(renderer, m_texture, &glyph, &dest);
+}
+
 TextSize
 Font::GetSize(const std::string_view text)
 {
 
   TextSize size{0, 0};
   for (const char& character : text) {
-    auto glyph = m_glyphs[character];
+    auto glyph = glyph_map[character];
     size.w += glyph.w;
     size.h += glyph.h;
   }
   return size;
 }
 
+SDL_Rect
+Font::GetGlyph(const char character) const
+{
+  return glyph_map[character];
+}
+
+SDL_Texture*
+Font::GetTexturePtr() const
+{
+  return m_texture;
+}

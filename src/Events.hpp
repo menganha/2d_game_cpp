@@ -17,14 +17,6 @@ struct DamageEvent
     int          health;
 };
 
-struct BulletEvent
-{
-    Position  position;
-    Velocity  velocity;
-    SDL_Color color;
-    Size      collider_size;
-};
-
 struct CollisionEvent
 {
     entt::entity entity_a;

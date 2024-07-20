@@ -10,4 +10,6 @@ namespace Config {
     inline constexpr int    COLLISION_GRID_CELL_WIDTH = 40;
     inline constexpr Uint32 FLAGS =
       SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_ALLOW_HIGHDPI;
+    inline constexpr char font_s[] = "f21";
+    inline constexpr char font_l[] = "f30";
 }
