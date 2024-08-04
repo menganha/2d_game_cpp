@@ -2,6 +2,7 @@
 
 #include "../Components.hpp"
 #include "../Enemy.hpp"
+#include "engine/Log.hpp"
 
 TextSystem::TextSystem(entt::registry& registry, AssetManager& asset_manager)
   : m_registry{registry}
@@ -31,6 +32,7 @@ TextSystem::Update()
       }
       else {
         auto  renderable_ent = m_registry.create();
+        LDEBUG("Creating letter-enemy with id %i", static_cast<int>(renderable_ent));
         float position_x = position.x + t_text.pos_x;
         float position_y = position.y + t_text.pos_y;
         m_registry.emplace<Position>(renderable_ent, position_x, position_y);

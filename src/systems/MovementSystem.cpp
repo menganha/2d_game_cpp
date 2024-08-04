@@ -1,6 +1,7 @@
 #include "MovementSystem.hpp"
 
 #include "engine/Log.hpp"
+#include "../Components.hpp"
 
 #include <entt/entt.hpp>
 
@@ -23,7 +24,7 @@ MovementSystem::Update()
 
   auto movables = m_registry.view<Position, const Velocity>();
   for (auto entity : movables) {
-    auto& pos = movables.get<Position>(entity);
+    auto&       pos = movables.get<Position>(entity);
     const auto& vel = movables.get<Velocity>(entity);
     pos.x += vel.x;
     pos.y += vel.y;
@@ -63,32 +64,30 @@ MovementSystem::OnSetEntityPositionEvent(const SetEntityPositionEvent& move_enti
 void
 MovementSystem::OnOutOfBoundariesEvent(const OutOfBoundariesEvent& out_of_boundaries_event)
 {
-  // TODO: There will always be a collider entity. Remove this check!
-  auto* coll_ptr = m_registry.try_get<Collider>(out_of_boundaries_event.entity);
-
-  // move this into its own method on the collision system
-  if (coll_ptr != nullptr and coll_ptr->solid) // Resolve collision
-  {
+  // Resolves collision
+  // TODO: move this into its own method on the collision system
+  LDEBUG("Resolving out of boundaries event with id %i", static_cast<int>(out_of_boundaries_event.entity));
+  const auto collider = m_registry.get<Collider>(out_of_boundaries_event.entity);
+  if (collider.solid) {
     auto& pos = m_registry.get<Position>(out_of_boundaries_event.entity);
-
-    int a_min, a_max, b_min, b_max;
+    int   a_min, a_max, b_min, b_max;
     a_min = static_cast<int>(out_of_boundaries_event.bound_pos.x) + out_of_boundaries_event.bound_coll.offset.x;
     a_max = a_min + out_of_boundaries_event.bound_coll.size.x;
-    b_min = static_cast<int>(pos.x) + coll_ptr->offset.x;
-    b_max = b_min + coll_ptr->size.x;
+    b_min = static_cast<int>(pos.x) + collider.offset.x;
+    b_max = b_min + collider.size.x;
 
     if (b_min < a_min)
-      pos.x = a_min - coll_ptr->offset.x;
+      pos.x = a_min - collider.offset.x;
     else if (b_max > a_max)
-      pos.x = a_max - coll_ptr->offset.x - coll_ptr->size.x;
+      pos.x = a_max - collider.offset.x - collider.size.x;
 
     a_min = static_cast<int>(out_of_boundaries_event.bound_pos.y) + out_of_boundaries_event.bound_coll.offset.y;
     a_max = a_min + out_of_boundaries_event.bound_coll.size.y;
-    b_min = static_cast<int>(pos.y) + coll_ptr->offset.y;
-    b_max = b_min + coll_ptr->size.y;
+    b_min = static_cast<int>(pos.y) + collider.offset.y;
+    b_max = b_min + collider.size.y;
     if (b_min < a_min)
-      pos.y = a_min - coll_ptr->offset.y;
+      pos.y = a_min - collider.offset.y;
     else if (b_max > a_max)
-      pos.y = a_max - coll_ptr->offset.y - coll_ptr->size.x;
+      pos.y = a_max - collider.offset.y - collider.size.x;
   }
 }

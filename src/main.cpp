@@ -9,6 +9,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
+#include <cstdlib>
 
 int
 main([[maybe_unused]] int argc, char* argv[])
@@ -29,6 +30,13 @@ main([[maybe_unused]] int argc, char* argv[])
   }
 
   try {
+
+    const char* log_level_str = std::getenv("YASTU_LOG_LEVEL");
+    if (log_level_str)
+      Logger::set_log_level(std::stoi(log_level_str));
+    else
+      Logger::set_log_level(0);
+
     // Asset manager and scene manager.
     Window       window{Config::WINDOW_NAME, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y, Config::FLAGS};
     AssetManager asset_manager{argv[0], window.GetRenderer()};

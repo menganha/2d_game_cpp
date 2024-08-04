@@ -1,6 +1,6 @@
 // Option 1: Add renderer to the class variables of asset manager. Con -> we have to live with this reference in this
 // class (not beautiful) Option 2: Do some if/else whenever we're updating the texture. Con -> we have to check every
-// frame for this function (not beautiful) Option 3: I don't know. 
+// frame for this function (not beautiful) Option 3: I don't know.
 // Best option so far is Option 1 and is the one implemented
 
 #include "AssetManager.hpp"
@@ -87,3 +87,4 @@ AssetManager::GetAbsolutePathStr(std::string_view relative_path) const
 {
   return (m_assets_dir / relative_path).string();
 }
+

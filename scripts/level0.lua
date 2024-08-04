@@ -1,9 +1,8 @@
--- yage.set_music("music/penso_positivo.wav")
+yage.set_music("music/penso_positivo.wav")
 yage.set_video("videos/clouds.mp4")
 
 local enemies = {
     {"SeekeR", 40, 300, 0}, {"seeker", 40, 400, 0}, {"simple", 65, 20, 0},
-    {"simple", 40, 300, 10}, {"simple", 40, 400, 20}, {"simple", 65, 20, 20},
 }
 
 for _, ene in ipairs(enemies) do
@@ -13,7 +12,7 @@ end
 
 yage.add_text(
 [[
-Level 2!
+something is happening.
 ]]
 )
 

@@ -17,12 +17,11 @@
 
 #include <SDL2/SDL.h>
 #include <entt/fwd.hpp>
-#include <string_view>
 
 class GamePlayScene : public IScene
 {
 public:
-  GamePlayScene(AssetManager& asset_manager, std::string_view intial_level_path);
+  GamePlayScene(AssetManager& asset_manager, int level);
   ~GamePlayScene();
   void ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager) override;
   void Update(uint64_t ticks) override;
@@ -31,7 +30,7 @@ public:
   void OnExit() override;
 
 private:
-  void LoadLevel(const char* level_config_path = nullptr);
+  void LoadLevel();
   void OnDestroy(DestroyEvent destroy_event);
   void OnEndLevel(EndLevelEvent end_level_event);
 
@@ -49,6 +48,6 @@ private:
   HUD              m_hud;
   LevelData        m_level_data;
   LuaContext       m_lua_context;
-  bool             m_restart_level; // TODO: Maybe these two bools could be condensed into one?
-  bool             m_level_finished;
+  bool             m_level_ended;
+  int              m_current_level;
 };

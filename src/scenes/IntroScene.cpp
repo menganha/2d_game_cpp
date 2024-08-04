@@ -4,11 +4,11 @@
 #include "../Config.hpp"
 #include "GamePlayScene.hpp"
 
-IntroScene::IntroScene(AssetManager& asset_manager)
+IntroScene::IntroScene(AssetManager& asset_manager, int level)
   : m_asset_manager{asset_manager}
+  , m_level{level}
   , m_font{m_asset_manager.GetFont(Config::font_l)}
-  , m_title_text{"Game Title", Config::font_l, Colors::BLACK}
-  , m_imgui{} // should we pass here the gampad???
+  , m_imgui{} // should we pass here the gamepad???
 {
 }
 
@@ -17,11 +17,11 @@ IntroScene::ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager)
 {
   m_imgui.UpdateGUIState(gamepad);
 
-  if (m_imgui.Button("Start Game", 20, 50)) {
-    std::shared_ptr<IScene> gameplay_scene = std::make_shared<GamePlayScene>(m_asset_manager, "scripts/level1.lua");
+  if (m_imgui.Button(m_start_game_text, 20, 50)) {
+    std::shared_ptr<IScene> gameplay_scene = std::make_shared<GamePlayScene>(m_asset_manager, m_level);
     scene_manager.PushScene(gameplay_scene);
   }
-  if (m_imgui.Button("Exit", 20, 100)) {
+  if (m_imgui.Button(m_exit_text, 20, 100)) {
     scene_manager.PopScene();
   }
 }
@@ -40,8 +40,7 @@ IntroScene::Render(SDL_Renderer* renderer)
 
   m_imgui.Render(m_asset_manager.GetFont(Config::font_s), renderer);
 
-  // TODO: Add this to the the imgui framework, i.e., a game title
-  m_font.DrawText("GameTitle", 10, 10, Colors::BLACK, renderer);
+  m_font.DrawText(m_game_title, 10, 10, Colors::BLACK, renderer); // TODO: Add this to the the imgui framework, i.e., a game title
 
   SDL_RenderPresent(renderer);
 }

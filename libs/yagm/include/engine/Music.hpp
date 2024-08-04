@@ -10,6 +10,7 @@ public:
   ~Music();
   void Play(int loop = 0);
   void Pause();
+  void Halt();
   void Resume();
 
 private:

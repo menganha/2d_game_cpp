@@ -5,9 +5,9 @@
 #include "../Events.hpp"
 
 CollisionSystem::CollisionSystem(entt::registry& registry, entt::dispatcher& dispatcher, Grid grid)
-  : m_registry{ registry }
-  , m_dispatcher{ dispatcher }
-  , m_grid{ grid }
+  : m_registry{registry}
+  , m_dispatcher{dispatcher}
+  , m_grid{grid}
 {
   // We check that it always takes one row/column of cells more if it doesn't fit exactly
   // in the input height and width
@@ -49,7 +49,7 @@ CollisionSystem::Update()
 void
 CollisionSystem::update_grid_cells()
 {
-  Position grid_position{ static_cast<float>(m_grid.origin_x), static_cast<float>(m_grid.origin_y) };
+  Position grid_position{static_cast<float>(m_grid.origin_x), static_cast<float>(m_grid.origin_y)};
   Collider grid_collider{
     {m_grid.width, m_grid.height}
   };
@@ -68,7 +68,7 @@ CollisionSystem::update_grid_cells()
     for (auto& cell : m_cells) {
       int      origin_x = m_grid.origin_x + (counter % m_num_cells_x) * m_grid.cell_width;
       int      origin_y = m_grid.origin_y + (counter / m_num_cells_x) * m_grid.cell_height;
-      Position cell_pos{ static_cast<float>(origin_x), static_cast<float>(origin_y) };
+      Position cell_pos{static_cast<float>(origin_x), static_cast<float>(origin_y)};
       Collider cell_coll{
         {m_grid.cell_width, m_grid.cell_height}
       };
