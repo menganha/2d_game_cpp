@@ -29,7 +29,7 @@ void
 Player::Shoot()
 {
     auto bullet_entity = m_registry.create();
-    LINFO("Creating player bullet with id %i", static_cast<int>(bullet_entity));
+    LDEBUG("Creating player bullet with id %i", static_cast<int>(bullet_entity));
     auto position = GetPosition();
     m_registry.emplace<Position>(bullet_entity, position.x + 3, position.y - 10);
     m_registry.emplace<Velocity>(bullet_entity, 0.f, -6.f);

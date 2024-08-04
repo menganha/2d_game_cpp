@@ -4,6 +4,7 @@
 #include "../Config.hpp"
 #include "../Events.hpp"
 #include "PauseScene.hpp"
+#include "engine/Log.hpp"
 
 GamePlayScene::GamePlayScene(AssetManager& asset_manager, int level)
   : m_registry{}
@@ -131,6 +132,7 @@ void
 GamePlayScene::LoadLevel()
 {
   auto script_path = m_asset_manager.GetAbsolutePathStr(intToLevelScript(m_current_level));
+  LINFO("Intialiting level: %s", script_path.c_str());
   m_level_data = m_lua_context.GetLevelData(script_path.c_str());
 
   // Add enemises
@@ -141,13 +143,11 @@ GamePlayScene::LoadLevel()
   m_asset_manager.GetMusic(m_level_data.music).Play();
 
   // Add Video entity and start playing it forever ...
-  if (!m_level_data.video.empty()) {
-    auto entity = m_registry.create();
-    m_asset_manager.AddVideo(m_level_data.video.c_str());
-    m_asset_manager.GetVideo(m_level_data.video).StartDecodeThread(-1); // Start playing it
-    m_registry.emplace<Position>(entity, 0.f, 0.f, -1);
-    m_registry.emplace<Renderable>(entity, m_level_data.video, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y);
-  }
+  auto entity = m_registry.create();
+  m_asset_manager.AddVideo(m_level_data.video.c_str());
+  m_asset_manager.GetVideo(m_level_data.video).StartDecodeThread(-1); // Start playing it
+  m_registry.emplace<Position>(entity, 0.f, 0.f, -1);
+  m_registry.emplace<Renderable>(entity, m_level_data.video, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y);
 
   // Add text entity
   auto text_entity = m_registry.create();
