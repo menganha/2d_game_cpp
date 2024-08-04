@@ -28,7 +28,8 @@ SceneManager::PopScene()
     m_scene_stack[m_top_index]->OnExit();
     m_scene_stack[m_top_index] = nullptr;
     m_top_index--;
-    m_scene_stack[m_top_index]->OnEnter();
+    if (m_top_index >= 0)
+      m_scene_stack[m_top_index]->OnEnter();
     return 1;
   }
 }
