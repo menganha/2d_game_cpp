@@ -9,8 +9,8 @@ EnemySystem::EnemySystem(entt::registry& registry, entt::dispatcher& dispatcher)
   : m_registry{registry}
   , m_dispatcher{dispatcher}
   , m_level_counter{0}
-{
-}
+  , m_level_ended_event_triggered{false}
+{}
 
 void
 EnemySystem::Update(entt::entity player_entity)
@@ -18,6 +18,7 @@ EnemySystem::Update(entt::entity player_entity)
   // Handle enemy behaviour
   auto        enemies = m_registry.view<Enemy, Position, Velocity>();
   const auto& player_position = m_registry.get<Position>(player_entity);
+  // TODO: Fix this so that it works with no player present
 
   // Enemy behaviour
 
@@ -61,9 +62,11 @@ EnemySystem::Update(entt::entity player_entity)
       else
         last = m_enemy_list_to_dispatch.back();
     }
-  } else if (m_registry.view<Enemy>().empty()) {
+  }
+  else if (m_registry.view<Enemy>().empty() and not m_level_ended_event_triggered) {
     // If all enemies have been dispatched, check if there are still enemies alive and if so send the end level signal
     m_dispatcher.enqueue(EndLevelEvent());
+    m_level_ended_event_triggered = true;
   }
   m_level_counter++;
 }
@@ -73,4 +76,5 @@ EnemySystem::SetEnemyList(const std::vector<EnemyEntry>& enemy_list)
 {
   m_enemy_list_to_dispatch = enemy_list;
   m_level_counter = 0;
+  m_level_ended_event_triggered = false;
 }

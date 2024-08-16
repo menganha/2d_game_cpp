@@ -5,6 +5,8 @@
 #include <SDL2/SDL.h>
 #include <entt/entt.hpp>
 
+#include <lua.hpp>
+
 struct DestroyEvent
 {
     entt::entity entity;
@@ -38,3 +40,8 @@ struct SetEntityPositionEvent
 
 struct EndLevelEvent
 {};
+
+struct ScriptFinishedEvent
+{
+  lua_State* lua_thread;
+};

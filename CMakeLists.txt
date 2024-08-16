@@ -7,6 +7,7 @@ add_executable(app
         src/Collision.cpp
         src/HUD.cpp
         src/Enemy.cpp
+        src/Script.cpp
         src/Player.cpp
         src/LuaState.cpp
         src/LuaContext.cpp
@@ -20,6 +21,7 @@ add_executable(app
         src/systems/CombatSystem.cpp
         src/systems/EnemySystem.cpp
         src/systems/TextSystem.cpp
+        src/systems/ScriptSystem.cpp
     )
 
 # Always set the name to app for easily passing this variable to vim

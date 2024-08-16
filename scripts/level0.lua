@@ -2,19 +2,36 @@ yage.set_music("music/penso_positivo.wav")
 yage.set_video("videos/clouds.mp4")
 
 local enemies = {
-    {"SeekeR", 40, 300, 0}, {"seeker", 40, 400, 0}, {"simple", 65, 20, 0},
+    -- {"SeekeR", 40, 300, 0}, {"seeker", 40, 400, 0}, {"simple", 65, 20, 0}
+    {"simple", 0, 200, 0}
 }
 
-for _, ene in ipairs(enemies) do
-    yage.add_enemy(ene[1], ene[2], ene[3], ene[4])
+for _, ene in ipairs(enemies) do yage.add_enemy(ene[1], ene[2], ene[3], ene[4]) end
+
+yage.add_text([[
+                         some
+]])
+
+function on_level_end()
+    print('heya')
+    -- yage.show_banner("Level ended", completion_time, blinking_rate)
+    yage.move_player(0, 0, 10)
 end
 
+function on_level_end()
+    yage.move_player(0, 0, 120)
+    coroutine.yield()
+    yage.move_player(200, 200, 120)
+end
 
-yage.add_text(
-[[
-something is happening.
-]]
-)
+-- while true do
+--     print("kaka")
+--     yage.action.show_banner("Level ended",time=45, blink=0.5)
+--     coroutine.yield()
+--     print("pollo")
+--     yage.action.move_player(target_pos, completion_time=45)
+--     coroutine.yield()
+-- end
 
 -- music = "music/penso_positivo.wav"
 -- video = "videos/clouds.mp4"

@@ -10,6 +10,7 @@
 #include "../systems/EnemySystem.hpp"
 #include "../systems/MovementSystem.hpp"
 #include "../systems/RenderSystem.hpp"
+#include "../systems/ScriptSystem.hpp"
 #include "../systems/TextSystem.hpp"
 #include "engine/AssetManager.hpp"
 #include "engine/Gamepad.hpp"
@@ -44,6 +45,7 @@ private:
   RenderSystem     m_render_system;
   EnemySystem      m_enemy_system;
   TextSystem       m_text_system;
+  ScriptSystem     m_script_system;
   CleanUpSystem    m_cleanup_system;
   HUD              m_hud;
   LevelData        m_level_data;

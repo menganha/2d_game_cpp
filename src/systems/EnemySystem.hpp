@@ -20,5 +20,6 @@ private:
   entt::dispatcher& m_dispatcher;
   std::vector<EnemyEntry> m_enemy_list_to_dispatch;
   int m_level_counter; // FIXME: Could this cause an overflow at some point? Levels should not be so large I guess (?)
+  bool m_level_ended_event_triggered;
 };
 

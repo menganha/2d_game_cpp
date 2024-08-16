@@ -1,7 +1,7 @@
 #include "MovementSystem.hpp"
 
-#include "engine/Log.hpp"
 #include "../Components.hpp"
+#include "engine/Log.hpp"
 
 #include <entt/entt.hpp>
 
