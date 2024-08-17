@@ -175,7 +175,7 @@ Video::DecodeVideoStream(int loop)
     {
       if (loop != 0) {
         loop--;
-        LINFO("Looping video. loops left = %i", loop);
+        LDEBUG("Looping video. loops left = %i", loop);
         ret = avformat_seek_file(m_format_ctx, -1, INT64_MIN, m_format_ctx->start_time, m_format_ctx->start_time, 0);
         if (ret < 0)
           LERROR("Video error: %s", av_make_error_string(m_error_str_buffer, MAX_ERR_STR, ret));

@@ -16,31 +16,27 @@ void
 EnemySystem::Update(entt::entity player_entity)
 {
   // Handle enemy behaviour
-  auto        enemies = m_registry.view<Enemy, Position, Velocity>();
-  const auto& player_position = m_registry.get<Position>(player_entity);
-  // TODO: Fix this so that it works with no player present
+  auto       enemies = m_registry.view<Enemy, Position, Velocity>();
+  const auto* player_position = m_registry.try_get<Position>(player_entity);
 
   // Enemy behaviour
-
   for (auto entity : enemies) {
     auto& enemy = enemies.get<Enemy>(entity);
     auto& position = enemies.get<Position>(entity);
-    // auto& velocity = enemies.get<Velocity>(entity);
-    // EnemyUtils::OnUpdate(enemy, position, velocity, player_position);
-
-    int d_to_player_x = player_position.x - position.x;
-    int d_to_player_y = player_position.y - position.y;
-    int d_to_player = std::sqrt(d_to_player_x * d_to_player_x + d_to_player_y * d_to_player_y);
 
     switch (enemy.breed) {
       case EnemyBreed::SEEKER:
         position.x += 100.f * std::sin(static_cast<float>(enemy.lifetime) / (3.1416 * 4)) / (3.1416 * 4);
         break;
       case EnemyBreed::SIMPLE:
-        if (enemy.lifetime % 60 == 0) {
+        // Only create bullets if the player position is known
+        if (enemy.lifetime % 60 == 0 and player_position) {
           float    bullet_vel = 2.f;
           int      bullet_size = 3;
           int      bullet_power = 5;
+          int      d_to_player_x = player_position->x - position.x;
+          int      d_to_player_y = player_position->y - position.y;
+          int      d_to_player = std::sqrt(d_to_player_x * d_to_player_x + d_to_player_y * d_to_player_y);
           Velocity bullet_vel_vec{d_to_player_x * bullet_vel / d_to_player, d_to_player_y * bullet_vel / d_to_player};
           EnemyUtils::CreateSimpleBullet(m_registry, position, bullet_vel_vec, bullet_size, bullet_power);
           break;
@@ -64,7 +60,7 @@ EnemySystem::Update(entt::entity player_entity)
     }
   }
   else if (m_registry.view<Enemy>().empty() and not m_level_ended_event_triggered) {
-    // If all enemies have been dispatched, check if there are still enemies alive and if so send the end level signal
+    // When all enemies have been dispatched check if there are still all alive and if so send the end level signal
     m_dispatcher.enqueue(EndLevelEvent());
     m_level_ended_event_triggered = true;
   }
