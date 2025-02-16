@@ -1,4 +1,4 @@
--- yage.set_music("music/penso_positivo.wav")
+yage.set_music("music/penso_positivo.wav")
 yage.set_video("videos/clouds.mp4")
 
 local enemies = {
@@ -11,11 +11,11 @@ for _, ene in ipairs(enemies) do
 end
 
 
-yage.add_text(
-[[
-Level 2!
-]]
-)
+yage.add_text([[
+This is the second level.
+Please eliminate all the letters 
+on screen!
+]])
 
 -- music = "music/penso_positivo.wav"
 -- video = "videos/clouds.mp4"

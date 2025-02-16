@@ -1,6 +1,8 @@
 cmake-build*
 build
-assets
+assets/music
+assets/videos
 .idea
 .cache
+.gdbinit
 compile_commands.json

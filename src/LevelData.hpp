@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Enemy.hpp"
+#include "systems/EnemySystem.hpp"
 
 #include <string>
 #include <vector>

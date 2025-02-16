@@ -9,11 +9,12 @@ local enemies = {
 for _, ene in ipairs(enemies) do yage.add_enemy(ene[1], ene[2], ene[3], ene[4]) end
 
 yage.add_text([[
-                         some
+This is the text on level one
+and this is a test
 ]])
 
 function on_level_end()
-    print('heya')
+    print('Text is being printed on the console')
     -- yage.show_banner("Level ended", completion_time, blinking_rate)
     yage.move_player(0, 0, 10)
 end

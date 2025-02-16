@@ -3,7 +3,6 @@
 #include "../HUD.hpp"
 #include "../LevelData.hpp"
 #include "../LuaContext.hpp"
-#include "../Player.hpp"
 #include "../systems/CleanUpSystem.hpp"
 #include "../systems/CollisionSystem.hpp"
 #include "../systems/CombatSystem.hpp"
@@ -35,9 +34,15 @@ private:
   void OnDestroy(DestroyEvent destroy_event);
   void OnEndLevel(EndLevelEvent end_level_event);
 
+  struct MainEntities
+  {
+    entt::entity player = entt::null;
+    entt::entity camera = entt::null;
+  };
+
   entt::registry   m_registry;
   entt::dispatcher m_dispatcher;
-  Player           m_player;
+  MainEntities     m_main_entities;
   AssetManager&    m_asset_manager;
   MovementSystem   m_movement_system;
   CollisionSystem  m_collision_system;

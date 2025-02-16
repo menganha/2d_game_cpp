@@ -1,24 +1,12 @@
 #pragma once
-#include "Components.hpp"
 
 #include <entt/entt.hpp>
 
 enum class EnemyBreed
 {
-  NOTYPE = 0,   // Serves just as a flag
-  SIMPLE,       // Just moves Down
-  SIMPLEBULLET, // Linear bullet
+  NOTYPE = 0, // Serves just as a flag
+  SIMPLE,     // Just moves Down
   SEEKER,
-  SEEKERBULLET,
-
-};
-
-struct EnemyEntry
-{
-  EnemyBreed breed;
-  int        delay;
-  int        pos_x;
-  int        pos_y;
 };
 
 struct Enemy
@@ -27,18 +15,3 @@ struct Enemy
   int        lifetime = 0;
 };
 
-namespace EnemyUtils {
-// void
-// OnUpdate(
-//   entt::registry& regristry, Enemy& enemy, Position& position, Velocity& velocity, const Position& player_position,
-//   uint64_t ticks);
-
-void
-CreateEnemy(entt::registry& registry, EnemyBreed enemy_type, int initial_pos_x, int initial_pos_y);
-
-void
-CreateSimpleBullet(entt::registry&, const Position&, const Velocity&, const Collider&, int);
-
-void
-CreateSimpleBullet(entt::registry&, const Position&, const Velocity&, int, int);
-}

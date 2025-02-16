@@ -150,7 +150,26 @@ LuaContext::move_player(lua_State* state)
   lua_getfield(state, LUA_REGISTRYINDEX, k_player_entity);
   entt::entity player_entity = (entt::entity)lua_tointeger(state, -1);
 
-  LINFO("Passing state %p to move_player", (void*)state);
+  p_registry->emplace<ScriptContainer>(
+    player_entity, std::make_shared<MoveEntityScript>(*p_registry, player_entity, target_x, target_y, time_it_takes),
+    state);
+
+  return 0;
+}
+
+int
+LuaContext::move_camera(lua_State* state)
+{
+  int target_x = static_cast<int>(lua_tonumber(state, 1));
+  int target_y = static_cast<int>(lua_tonumber(state, 2));
+  int time_it_takes = static_cast<int>(lua_tonumber(state, 3));
+
+  lua_getfield(state, LUA_REGISTRYINDEX, k_registry);
+  entt::registry* p_registry = (entt::registry*)lua_touserdata(state, -1);
+
+  lua_getfield(state, LUA_REGISTRYINDEX, k_player_entity);
+  entt::entity player_entity = (entt::entity)lua_tointeger(state, -1);
+
   p_registry->emplace<ScriptContainer>(
     player_entity, std::make_shared<MoveEntityScript>(*p_registry, player_entity, target_x, target_y, time_it_takes),
     state);
@@ -179,9 +198,6 @@ LuaContext::add_enemy(lua_State* state)
   }
   else if (std::strcmp(breed, "seeker") == 0) {
     breed_enum = EnemyBreed::SEEKER;
-  }
-  else if (std::strcmp(breed, "simplebullet") == 0) {
-    breed_enum = EnemyBreed::SIMPLEBULLET;
   }
   else {
     breed_enum = EnemyBreed::NOTYPE;

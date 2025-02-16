@@ -2,6 +2,7 @@
 
 #include "../Colors.hpp"
 #include "../Config.hpp"
+#include "../Entities.hpp"
 #include "../Events.hpp"
 #include "PauseScene.hpp"
 #include "engine/Log.hpp"
@@ -9,7 +10,7 @@
 GamePlayScene::GamePlayScene(AssetManager& asset_manager, int level)
   : m_registry{}
   , m_dispatcher{}
-  , m_player{m_registry}
+  , m_main_entities{}
   , m_asset_manager{asset_manager}
   , m_movement_system{m_registry, Config::SCREEN_SIZE_X, Config::SCREEN_SIZE_Y}
   , m_collision_system{
@@ -69,15 +70,15 @@ GamePlayScene::ProcessEvents(const Gamepad& gamepad, SceneManager& scene_manager
 
   // Input processing
   if (gamepad.IsButtonDown(Gamepad::UP))
-    m_movement_system.MoveEntity(Position{0.0f, -m_player.PLAYER_VELOCITY}, m_player.GetEntity());
+    m_movement_system.MoveEntity(Position{0.0f, -entities::PLAYER_VELOCITY}, m_main_entities.player);
   if (gamepad.IsButtonDown(Gamepad::DOWN))
-    m_movement_system.MoveEntity(Position{0.0f, m_player.PLAYER_VELOCITY}, m_player.GetEntity());
+    m_movement_system.MoveEntity(Position{0.0f, entities::PLAYER_VELOCITY}, m_main_entities.player);
   if (gamepad.IsButtonDown(Gamepad::LEFT))
-    m_movement_system.MoveEntity(Position{-m_player.PLAYER_VELOCITY, 0.0f}, m_player.GetEntity());
+    m_movement_system.MoveEntity(Position{-entities::PLAYER_VELOCITY, 0.0f}, m_main_entities.player);
   if (gamepad.IsButtonDown(Gamepad::RIGHT))
-    m_movement_system.MoveEntity(Position{m_player.PLAYER_VELOCITY, 0.0f}, m_player.GetEntity());
+    m_movement_system.MoveEntity(Position{entities::PLAYER_VELOCITY, 0.0f}, m_main_entities.player);
   if (gamepad.IsButtonPressed(Gamepad::A))
-    m_player.Shoot();
+    entities::PlayerShoot(m_main_entities.player, m_registry);
   if (gamepad.IsButtonPressed(Gamepad::SELECT))
     scene_manager.PopScene();
   if (gamepad.IsButtonPressed(Gamepad::START)) {
@@ -95,14 +96,12 @@ GamePlayScene::Update([[maybe_unused]] uint64_t ticks)
   m_script_system.Update();
   m_movement_system.Update();
   m_collision_system.Update();
-  // m_dispatcher.update<CollisionEvent>();
-  // m_dispatcher.update<OutOfBoundariesEvent>();
   /*
      There should be some intermediate process of event to correct for collision agains solid objectes here.
      In this way we don't have to wait for a frame to correction and prevent artifacts such as being able
      to penetrate walls, etc.
   */
-  m_enemy_system.Update(m_player.GetEntity());
+  m_enemy_system.Update(m_main_entities.player);
   m_text_system.Update();
   m_combat_system.Update();
 }
@@ -114,7 +113,7 @@ GamePlayScene::Render(SDL_Renderer* renderer)
 
   SDL_RenderClear(renderer);
 
-  m_render_system.Update(m_asset_manager, renderer);
+  m_render_system.Update(m_asset_manager, renderer, m_main_entities.camera);
 
   SDL_RenderPresent(renderer);
 }
@@ -135,17 +134,19 @@ void
 GamePlayScene::LoadLevel()
 {
 
-  // Add Player
-  m_player.Create();
+  // Add Player and Camera
+  m_main_entities.player = entities::CreatePlayer(m_registry);
+  m_main_entities.camera = entities::CreateCamera(m_registry);
+  
 
   // Add HUD
-  m_hud.Create(m_player.GetEntity());
-  m_hud.Refresh(m_player.PLAYER_INITIAL_HEALTH);
+  m_hud.Create(m_main_entities.player);
+  m_hud.Refresh(entities::PLAYER_INITIAL_HEALTH);
 
   // Load Level Data
   auto script_path = m_asset_manager.GetAbsolutePathStr(intToLevelScript(m_current_level));
   LINFO("Intialiting level: %s", script_path.c_str());
-  m_lua_context.GetLevelData(script_path.c_str(), m_level_data, m_registry, m_dispatcher, m_player.GetEntity());
+  m_lua_context.GetLevelData(script_path.c_str(), m_level_data, m_registry, m_dispatcher, m_main_entities.player);
 
   // Add enemises
   m_enemy_system.SetEnemyList(m_level_data.enemy_list_to_dispatch);
@@ -170,7 +171,7 @@ GamePlayScene::LoadLevel()
 void
 GamePlayScene::OnDestroy(DestroyEvent destroy_event)
 {
-  if (destroy_event.entity == m_player.GetEntity())
+  if (destroy_event.entity == m_main_entities.player)
     m_level_ended = true;
 }
 

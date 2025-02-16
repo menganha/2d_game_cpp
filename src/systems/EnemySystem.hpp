@@ -1,11 +1,21 @@
 #pragma once
 
-#include <entt/fwd.hpp>
 #include "../Enemy.hpp"
+
+#include <entt/fwd.hpp>
 
 //
 // It takes care (in the moment) of the enemy loading for each level and some enemy behaviour
 //
+
+struct EnemyEntry
+{
+  EnemyBreed breed;
+  int        delay;
+  int        pos_x;
+  int        pos_y;
+};
+
 class EnemySystem
 {
 
@@ -15,11 +25,10 @@ public:
   void SetEnemyList(const std::vector<EnemyEntry>& enemy_list);
 
 private:
-
-  entt::registry&   m_registry;
-  entt::dispatcher& m_dispatcher;
+  entt::registry&         m_registry;
+  entt::dispatcher&       m_dispatcher;
   std::vector<EnemyEntry> m_enemy_list_to_dispatch;
-  int m_level_counter; // FIXME: Could this cause an overflow at some point? Levels should not be so large I guess (?)
+  int  m_level_counter; // FIXME: Could this cause an overflow at some point? Levels should not be so large I guess (?)
   bool m_level_ended_event_triggered;
 };
 

@@ -6,9 +6,8 @@ add_executable(app
         src/main.cpp
         src/Collision.cpp
         src/HUD.cpp
-        src/Enemy.cpp
         src/Script.cpp
-        src/Player.cpp
+        src/Entities.cpp
         src/LuaState.cpp
         src/LuaContext.cpp
         src/scenes/IntroScene.cpp

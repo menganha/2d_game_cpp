@@ -6,22 +6,29 @@ RenderSystem::RenderSystem(entt::registry& registry)
   : m_registry{registry} {};
 
 void
-RenderSystem::Update(AssetManager& asset_manager, SDL_Renderer* renderer)
+RenderSystem::Update(AssetManager& asset_manager, SDL_Renderer* renderer, entt::entity camera_entity)
 {
   // Render SDL2 textures
   m_registry.sort<Position>([](const Position& lhs, const Position& rhs) { return lhs.z < rhs.z; });
   auto view_renderable = m_registry.view<const Position, const Renderable>();
-  view_renderable.use<Position>(); // Use position componen order
+  view_renderable.use<Position>(); // Uses position component order
+
+  // m_scaling += 0.001f;
+  // SDL_RenderSetScale(renderer, m_scaling, m_scaling);
+
+  const auto& camera_pos =
+    m_registry.get<Position>(camera_entity); // TODO: Maybe have a reference to it and not request it every frame
 
   for (auto entity : view_renderable) {
     const auto&  pos = view_renderable.get<Position>(entity);
     const auto&  ren = view_renderable.get<Renderable>(entity);
     SDL_Texture* texture = asset_manager.GetTexture(ren.name);
-    SDL_Rect     rect{static_cast<int>(pos.x), static_cast<int>(pos.y), ren.size.x, ren.size.y};
-    auto         src_rect_ptr = SDL_RectEmpty(&ren.subsection) ? nullptr : &ren.subsection;
+    SDL_Rect     drect{
+      static_cast<int>(pos.x - camera_pos.x), static_cast<int>(pos.y - camera_pos.y), ren.size.x, ren.size.y};
+    auto src_rect_ptr = SDL_RectEmpty(&ren.subsection) ? nullptr : &ren.subsection;
     if (ren.color_mod.a != 0)
       SDL_SetTextureColorMod(texture, ren.color_mod.r, ren.color_mod.g, ren.color_mod.b);
-    SDL_RenderCopy(renderer, texture, src_rect_ptr, &rect);
+    SDL_RenderCopy(renderer, texture, src_rect_ptr, &drect);
   }
 
   // Render text. TODO: We could probably refactor this call into the above render loop!
@@ -30,8 +37,11 @@ RenderSystem::Update(AssetManager& asset_manager, SDL_Renderer* renderer)
     auto&       fulltext = view_text.get<FullText>(entity);
     const auto& position = view_text.get<Position>(entity);
     const auto& font = asset_manager.GetFont(fulltext.font_id);
-    font.DrawText(
-      fulltext.string, static_cast<int>(position.x), static_cast<int>(position.y), fulltext.color, renderer);
+    int         pos_x = static_cast<int>(position.x - camera_pos.x);
+    int         pos_y = static_cast<int>(position.y - camera_pos.y);
+    pos_x -= 100 * (m_scaling - 1);
+    pos_y -= 100 * (m_scaling - 1);
+    font.DrawText(fulltext.string, pos_x, pos_y, fulltext.color, renderer);
   }
 
   // Render primitive shapes
@@ -47,7 +57,8 @@ RenderSystem::Update(AssetManager& asset_manager, SDL_Renderer* renderer)
       }
     }
     SDL_SetRenderDrawColor(renderer, ren.color.r, ren.color.g, ren.color.b, alpha);
-    SDL_Rect rectangle{static_cast<int>(pos.x), static_cast<int>(pos.y), ren.size.x, ren.size.y};
+    SDL_Rect rectangle{
+      static_cast<int>(pos.x - camera_pos.x), static_cast<int>(pos.y - camera_pos.y), ren.size.x, ren.size.y};
     SDL_RenderFillRect(renderer, &rectangle);
   }
 }

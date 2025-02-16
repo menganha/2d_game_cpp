@@ -2,6 +2,7 @@
 
 #include "../Components.hpp"
 #include "../Enemy.hpp"
+#include "../Entities.hpp"
 #include "../Events.hpp"
 #include "cmath"
 
@@ -16,7 +17,7 @@ void
 EnemySystem::Update(entt::entity player_entity)
 {
   // Handle enemy behaviour
-  auto       enemies = m_registry.view<Enemy, Position, Velocity>();
+  auto        enemies = m_registry.view<Enemy, Position, Velocity>();
   const auto* player_position = m_registry.try_get<Position>(player_entity);
 
   // Enemy behaviour
@@ -32,13 +33,11 @@ EnemySystem::Update(entt::entity player_entity)
         // Only create bullets if the player position is known
         if (enemy.lifetime % 60 == 0 and player_position) {
           float    bullet_vel = 2.f;
-          int      bullet_size = 3;
-          int      bullet_power = 5;
           int      d_to_player_x = player_position->x - position.x;
           int      d_to_player_y = player_position->y - position.y;
           int      d_to_player = std::sqrt(d_to_player_x * d_to_player_x + d_to_player_y * d_to_player_y);
           Velocity bullet_vel_vec{d_to_player_x * bullet_vel / d_to_player, d_to_player_y * bullet_vel / d_to_player};
-          EnemyUtils::CreateSimpleBullet(m_registry, position, bullet_vel_vec, bullet_size, bullet_power);
+          entities::EnemyShoot(m_registry, position, bullet_vel_vec);
           break;
         }
       default:
@@ -51,7 +50,7 @@ EnemySystem::Update(entt::entity player_entity)
   if (not m_enemy_list_to_dispatch.empty()) {
     auto last = m_enemy_list_to_dispatch.back();
     while (last.delay <= m_level_counter) {
-      EnemyUtils::CreateEnemy(m_registry, last.breed, last.pos_x, last.pos_y);
+      entities::CreateEnemy(m_registry, last.breed, last.pos_x, last.pos_y);
       m_enemy_list_to_dispatch.pop_back();
       if (m_enemy_list_to_dispatch.empty())
         break;
